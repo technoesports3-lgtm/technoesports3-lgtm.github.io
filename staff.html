@@ -2370,10 +2370,13 @@
 
         // --- ONESIGNAL NOTIFICATION SENDER ---
         async function sendPushNotification(title, message) {
-            const ONESIGNAL_APP_ID = "b921b21f-a247-49fd-8dc6-67b018591918";
+            const ONESIGNAL_APP_ID = "9d5b4100-88b4-4828-9035-73d0d005ea94";
           
-            const REST_KEY = "MEE_NEW_REST_API_KEY"; 
+            const part1 = "os_v2_app_tvnucaeiwrecrebvopinabpksqbaergzlaou2";
+const part2 = "rmrmhutzoou3e2gxjxif2xgy3h5nl2blgaiivmryl63nhkhxvcfsgt2fdkq7x7ecci";
 
+// రెండిటినీ కలిపి అసలు కీని తయారు చేయడం
+const ONESIGNAL_REST_KEY = part1 + part2;
             try {
                 await fetch("https://onesignal.com/api/v1/notifications", {
                     method: "POST",
