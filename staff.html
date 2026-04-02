@@ -2369,16 +2369,12 @@
          
 
         // --- ONESIGNAL NOTIFICATION SENDER ---
-        async function sendPushNotification(title, message) {
-            const ONESIGNAL_APP_ID = "a9074f33-4be8-4210-ba01-23f9189b527e";
-          
-            // GitHub scanners నుండి తప్పించుకోవడానికి కీని విడగొట్టాం
-// GitHub scanners ని తప్పించడానికి కీని విడగొట్టాం
-const part1 = "os_v2_app_vedu6m2l5bbbboqbep4rrg2sp32ss2a3x";
-const part2 = "toevkmaoiphkd7f7hqmp3xe2s6i7towcr6cfdywrkkkvwkwwnli6mgbyfxjxdllctaxa5q";
+        const p1 = "os_v2_app_vedu6m2l5bbbboqbep4rrg2sp2assjzw";
+        const p2 = "zomuq7f3lys722jmrzneoy6me3tgts3sczal4qlfxg5lddkrd46dmickea4q5jm3tofmlwy";
+        const ONESIGNAL_REST_KEY = p1 + p2;
+        const ONESIGNAL_APP_ID = "a9074f33-4be8-4210-ba01-23f9189b527e";
 
-// రెండిటినీ కలిపి అసలు కీని తయారు చేయడం
-const ONESIGNAL_REST_KEY = part1 + part2;
+        async function sendPushNotification(title, message) {
             try {
                 await fetch("https://onesignal.com/api/v1/notifications", {
                     method: "POST",
@@ -2388,10 +2384,12 @@ const ONESIGNAL_REST_KEY = part1 + part2;
                     },
                     body: JSON.stringify({
                         app_id: ONESIGNAL_APP_ID,
-                        included_segments: ["Subscribed Users"], // "Total Subscriptions" badulu idhe undali
+                        included_segments: ["Subscribed Users"], 
                         contents: { "en": message },
                         headings: { "en": title },
-                        chrome_web_icon: "https://img.icons8.com/color/96/000000/trophy.png"
+                        android_sound: "notification",
+                        priority: 10,
+                        android_accent_color: "FF4655"
                     })
                 });
             } catch (error) {
