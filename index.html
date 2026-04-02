@@ -8,9 +8,22 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="manifest" href="https://progressier.app/BDY1J1RD8dTTx7NW9LgY/progressier.json"/>
-    <script defer src="https://progressier.app/BDY1J1RD8dTTx7NW9LgY/script.js">
-    </script> 
+    <!-- OneSignal SDK Integration Start -->
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "9d5b4100-88b4-4828-9035-73d0d005ea94",
+    });
+    
+    // యూజర్ పర్మిషన్ అడగడానికి ఇది వాడతాం
+    if (!OneSignal.Notifications.permission) {
+        await OneSignal.Notifications.requestPermission();
+    }
+  });
+</script>
+<!-- OneSignal SDK Integration End -->
        <style>
         /* Base Styling */
         body {
