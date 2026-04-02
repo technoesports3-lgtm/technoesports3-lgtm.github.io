@@ -2368,34 +2368,42 @@
         const IMGBB_API_KEY = "db671a28c5c7d432622dc7e5bc74eecc";
          
 
-        // --- ONESIGNAL NOTIFICATION SENDER ---
-        const p1 = "os_v2_app_vedu6m2l5bbbboqbep4rrg2sp2assjzw";
-        const p2 = "zomuq7f3lys722jmrzneoy6me3tgts3sczal4qlfxg5lddkrd46dmickea4q5jm3tofmlwy";
-        const ONESIGNAL_REST_KEY = p1 + p2;
-        const ONESIGNAL_APP_ID = "a9074f33-4be8-4210-ba01-23f9189b527e";
-
         async function sendPushNotification(title, message) {
-            try {
-                await fetch("https://onesignal.com/api/v1/notifications", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json; charset=utf-8",
-                        "Authorization": "Basic " + ONESIGNAL_REST_KEY
-                    },
-                    body: JSON.stringify({
-                        app_id: ONESIGNAL_APP_ID,
-                        included_segments: ["Subscribed Users"], 
-                        contents: { "en": message },
-                        headings: { "en": title },
-                        android_sound: "notification",
-                        priority: 10,
-                        android_accent_color: "FF4655"
-                    })
-                });
-            } catch (error) {
-                console.error("OneSignal Error:", error);
-            }
+    const p1 = "os_v2_app_vedu6m2l5bbbboqbep4rrg2sp2assjzw";
+    const p2 = "zomuq7f3lys722jmrzneoy6me3tgts3sczal4qlfxg5lddkrd46dmickea4q5jm3tofmlwy";
+    const REST_KEY = p1 + p2;
+    const APP_ID = "a9074f33-4be8-4210-ba01-23f9189b527e";
+
+    try {
+        const response = await fetch("https://onesignal.com/api/v1/notifications", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json; charset=utf-8",
+                "Authorization": "Basic " + REST_KEY
+            },
+            body: JSON.stringify({
+                app_id: APP_ID,
+                included_segments: ["Subscribed Users"], 
+                headings: { "en": title },
+                contents: { "en": message },
+                android_sound: "notification",
+                priority: 10
+            })
+        });
+
+        const result = await response.json();
+        
+        if (result.id) {
+            alert("SUCCESS: Notification Dispatched! ✅");
+        } else {
+            // ఒకవేళ ఐడీ తప్పున్నా లేదా కీ తప్పున్నా ఇక్కడ అలర్ట్ వస్తుంది
+            alert("ONESIGNAL ERROR: " + JSON.stringify(result.errors));
         }
+    } catch (error) {
+        // ఇంటర్నెట్ ప్రాబ్లం లేదా CORS ఇష్యూ ఉంటే ఇక్కడ వస్తుంది
+        alert("BROWSER ERROR: " + error.message);
+    }
+}
 
         // --- MANUAL ANNOUNCEMENT LOGIC ---
         async function sendCustomPushAnnouncement() {
