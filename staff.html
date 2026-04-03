@@ -2,28 +2,24 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>TECHNO E-SPORTS STAFF PANEL</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* Base Styling */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            background-color: #0a0a0a;
-            color: #fff;
-            touch-action: pan-y;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-            -webkit-text-size-adjust: 100%;
-            -ms-text-size-adjust: 100%;
-            text-size-adjust: 100%;
-        }
+    body {
+       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+       margin: 0;
+       background-color: #0a0a0a;
+       color: #fff;
+    /* touch-action మరియు user-select లైన్లను పూర్తిగా తొలగించాను */
+       -webkit-text-size-adjust: 100%;
+       -ms-text-size-adjust: 100%;
+       text-size-adjust: 100%;
+       overflow-x: auto; /* జూమ్ చేసినప్పుడు పక్కకి జరగడానికి */
+       }
 
         .app-container {
             max-width: 1000px;
@@ -2248,6 +2244,11 @@
                                     <option value="">-- Select a Tournament --</option>
                                 </select>
                             </div>
+
+                            <!-- డౌన్‌లోడ్ బటన్ ఇక్కడ ఉంటుంది -->
+                            <button id="download-csv-btn" onclick="downloadTournamentData()" style="display:none; background: #26a269; margin: 15px 0; width:100%; border-radius: 6px; padding: 12px; font-weight: bold; color: white; border: none; cursor: pointer;">
+                                <i class="fas fa-file-excel"></i> DOWNLOAD APPROVED PLAYERS (CSV/EXCEL)
+                            </button>
                             
                             <div id="registered-users-container">
                                 <div class="empty-state">
@@ -2301,19 +2302,15 @@
             <div class="modal-content">
                 <span class="close-button" onclick="closeModal('credentials-modal')">&times;</span>
                 <h3 style="font-size: 1.2em;" id="credentials-title">Tournament Credentials</h3>
-                
-                <div class="credentials-display" id="credentials-display">
+                    <div class="credentials-display" id="credentials-display">
                     <div class="credentials-item">
-                        <div class="credentials-label">Tournament ID:</div>
-                        <div class="credentials-value" id="credentials-tournament-id">Loading...</div>
-                        <button class="copy-btn" onclick="copyToClipboard('credentials-tournament-id')">Copy</button>
+                        <div class="credentials-label">Edit Tournament ID:</div>
+                        <input type="text" id="edit-modal-id" style="background:#222; border:1px solid #00a8ff; color:white; width:100%; padding: 8px;">
                     </div>
                     <div class="credentials-item">
-                        <div class="credentials-label">Password:</div>
-                        <div class="credentials-value" id="credentials-password">Loading...</div>
-                        <button class="copy-btn" onclick="copyToClipboard('credentials-password')">Copy</button>
+                        <div class="credentials-label">Edit Password:</div>
+                        <input type="text" id="edit-modal-pass" style="background:#222; border:1px solid #00a8ff; color:white; width:100%; padding: 8px;">
                     </div>
-                    <div class="credentials-item">
                         <div class="credentials-label">Status:</div>
                         <div style="color: #fff; font-weight: bold;" id="credentials-status">Loading...</div>
                     </div>
@@ -3399,7 +3396,7 @@
         }
         
         // --- Credentials Management Functions ---
-        function showCredentialsModal(tournamentId) {
+       function showCredentialsModal(tournamentId) {
             currentTournamentId = tournamentId;
             const tournament = tournaments.find(t => t.id === tournamentId);
             
@@ -3408,20 +3405,26 @@
                 return;
             }
             
+            // టైటిల్ అప్‌డేట్
             document.getElementById('credentials-title').textContent = `Credentials: ${tournament.title}`;
             
-            document.getElementById('credentials-tournament-id').textContent = tournament.tournamentId || 'N/A';
-            document.getElementById('credentials-password').textContent = tournament.tournamentPassword || 'N/A';
-           
+            // ఇన్పుట్ బాక్సులలో పాత ID, Password సెట్ చేయడం
+            document.getElementById('edit-modal-id').value = tournament.tournamentId || '';
+            document.getElementById('edit-modal-pass').value = tournament.tournamentPassword || '';
+
+            // స్టేటస్ అప్‌డేట్
             const statusText = tournament.status ? tournament.status.charAt(0).toUpperCase() + tournament.status.slice(1) : 'Unknown';
             document.getElementById('credentials-status').textContent = statusText;
-            
+
+            // విజిబిలిటీ అప్‌డేట్
             const isVisible = tournament.showCredentials !== false;
             document.getElementById('credentials-visibility').textContent = isVisible ? 'Visible to Users' : 'Hidden from Users';
             document.getElementById('credentials-visibility').style.color = isVisible ? '#26a269' : '#d72638';
             
+            // టోగుల్ స్విచ్ సెట్ చేయడం
             document.getElementById('modal-show-credentials').checked = isVisible;
             
+            // మోడల్ ని చూపించడం
             document.getElementById('credentials-modal').style.display = 'block';
         }
         
@@ -3439,9 +3442,13 @@
             setButtonLoading('save-credentials-btn', true);
             
             try {
-                await db.collection("tournaments").doc(currentTournamentId).update({ 
-                    showCredentials: newVisibility,
-                    updatedAt: FieldValue.serverTimestamp()
+           
+            await db.collection("tournaments").doc(currentTournamentId).update({ 
+                tournamentId: document.getElementById('edit-modal-id').value.trim(),
+                tournamentPassword: document.getElementById('edit-modal-pass').value.trim(),
+                showCredentials: newVisibility,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            
                 }); // Correctly closing the update object
                 
                 if(newVisibility) { 
@@ -3896,6 +3903,14 @@
                     
                     container.appendChild(userCard);
                 });
+       
+
+                // ఈ కింద ఉన్న లైన్ ని కరెక్ట్‌గా ఇక్కడే పేస్ట్ చేయండి
+                const downloadBtn = document.getElementById('download-csv-btn');
+                if (downloadBtn) {
+                    downloadBtn.style.display = registeredUsers.length > 0 ? 'block' : 'none';
+                }
+
                 
             } catch (error) {
                 console.error("Error loading registered users:", error);
@@ -3961,6 +3976,51 @@
                 document.getElementById('professional-auth-section').style.display = 'flex';
             }
         }, 3000);
-    </script>
+        
+         async function downloadTournamentData() {
+    const tournamentId = document.getElementById('tournament-selection').value;
+    const tournament = tournaments.find(t => t.id === tournamentId);
+    
+    if (!tournamentId) return;
+
+    showToast("Preparing Excel file...", "info");
+
+    try {
+        const registrationsSnapshot = await firebase.firestore().collection("tournament_registrations")
+            .where("tournamentId", "==", tournamentId)
+            .where("status", "==", "approved")
+            .get();
+
+        if (registrationsSnapshot.empty) {
+            showToast("No approved players found", "warning");
+            return;
+        }
+
+        let csvContent = "data:text/csv;charset=utf-8,Player Name,Free Fire ID,Mobile,Email,Team Name\n";
+
+        registrationsSnapshot.forEach(doc => {
+            const d = doc.data();
+            const team = d.teamName || 'Solo';
+            if (d.playerDetails && Array.isArray(d.playerDetails)) {
+                d.playerDetails.forEach(p => {
+                    csvContent += `"${p.name}","${p.freeFireId}","${d.mobile}","${d.email}","${team}"\n`;
+                });
+            }
+        });
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `${tournament.title}_Approved_List.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        showToast("Excel Downloaded!", "success");
+        } catch (error) {
+        console.error("Download Error:", error);
+        showToast("Error downloading file", "error");
+       }
+     }
+   </script>
 </body>
 </html>
