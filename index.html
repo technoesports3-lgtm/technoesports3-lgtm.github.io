@@ -3759,15 +3759,18 @@
                 `;
             }
             
-            if (tournament.category === 'solo') {
+             if (tournament.category === 'solo') {
                 formHTML += `
                     <div class="player-details-section">
                         <h4>Player Details</h4>
                         <div class="form-group">
+                            <label>Free Fire Name (Copy-Paste Name)</label>
+                            <input type="text" id="player1-name" placeholder="Enter Exact In-Game Name" required>
+                        </div>
+                        <div class="form-group">
                             <label>Free Fire ID (Numbers only)</label>
                             <input type="text" id="player1-id" placeholder="Your Free Fire ID number" required 
                                    pattern="[0-9]*" title="Enter numbers only">
-                            <small style="color: #666; font-size: 0.85em;">Enter your Free Fire ID (numeric only)</small>
                         </div>
                     </div>
                 `;
@@ -3775,6 +3778,10 @@
                 formHTML += `
                     <div class="player-details-section">
                         <h4>Player 1 Details</h4>
+                        <div class="form-group">
+                            <label>Free Fire Name (Copy-Paste Name)</label>
+                            <input type="text" id="player1-name" placeholder="Enter Exact In-Game Name" required>
+                        </div>
                         <div class="form-group">
                             <label>Free Fire ID (Numbers only)</label>
                             <input type="text" id="player1-id" placeholder="Player 1 Free Fire ID" required 
@@ -3785,6 +3792,10 @@
                     
                     <div class="player-details-section">
                         <h4>Player 2 Details</h4>
+                          <div class="form-group">
+                            <label>Free Fire Name (Copy-Paste Name)</label>
+                            <input type="text" id="player1-name" placeholder="Enter Exact In-Game Name" required>
+                        </div>
                         <div class="form-group">
                             <label>Free Fire ID (Numbers only)</label>
                             <input type="text" id="player2-id" placeholder="Player 2 Free Fire ID" required 
@@ -3798,6 +3809,10 @@
                     formHTML += `
                         <div class="player-details-section">
                             <h4>Player ${i} Details</h4>
+                               <div class="form-group">
+                            <label>Free Fire Name (Copy-Paste Name)</label>
+                            <input type="text" id="player1-name" placeholder="Enter Exact In-Game Name" required>
+                        </div>
                             <div class="form-group">
                                 <label>Free Fire ID (Numbers only)</label>
                                 <input type="text" id="player${i}-id" placeholder="Player ${i} Free Fire ID" required 
@@ -3843,14 +3858,13 @@
                              selectedTournament.category === 'duo' ? 2 : 4;
             
             for (let i = 1; i <= playerCount; i++) {
-                const playerId = document.getElementById(`player${i}-id`).value.trim();
+                const playerName = document.getElementById(`player${i}-name`).value.trim();
                 
-                if (!playerId) {
+                if (!playerName || !playerId) {
                     playersValid = false;
-                    showToast(`Please enter Free Fire ID for Player ${i}`, 'error');
+                    showToast(`Please enter Name and ID for Player ${i}`, 'error');
                     return;
                 }
-                
                 // Validate Free Fire ID is numbers only
                 if (!/^\d+$/.test(playerId)) {
                     showToast(`Free Fire ID for Player ${i} must contain only numbers`, 'error');
@@ -3999,11 +4013,10 @@
                     return;
                 }
                 
-                // MODIFIED: Only store Free Fire ID, not name or level
-                playerDetails.push({
-                    name: `Player ${i}`, // Default name since we removed the field
+                playerDetails.push({ 
+                    name: document.getElementById(`player${i}-name`).value.trim(),
                     freeFireId: playerId,
-                    level: 0 // Default level since we removed the field
+                    level: 0 
                 });
             }
             
