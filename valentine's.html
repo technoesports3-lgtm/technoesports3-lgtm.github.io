@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Forever Journey</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Dancing+Script:wght@700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --deep-midnight-purple: #0f0510;
+            --soft-rose-pink: #ff7eb9;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--deep-midnight-purple);
+            color: white;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+        
+        .glassmorphism {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+        
+        .typewriter {
+            overflow: hidden;
+            border-right: 2px solid var(--soft-rose-pink);
+            white-space: nowrap;
+            animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
+        }
+        
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+        
+        @keyframes blink-caret {
+            from, to { border-color: transparent }
+            50% { border-color: var(--soft-rose-pink) }
+        }
+        
+        .fade-up {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+        
+        .fade-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .heartbeat {
+            animation: heartbeat 1.5s ease-in-out infinite both;
+        }
+        
+        @keyframes heartbeat {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        .progress-bar {
+            height: 4px;
+            background: linear-gradient(to right, var(--deep-midnight-purple), var(--soft-rose-pink));
+            width: 0%;
+            transition: width 0.3s ease;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+        }
+        
+        .envelope {
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .envelope.open .top {
+            transform: rotateX(180deg);
+            z-index: 0;
+        }
+        
+        .envelope.open .letter {
+            transform: translateY(-120px);
+        }
+        
+        .life-card {
+            transition: all 0.5s ease;
+        }
+        
+        .life-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(255, 126, 185, 0.15);
+        }
+        
+        .image-frame {
+            width: 100%;
+            height: 320px;
+            border-radius: 1rem;
+            overflow: hidden;
+            border: 3px solid var(--soft-rose-pink);
+            box-shadow: 0 0 20px rgba(255, 126, 185, 0.3);
+        }
+        
+        .image-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        
+        .image-frame:hover img {
+            transform: scale(1.1);
+        }
+        
+        .image-caption {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 126, 185, 0.8);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            backdrop-filter: blur(5px);
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .image-frame:hover .image-caption {
+            opacity: 1;
+        }
+        
+        .sparkle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            box-shadow: 0 0 20px 5px rgba(255, 126, 185, 0.7);
+            animation: sparkle 2s infinite;
+        }
+        
+        @keyframes sparkle {
+            0%, 100% { opacity: 0; transform: scale(0); }
+            50% { opacity: 1; transform: scale(1); }
+        }
+
+        .no-button-message {
+            animation: fadeInOut 2s ease-in-out;
+        }
+        
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateY(10px); }
+            20% { opacity: 1; transform: translateY(0); }
+            80% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-10px); }
+        }
+    </style>
+</head>
+<body class="relative">
+    <!-- Progress Indicator -->
+    <div class="progress-bar" id="progressBar"></div>
+    
+    <!-- Hero Section -->
+    <section id="hero" class="min-h-screen flex flex-col items-center justify-center relative px-4">
+        <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+            <div class="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-gradient-to-br from-purple-900/30 to-pink-900/10 blur-3xl"></div>
+            <div class="absolute top-1/3 -right-20 w-80 h-80 rounded-full bg-gradient-to-tr from-pink-900/20 to-purple-900/10 blur-3xl"></div>
+            <div class="absolute -bottom-20 left-1/3 w-72 h-72 rounded-full bg-gradient-to-tr from-purple-900/20 to-pink-900/10 blur-3xl"></div>
+        </div>
+        
+        <div class="glassmorphism rounded-2xl p-8 md:p-12 max-w-2xl text-center z-10">
+            <div class="heartbeat floating text-6xl md:text-7xl mb-6">
+                <i class="fas fa-heart" style="color: var(--soft-rose-pink);"></i>
+            </div>
+            <h1 class="text-3xl md:text-5xl font-bold mb-4 typewriter">My Beautiful Love,</h1>
+            <p class="text-xl md:text-2xl mb-8 fade-up">I created this to show you the life I dream of with you...</p>
+            <button id="beginBtn" class="bg-gradient-to-r from-purple-700 to-pink-600 hover:from-purple-800 hover:to-pink-700 text-white font-semibold py-3 px-8 rounded-full text-lg transition-all duration-300 transform hover:scale-105 fade-up">
+                Begin Our Forever Journey
+            </button>
+        </div>
+        
+        <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 text-pink-300/70 animate-bounce">
+            <i class="fas fa-chevron-down text-2xl"></i>
+        </div>
+    </section>
+    
+    <!-- Cuteness Calibration Section -->
+    <section id="calibration" class="min-h-screen flex flex-col items-center justify-center px-4 hidden">
+        <div class="glassmorphism rounded-2xl p-8 md:p-12 max-w-2xl w-full text-center">
+            <h2 class="text-3xl md:text-4xl font-bold mb-8" style="color: var(--soft-rose-pink);">Heart Calibration</h2>
+            
+            <div class="mb-10">
+                <div class="flex justify-between text-sm mb-2">
+                    <span>Measuring love intensity...</span>
+                    <span id="calibrationPercent">0%</span>
+                </div>
+                <div class="h-4 bg-gray-800 rounded-full overflow-hidden">
+                    <div id="calibrationBar" class="h-full bg-gradient-to-r from-purple-600 to-pink-500 rounded-full" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <div id="calibrationMessage" class="text-lg md:text-xl mb-8 min-h-24">
+                <p>Initializing forever love protocol...</p>
+            </div>
+            
+            <div class="flex justify-center space-x-4">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-r from-purple-700 to-pink-600 flex items-center justify-center heartbeat">
+                    <i class="fas fa-heart text-white"></i>
+                </div>
+                <div class="w-12 h-12 rounded-full bg-gradient-to-r from-purple-700 to-pink-600 flex items-center justify-center heartbeat" style="animation-delay: 0.2s">
+                    <i class="fas fa-home text-white"></i>
+                </div>
+                <div class="w-12 h-12 rounded-full bg-gradient-to-r from-purple-700 to-pink-600 flex items-center justify-center heartbeat" style="animation-delay: 0.4s">
+                    <i class="fas fa-ring text-white"></i>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Our Future Life Section -->
+    <section id="future" class="py-20 px-4 hidden">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-bold text-center mb-16" style="color: var(--soft-rose-pink);">Our Beautiful Future Together</h2>
+            
+            <div class="space-y-16">
+                <!-- Card 1 - Morning Together -->
+                <div class="life-card glassmorphism rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-center fade-up">
+                    <div class="md:w-1/2 mb-6 md:mb-0 md:pr-8 relative">
+                        <div class="image-frame">
+                            <img src="https://i.ibb.co/JFKSdpW7/file-000000000334871f88dda5348a086c7a1-2.jpg" alt="Morning Together" onerror="this.src='https://via.placeholder.com/600x400/ff7eb9/0f0510?text=Our+Morning'">
+                            <div class="image-caption">Our Beautiful Mornings Together ❤️</div>
+                        </div>
+                    </div>
+                    <div class="md:w-1/2">
+                        <div class="text-2xl md:text-3xl font-bold mb-4" style="color: #fbbf24;">Waking Up Beside You</div>
+                        <p class="text-lg md:text-xl mb-6">I imagine waking up to your beautiful face every morning. Making you coffee just the way you like it, sharing breakfast while we talk about our dreams for the day. Those quiet morning moments where it's just us, before the world wakes up.</p>
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-r from-yellow-500 to-orange-400 flex items-center justify-center mr-3">
+                                <i class="fas fa-coffee text-white"></i>
+                            </div>
+                            <span class="text-gray-300">Chapter 1 of Our Story</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Card 2 - Building Our Home -->
+                <div class="life-card glassmorphism rounded-3xl p-6 md:p-8 flex flex-col md:flex-row-reverse items-center fade-up">
+                    <div class="md:w-1/2 mb-6 md:mb-0 md:pl-8 relative">
+                        <div class="image-frame">
+                            <img src="https://i.ibb.co/KCHwr0J/file-000000000334871f88dda5348a086c7a1-1-1.png" alt="Building Our Home" onerror="this.src='https://via.placeholder.com/600x400/ff7eb9/0f0510?text=Our+Home'">
+                            <div class="image-caption">Building Our Dream Home Together ❤️</div>
+                        </div>
+                    </div>
+                    <div class="md:w-1/2">
+                        <div class="text-2xl md:text-3xl font-bold mb-4" style="color: #10b981;">Our Sanctuary</div>
+                        <p class="text-lg md:text-xl mb-6">I dream of building a home with you - a place filled with love, laughter, and our shared memories. Choosing furniture together, painting walls, cooking in our kitchen, and creating a space that's uniquely ours. A place where we can be completely ourselves.</p>
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-r from-green-500 to-teal-400 flex items-center justify-center mr-3">
+                                <i class="fas fa-heart text-white"></i>
+                            </div>
+                            <span class="text-gray-300">Chapter 2 of Our Story</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Card 3 - Adventures Together -->
+                <div class="life-card glassmorphism rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-center fade-up">
+                    <div class="md:w-1/2 mb-6 md:mb-0 md:pr-8 relative">
+                        <div class="image-frame">
+                            <img src="https://i.ibb.co/nswC5m8c/file-000000000334871f88dda5348a086c7a1-1.png" alt="Our Adventures" onerror="this.src='https://via.placeholder.com/600x400/ff7eb9/0f0510?text=Our+Adventures'">
+                            <div class="image-caption">Our Amazing Adventures Together ❤️</div>
+                        </div>
+                    </div>
+                    <div class="md:w-1/2">
+                        <div class="text-2xl md:text-3xl font-bold mb-4" style="color: #06b6d4;">Our Adventures</div>
+                        <p class="text-lg md:text-xl mb-6">I want to explore the world with you by my side. From spontaneous road trips to planned vacations to places we've both dreamed of visiting. Getting lost together in new cities, trying exotic foods, and creating unforgettable memories across the globe.</p>
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-r from-cyan-500 to-blue-400 flex items-center justify-center mr-3">
+                                <i class="fas fa-map-marked-alt text-white"></i>
+                            </div>
+                            <span class="text-gray-300">Chapter 3 of Our Story</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Card 4 - Growing Old Together -->
+                <div class="life-card glassmorphism rounded-3xl p-6 md:p-8 flex flex-col md:flex-row-reverse items-center fade-up">
+                    <div class="md:w-1/2 mb-6 md:mb-0 md:pl-8 relative">
+                        <div class="image-frame">
+                            <img src="https://i.ibb.co/FL39r9Db/file-000000000334871f88dda5348a086c7a1-2.png" alt="Forever Together" onerror="this.src='https://via.placeholder.com/600x400/ff7eb9/0f0510?text=Forever+Together'">
+                            <div class="image-caption">Growing Old Together, Forever ❤️</div>
+                        </div>
+                    </div>
+                    <div class="md:w-1/2">
+                        <div class="text-2xl md:text-3xl font-bold mb-4" style="color: #f472b6;">Growing Old Together</div>
+                        <p class="text-lg md:text-xl mb-6">Most of all, I dream of growing old with you. Watching our love deepen with each passing year. Sitting together on a porch swing, holding your hand as we watch the sunset, reminiscing about our beautiful journey together. Every wrinkle telling a story of our love.</p>
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-r from-rose-500 to-pink-400 flex items-center justify-center mr-3">
+                                <i class="fas fa-infinity text-white"></i>
+                            </div>
+                            <span class="text-gray-300">The Final Chapter</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-12">
+                <button id="nextSectionBtn" class="bg-gradient-to-r from-purple-700 to-pink-600 hover:from-purple-800 hover:to-pink-700 text-white font-semibold py-3 px-8 rounded-full text-lg transition-all duration-300 transform hover:scale-105">
+                    Continue to My Promise
+                </button>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Poetry Reveal Section -->
+    <section id="poetry" class="min-h-screen flex flex-col items-center justify-center px-4 py-12 hidden">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-4xl md:text-5xl font-bold mb-12" style="color: var(--soft-rose-pink);">My Eternal Promise</h2>
+            
+            <div class="flex flex-col items-center justify-center mb-12">
+                <div class="envelope relative cursor-pointer mb-12" id="envelope">
+                    <div class="top absolute w-64 h-36 bg-gradient-to-r from-pink-500 to-rose-500 rounded-t-lg z-10 transition-all duration-500 origin-bottom" style="clip-path: polygon(50% 0%, 0% 100%, 100% 100%);"></div>
+                    <div class="body w-64 h-36 bg-gradient-to-r from-pink-400 to-rose-400 rounded-lg"></div>
+                    <div class="letter absolute top-8 left-1/2 transform -translate-x-1/2 w-60 h-32 bg-white text-gray-800 p-4 rounded-lg shadow-lg z-0 transition-all duration-500">
+                        <div class="text-left">
+                            <div class="flex items-center mb-2">
+                                <div class="w-3 h-3 rounded-full bg-pink-500 mr-2"></div>
+                                <div class="w-3 h-3 rounded-full bg-pink-500 mr-2"></div>
+                                <div class="w-3 h-3 rounded-full bg-pink-500"></div>
+                            </div>
+                            <p class="font-dancing text-lg font-bold">To My Forever Love,</p>
+                            <p class="text-sm mt-2">Open to read my eternal promise to you...</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="poemContent" class="glassmorphism rounded-2xl p-8 max-w-2xl mx-auto hidden fade-up">
+                    <h3 class="text-2xl md:text-3xl font-bold mb-6" style="color: var(--soft-rose-pink);">I Will Never Leave You</h3>
+                    <div class="text-lg md:text-xl space-y-4 text-left">
+                        <p class="mb-4">My dearest love,</p>
+                        
+                        <p>I want you to know with absolute certainty - <span class="font-bold text-pink-300">I will never leave you</span>.</p>
+                        
+                        <p>Not when life gets difficult. Not when storms come. Not when we face challenges that test us. I am here, and I will always be here.</p>
+                        
+                        <p>I want to be in your entire life - in your morning routines and your midnight thoughts. In your celebrations and your quiet moments. In your triumphs and your healing.</p>
+                        
+                        <p class="italic">I will be the hand that holds yours when you're scared.<br>
+                        I will be the shoulder you lean on when you're tired.<br>
+                        I will be the smile that greets you at the end of every day.<br>
+                        I will be the constant in your ever-changing world.</p>
+                        
+                        <p>I don't just want to be part of your life - I want to build a life <span class="font-bold">with</span> you. A life where "we" always comes before "me." A life where our love is the foundation of everything we do.</p>
+                        
+                        <p>When you look back years from now, I want you to see one consistent thread through all your memories: <span class="font-bold text-pink-300">me, by your side</span>.</p>
+                        
+                        <p>This isn't a temporary feeling. This isn't a phase. This is my forever choice. I choose you today, I will choose you tomorrow, and I will choose you every single day for the rest of my life.</p>
+                        
+                        <p class="font-bold text-xl mt-6 text-center" style="color: var(--soft-rose-pink);">You are my always. You are my forever. You are my entire life.</p>
+                    </div>
+                    <div class="mt-8 pt-6 border-t border-white/20">
+                        <p class="text-right font-dancing text-2xl">Always and Forever Yours</p>
+                    </div>
+                </div>
+            </div>
+            
+            <button id="proposalBtn" class="bg-gradient-to-r from-purple-700 to-pink-600 hover:from-purple-800 hover:to-pink-700 text-white font-semibold py-3 px-8 rounded-full text-lg transition-all duration-300 transform hover:scale-105 mt-4">
+                The Final Question
+            </button>
+        </div>
+    </section>
+    
+    <!-- Proposal Section -->
+    <section id="proposal" class="min-h-screen flex flex-col items-center justify-center px-4 hidden">
+        <div class="max-w-4xl mx-auto text-center glassmorphism rounded-2xl p-8 md:p-12 relative">
+            <h2 class="text-4xl md:text-5xl font-bold mb-8" style="color: var(--soft-rose-pink);">Will You Build This Life With Me?</h2>
+            <p class="text-xl md:text-2xl mb-12">Will you let me be by your side through every chapter of our story?</p>
+            
+            <div class="flex flex-col md:flex-row justify-center items-center space-y-8 md:space-y-0 md:space-x-12 mb-8">
+                <div>
+                    <button id="yesBtn" class="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-4 px-10 rounded-full text-2xl md:text-3xl transition-all duration-300 transform hover:scale-110 shadow-xl">
+                        YES, FOREVER!
+                    </button>
+                </div>
+                
+                <div>
+                    <button id="noBtn" class="bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 text-white font-bold py-4 px-10 rounded-full text-2xl md:text-3xl transition-all duration-300 shadow-xl">
+                        NO
+                    </button>
+                </div>
+            </div>
+            
+            <div id="noMessage" class="text-lg text-pink-300 mb-8 min-h-16"></div>
+            
+            <div class="text-sm text-gray-400 mb-8">
+                <p>(The "No" button is just for fun - my heart only knows "Yes" for you)</p>
+            </div>
+            
+            <div class="flex justify-center space-x-4">
+                <div class="w-16 h-16 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 flex items-center justify-center floating">
+                    <i class="fas fa-heart text-white text-2xl"></i>
+                </div>
+                <div class="w-16 h-16 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center floating" style="animation-delay: 0.5s">
+                    <i class="fas fa-home text-white text-2xl"></i>
+                </div>
+                <div class="w-16 h-16 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 flex items-center justify-center floating" style="animation-delay: 1s">
+                    <i class="fas fa-ring text-white text-2xl"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div id="successMessage" class="max-w-2xl mx-auto text-center mt-12 hidden">
+            <div class="glassmorphism rounded-2xl p-8 md:p-12">
+                <div class="text-6xl md:text-7xl mb-6" style="color: var(--soft-rose-pink);">
+                    <i class="fas fa-heart-circle-check"></i>
+                </div>
+                <h2 class="text-3xl md:text-4xl font-bold mb-6">You've Made Me The Happiest Person Alive!</h2>
+                <p class="text-xl md:text-2xl mb-6">Our beautiful journey begins now. I can't wait to build every single one of these dreams with you.</p>
+                <p class="text-lg mb-8 italic">This is just the beginning of our forever story...</p>
+                <div class="bg-gradient-to-r from-purple-900/30 to-pink-900/30 rounded-lg p-6">
+                    <p class="text-lg font-bold mb-2">My Promise:</p>
+                    <p>I will be by your side through every sunrise and sunset, through every dream realized and every challenge faced. My love for you is eternal.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Navigation Dots -->
+    <div class="fixed right-6 top-1/2 transform -translate-y-1/2 hidden md:flex flex-col space-y-4 z-50">
+        <a href="#hero" class="nav-dot w-3 h-3 rounded-full bg-gray-600 hover:bg-pink-500 transition-all duration-300" data-section="hero"></a>
+        <a href="#calibration" class="nav-dot w-3 h-3 rounded-full bg-gray-600 hover:bg-pink-500 transition-all duration-300" data-section="calibration"></a>
+        <a href="#future" class="nav-dot w-3 h-3 rounded-full bg-gray-600 hover:bg-pink-500 transition-all duration-300" data-section="future"></a>
+        <a href="#poetry" class="nav-dot w-3 h-3 rounded-full bg-gray-600 hover:bg-pink-500 transition-all duration-300" data-section="poetry"></a>
+        <a href="#proposal" class="nav-dot w-3 h-3 rounded-full bg-gray-600 hover:bg-pink-500 transition-all duration-300" data-section="proposal"></a>
+    </div>
+    
+    <script>
+        // DOM Elements
+        const heroSection = document.getElementById('hero');
+        const calibrationSection = document.getElementById('calibration');
+        const futureSection = document.getElementById('future');
+        const poetrySection = document.getElementById('poetry');
+        const proposalSection = document.getElementById('proposal');
+        
+        const progressBar = document.getElementById('progressBar');
+        const navDots = document.querySelectorAll('.nav-dot');
+        const beginBtn = document.getElementById('beginBtn');
+        const nextSectionBtn = document.getElementById('nextSectionBtn');
+        const proposalBtn = document.getElementById('proposalBtn');
+        const envelope = document.getElementById('envelope');
+        const poemContent = document.getElementById('poemContent');
+        const yesBtn = document.getElementById('yesBtn');
+        const noBtn = document.getElementById('noBtn');
+        const noMessage = document.getElementById('noMessage');
+        const successMessage = document.getElementById('successMessage');
+        
+        const calibrationBar = document.getElementById('calibrationBar');
+        const calibrationPercent = document.getElementById('calibrationPercent');
+        const calibrationMessage = document.getElementById('calibrationMessage');
+        
+        // Current section tracker
+        let currentSection = 'hero';
+        
+        // Create sparkle effects
+        function createSparkles() {
+            const sections = [heroSection, futureSection, poetrySection, proposalSection];
+            sections.forEach(section => {
+                if (section) {
+                    for (let i = 0; i < 8; i++) {
+                        const sparkle = document.createElement('div');
+                        sparkle.className = 'sparkle';
+                        sparkle.style.left = `${Math.random() * 100}%`;
+                        sparkle.style.top = `${Math.random() * 100}%`;
+                        sparkle.style.animationDelay = `${Math.random() * 2}s`;
+                        section.appendChild(sparkle);
+                    }
+                }
+            });
+        }
+        
+        // Initialize animations on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add visible class to fade-up elements in hero section
+            setTimeout(() => {
+                const fadeUps = document.querySelectorAll('#hero .fade-up');
+                fadeUps.forEach(el => el.classList.add('visible'));
+            }, 500);
+            
+            // Initialize navigation dots
+            updateNavigationDots();
+            
+            // Set up scroll observer for fade-up animations
+            setupScrollAnimations();
+            
+            // Create sparkle effects
+            createSparkles();
+            
+            // Check if images loaded
+            const images = document.querySelectorAll('img');
+            images.forEach(img => {
+                img.onload = () => console.log('Image loaded:', img.src);
+                img.onerror = () => console.log('Image failed:', img.src);
+            });
+        });
+        
+        // Update progress bar and navigation dots on scroll
+        window.addEventListener('scroll', function() {
+            updateProgressBar();
+            updateNavigationDots();
+        });
+        
+        // Update progress bar based on scroll position
+        function updateProgressBar() {
+            const totalHeight = document.body.scrollHeight - window.innerHeight;
+            const progress = (window.pageYOffset / totalHeight) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+        
+        // Update active navigation dot
+        function updateNavigationDots() {
+            const sections = ['hero', 'calibration', 'future', 'poetry', 'proposal'];
+            const scrollPosition = window.scrollY + 100;
+            
+            sections.forEach(section => {
+                const element = document.getElementById(section);
+                if (element) {
+                    const offsetTop = element.offsetTop;
+                    const offsetBottom = offsetTop + element.offsetHeight;
+                    
+                    const dot = document.querySelector(`.nav-dot[data-section="${section}"]`);
+                    
+                    if (scrollPosition >= offsetTop && scrollPosition < offsetBottom) {
+                        dot.classList.remove('bg-gray-600');
+                        dot.classList.add('bg-pink-500', 'w-4', 'h-4');
+                        currentSection = section;
+                    } else {
+                        dot.classList.add('bg-gray-600');
+                        dot.classList.remove('bg-pink-500', 'w-4', 'h-4');
+                    }
+                }
+            });
+        }
+        
+        // Set up scroll animations for fade-up elements
+        function setupScrollAnimations() {
+            const fadeElements = document.querySelectorAll('.fade-up');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            });
+            
+            fadeElements.forEach(el => observer.observe(el));
+        }
+        
+        // Begin journey button click
+        beginBtn.addEventListener('click', function() {
+            // Scroll to calibration section
+            calibrationSection.classList.remove('hidden');
+            calibrationSection.scrollIntoView({ behavior: 'smooth' });
+            
+            // Start calibration animation
+            startCalibration();
+        });
+        
+        // Start the love calibration
+        function startCalibration() {
+            let percent = 0;
+            const interval = setInterval(() => {
+                percent += 1;
+                calibrationBar.style.width = `${percent}%`;
+                calibrationPercent.textContent = `${percent}%`;
+                
+                // Update messages at different percentages
+                if (percent === 20) {
+                    calibrationMessage.innerHTML = '<p>Scanning for your beautiful smile...</p>';
+                } else if (percent === 45) {
+                    calibrationMessage.innerHTML = '<p>Measuring depth of connection...</p>';
+                } else if (percent === 70) {
+                    calibrationMessage.innerHTML = '<p>Calculating forever potential...</p>';
+                } else if (percent === 90) {
+                    calibrationMessage.innerHTML = '<p>Almost complete... My heart is racing...</p>';
+                } else if (percent === 99) {
+                    calibrationMessage.innerHTML = '<p>System overload! Love levels too high!</p>';
+                    
+                    // Pause at 99%
+                    clearInterval(interval);
+                    
+                    // Jump to 1000% after a pause
+                    setTimeout(() => {
+                        calibrationBar.style.width = `100%`;
+                        calibrationPercent.textContent = `1000%`;
+                        calibrationMessage.innerHTML = '<p class="text-pink-400 font-bold text-2xl">Error: My love for you exceeds all measurable limits!</p>';
+                        
+                        // Show continue button after message
+                        setTimeout(() => {
+                            const continueBtn = document.createElement('button');
+                            continueBtn.textContent = 'See Our Future Together';
+                            continueBtn.className = 'bg-gradient-to-r from-purple-700 to-pink-600 hover:from-purple-800 hover:to-pink-700 text-white font-semibold py-3 px-8 rounded-full text-lg transition-all duration-300 transform hover:scale-105 mt-6';
+                            continueBtn.addEventListener('click', () => {
+                                futureSection.classList.remove('hidden');
+                                futureSection.scrollIntoView({ behavior: 'smooth' });
+                            });
+                            calibrationMessage.appendChild(continueBtn);
+                        }, 1500);
+                    }, 2000);
+                }
+            }, 50);
+        }
+        
+        // Next section button in future section
+        nextSectionBtn.addEventListener('click', function() {
+            poetrySection.classList.remove('hidden');
+            poetrySection.scrollIntoView({ behavior: 'smooth' });
+        });
+        
+        // Proposal button in poetry section
+        proposalBtn.addEventListener('click', function() {
+            proposalSection.classList.remove('hidden');
+            proposalSection.scrollIntoView({ behavior: 'smooth' });
+        });
+        
+        // Envelope click to reveal poem
+        envelope.addEventListener('click', function() {
+            envelope.classList.add('open');
+            
+            setTimeout(() => {
+                poemContent.classList.remove('hidden');
+                
+                // Add visible class after a short delay for animation
+                setTimeout(() => {
+                    poemContent.classList.add('visible');
+                }, 100);
+                
+                // Create floating hearts around the poem
+                createFloatingHeartsAround(poemContent, 10);
+            }, 600);
+        });
+        
+        // No button click handler (doesn't disappear, just shows message)
+        noBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Show sweet message instead
+            const messages = [
+                "💖 My heart only knows 'Yes' for you! Try again?",
+                "✨ You know you want to say Yes!",
+                "🌹 There's no 'No' when it comes to my love for you!",
+                "💝 Oops! That button doesn't work - only 'Yes' does!",
+                "🌟 Even the universe wants you to say Yes!",
+                "💕 I'll keep waiting for your Yes!",
+                "🎀 The 'No' button is just for decoration!",
+                "💗 My heart skips a beat every time you try to say No!"
+            ];
+            
+            const randomMsg = messages[Math.floor(Math.random() * messages.length)];
+            noMessage.textContent = randomMsg;
+            noMessage.classList.add('no-button-message');
+            
+            // Clear message after 2 seconds
+            setTimeout(() => {
+                noMessage.textContent = '';
+                noMessage.classList.remove('no-button-message');
+            }, 2000);
+            
+            // Slight animation on the No button
+            noBtn.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                noBtn.style.transform = 'scale(1)';
+            }, 200);
+        });
+        
+        // "Yes" button click
+        yesBtn.addEventListener('click', function() {
+            // Trigger confetti explosion
+            triggerConfetti();
+            
+            // Hide proposal buttons and show success message
+            document.querySelector('#proposal .glassmorphism').classList.add('hidden');
+            successMessage.classList.remove('hidden');
+            
+            // Add floating hearts animation
+            createFloatingHearts();
+            
+            // Create a special message
+            setTimeout(() => {
+                const eternalPromise = document.createElement('div');
+                eternalPromise.className = 'glassmorphism rounded-2xl p-6 mt-8 max-w-lg mx-auto text-center';
+                eternalPromise.innerHTML = `
+                    <h3 class="text-2xl font-bold mb-4" style="color: var(--soft-rose-pink);">Our Forever Begins Now</h3>
+                    <p class="mb-4">From this moment forward, every sunrise is ours, every dream is shared, every challenge is faced together.</p>
+                    <p class="font-bold text-lg">I love you more than words could ever express.</p>
+                `;
+                successMessage.appendChild(eternalPromise);
+                
+                // Add more floating hearts
+                createFloatingHeartsAround(successMessage, 15);
+            }, 1000);
+        });
+        
+        // Trigger confetti explosion
+        function triggerConfetti() {
+            // Multiple confetti bursts
+            confetti({
+                particleCount: 200,
+                spread: 100,
+                origin: { y: 0.6 }
+            });
+            
+            setTimeout(() => {
+                confetti({
+                    particleCount: 150,
+                    angle: 60,
+                    spread: 80,
+                    origin: { x: 0 }
+                });
+            }, 250);
+            
+            setTimeout(() => {
+                confetti({
+                    particleCount: 150,
+                    angle: 120,
+                    spread: 80,
+                    origin: { x: 1 }
+                });
+            }, 500);
+            
+            // Heart-shaped confetti
+            setTimeout(() => {
+                confetti({
+                    particleCount: 80,
+                    spread: 70,
+                    origin: { y: 0.6 },
+                    shapes: ['heart'],
+                    scalar: 1.5
+                });
+            }, 750);
+            
+            // More hearts
+            setTimeout(() => {
+                confetti({
+                    particleCount: 100,
+                    spread: 100,
+                    origin: { y: 0.5 },
+                    shapes: ['heart'],
+                    colors: ['#ff7eb9', '#ff4d8d', '#ff2e7a']
+                });
+            }, 1000);
+        }
+        
+        // Create floating hearts animation
+        function createFloatingHearts() {
+            const heartsContainer = document.createElement('div');
+            heartsContainer.className = 'fixed inset-0 pointer-events-none z-40';
+            document.body.appendChild(heartsContainer);
+            
+            for (let i = 0; i < 25; i++) {
+                setTimeout(() => {
+                    const heart = document.createElement('div');
+                    heart.innerHTML = '<i class="fas fa-heart"></i>';
+                    heart.className = 'absolute text-pink-500 text-3xl';
+                    heart.style.left = `${Math.random() * 100}vw`;
+                    heart.style.top = '100vh';
+                    heart.style.opacity = '0.9';
+                    
+                    heartsContainer.appendChild(heart);
+                    
+                    // Animate heart floating up
+                    const animation = heart.animate([
+                        { transform: 'translateY(0) scale(1)', opacity: 0.9 },
+                        { transform: `translateY(-${window.innerHeight + 100}px) scale(0.5)`, opacity: 0 }
+                    ], {
+                        duration: 4000 + Math.random() * 2000,
+                        easing: 'cubic-bezier(0.215, 0.610, 0.355, 1)'
+                    });
+                    
+                    // Remove heart after animation completes
+                    animation.onfinish = () => {
+                        heart.remove();
+                    };
+                }, i * 200);
+            }
+            
+            // Remove container after all hearts are gone
+            setTimeout(() => {
+                heartsContainer.remove();
+            }, 8000);
+        }
+        
+        // Create floating hearts around an element
+        function createFloatingHeartsAround(element, count) {
+            const rect = element.getBoundingClientRect();
+            
+            for (let i = 0; i < count; i++) {
+                setTimeout(() => {
+                    const heart = document.createElement('div');
+                    heart.innerHTML = '<i class="fas fa-heart"></i>';
+                    heart.className = 'absolute text-pink-400 text-xl';
+                    heart.style.left = `${rect.left + Math.random() * rect.width}px`;
+                    heart.style.top = `${rect.top + Math.random() * rect.height}px`;
+                    heart.style.opacity = '0.8';
+                    heart.style.zIndex = '45';
+                    
+                    document.body.appendChild(heart);
+                    
+                    // Animate heart floating up
+                    const animation = heart.animate([
+                        { transform: 'translateY(0) scale(1)', opacity: 0.8 },
+                        { transform: 'translateY(-50px) scale(1.2)', opacity: 1 },
+                        { transform: 'translateY(-100px) scale(0.5)', opacity: 0 }
+                    ], {
+                        duration: 3000,
+                        easing: 'cubic-bezier(0.215, 0.610, 0.355, 1)'
+                    });
+                    
+                    // Remove heart after animation completes
+                    animation.onfinish = () => {
+                        heart.remove();
+                    };
+                }, i * 300);
+            }
+        }
+        
+        // Navigation dots click
+        navDots.forEach(dot => {
+            dot.addEventListener('click', function(e) {
+                e.preventDefault();
+                const sectionId = this.getAttribute('data-section');
+                const section = document.getElementById(sectionId);
+                
+                // Show the section if it's hidden
+                if (section.classList.contains('hidden')) {
+                    section.classList.remove('hidden');
+                }
+                
+                // Scroll to the section
+                section.scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+    </script>
+</body>
+</html>
