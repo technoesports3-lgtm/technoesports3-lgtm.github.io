@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -342,11 +341,11 @@
             box-shadow: 0 6px 15px rgba(255, 70, 85, 0.3);
         }
 
-        .auth-button:disabled {
+        button:disabled { /* This was defined twice, removing one here */
             background: #666;
+            cursor: not-allowed;
             transform: none;
             box-shadow: none;
-            cursor: not-allowed;
         }
 
         /* Registration Timer */
@@ -1871,7 +1870,7 @@
                         
                         <!-- Google Login Button for Signup Form -->
                         <div class="auth-divider"><span>OR</span></div>
-                        <button type="button" class="google-btn" onclick="handleGoogleLogin()" id="google-signup-btn">
+                        <button type="button" class="google-btn" onclick="handleGoogleLogin('signup')" id="google-signup-btn">
                             <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google Logo">
                             Continue with Google
                         </button>
@@ -1898,7 +1897,7 @@
                         
                         <!-- Google Login Button for Login Form -->
                         <div class="auth-divider"><span>OR</span></div>
-                        <button type="button" class="google-btn" onclick="handleGoogleLogin()" id="google-login-btn">
+                        <button type="button" class="google-btn" onclick="handleGoogleLogin('login')" id="google-login-btn">
                             <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google Logo">
                             Continue with Google
                         </button>
@@ -2287,7 +2286,7 @@
             },
             hindi: {
                 title: "अगर आप अपना पासवर्ड भूल गए हैं:",
-                message: "नए ईमेल पते के साथ एक नया खाता बनाएं।"
+                message: "नए ईमेल పతే के साथ एक नया खाता बनाएं।"
             },
             telugu: {
                 title: "మీరు మీ పాస్వర్డ్ మర్చిపోతే:",
@@ -2302,12 +2301,17 @@
             })
             .catch((error) => {
                 console.error("Error setting auth persistence:", error);
+                // Add a toast here to inform the user if persistence fails, though it's rare
+                showToast("Error setting login session. Please try again.", 'error');
             });
 
         // పేజీ లోడ్ అయినప్పుడు Google Redirect Result ని చెక్ చేయడం కోసం
         auth.getRedirectResult().then(async (result) => {
+            // Always hide loading screen once the redirect result is processed (or found to be absent)
+            document.getElementById('loading-screen').style.display = 'none'; 
+
             if (result.user) {
-                document.getElementById('loading-screen').style.display = 'flex';
+                // User successfully logged in via Google redirect
                 const user = result.user;
                 
                 // Firestore లో యూజర్ డేటా ఉందో లేదో చెక్ చేయండి
@@ -2326,12 +2330,39 @@
                     });
                 }
                 showToast("Logged in with Google successfully!", 'success');
+                // The auth.onAuthStateChanged listener will handle initializing the app fully
+            } else {
+                // This is not a Google redirect result, or the user cancelled/failed.
+                // Ensure auth screen is visible if no user is logged in
+                if (!auth.currentUser) {
+                    document.getElementById('professional-auth-section').style.display = 'flex';
+                }
             }
+            
+            // Reset Google button loading states regardless of success/failure
+            setButtonLoading('google-signup-btn', false);
+            setButtonLoading('google-login-btn', false);
+
         }).catch((error) => {
             document.getElementById('loading-screen').style.display = 'none';
             document.getElementById('professional-auth-section').style.display = 'flex'; // Google login failed, show auth screen
-            console.error("Google Auth Error:", error);
-            showToast("Google Login Error: " + error.message, 'error');
+
+            let errorMessage = error.message;
+            if (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request' || error.code === 'auth/cancelled-redirect') {
+                errorMessage = "Google login cancelled or interrupted.";
+                console.log("Google login cancelled:", error.message);
+            } else if (error.code === 'auth/internal-error') {
+                errorMessage = "Google login failed due to an internal error. Check Firebase Console logs for details.";
+                console.error("Google Auth Internal Error:", error);
+            } else if (error.code === 'auth/unauthorized-domain') {
+                errorMessage = "Google login failed: Unauthorized domain. Please add your app's domain to Firebase Authorized Domains.";
+                console.error("Google Auth Unauthorized Domain:", error);
+            }
+            showToast("Google Login Error: " + errorMessage, 'error');
+
+            // Reset Google button loading states regardless of success/failure
+            setButtonLoading('google-signup-btn', false);
+            setButtonLoading('google-login-btn', false);
         });
 
         // --- MODIFICATION 2: Language switching for forgot password ---
@@ -2342,9 +2373,33 @@
             document.querySelectorAll('.language-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
-            event.target.classList.add('active');
+            event.target.classList.add('active'); // event.target is undefined here, fixed below
             
-            // Update message
+            // Re-render message
+            const messageDiv = document.getElementById('forgot-password-message');
+            const messageData = forgotPasswordMessages[language];
+            
+            messageDiv.innerHTML = `
+                <div>
+                    <p style="margin: 0; color: #ff4655; font-weight: bold;">${messageData.title}</p>
+                    <p style="margin: 10px 0 0 0;">${messageData.message}</p>
+                </div>
+            `;
+        }
+        // Fixed: Pass event object or set active class based on ID
+        function switchForgotPasswordLanguage(language, event) {
+            currentForgotPasswordLanguage = language;
+            
+            document.querySelectorAll('.language-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            if (event && event.target) {
+                event.target.classList.add('active');
+            } else {
+                // Fallback for direct calls if needed, or identify button by language
+                document.querySelector(`.language-btn[onclick*="${language}"]`).classList.add('active');
+            }
+            
             const messageDiv = document.getElementById('forgot-password-message');
             const messageData = forgotPasswordMessages[language];
             
@@ -2378,6 +2433,9 @@
                     break;
                 case 'info':
                     iconClass = 'fas fa-info-circle';
+                    break;
+                case 'warning':
+                    iconClass = 'fas fa-exclamation-triangle';
                     break;
             }
             
@@ -2728,6 +2786,7 @@
         function showForgotPasswordAlert() {
             // Reset to English by default
             currentForgotPasswordLanguage = 'english';
+            // Correctly set active class on button
             document.querySelectorAll('.language-btn').forEach(btn => {
                 btn.classList.remove('active');
                 if (btn.textContent === 'English') {
@@ -2770,6 +2829,8 @@
 
         function setButtonLoading(buttonId, isLoading) {
             const button = document.getElementById(buttonId);
+            if (!button) return; // Add null check for button
+            
             if (isLoading) {
                 button.disabled = true;
                 if (buttonId.includes('google')) {
@@ -3011,11 +3072,11 @@
         // Google Auth Provider
         const googleProvider = new firebase.auth.GoogleAuthProvider();
 
-        function handleGoogleLogin() {
-            setButtonLoading('google-signup-btn', true); // Set loading state for Google buttons too
-            setButtonLoading('google-login-btn', true);
+        function handleGoogleLogin(formType) { // Pass formType to identify which button was clicked
+            setButtonLoading('google-signup-btn', true); 
+            setButtonLoading('google-login-btn', true); // Set both to loading, one will be cleared anyway
             document.getElementById('loading-screen').style.display = 'flex';
-            // Kodular లాంటి WebViews కి 'signInWithRedirect' బెస్ట్
+            
             auth.signInWithRedirect(googleProvider);
         }
 
@@ -3910,7 +3971,6 @@
 
             // 2. Validate Player Names and IDs
             let allPlayerDetailsValid = true;
-            let playerDetails = []; // This array is filled here, but re-generated in submitRegistration. Could be optimized.
             let numPlayers = 1;
             if (selectedTournament.category === 'duo') numPlayers = 2;
             if (selectedTournament.category === 'squad') numPlayers = 4;
@@ -3932,7 +3992,6 @@
                     allPlayerDetailsValid = false;
                     break;
                 }
-                playerDetails.push({ name: playerName, freeFireId: playerId, level: 0 }); // Not actually used later, just for validation.
             }
 
             if (!allPlayerDetailsValid) {
@@ -3952,7 +4011,7 @@
             console.log("Validation passed, opening payment...");
             
             // Hide registration modal
-            document.getElementById('registration-modal').style.display = 'none';
+            closeModal('registration-modal');
             
             // Show payment modal
             showPaymentModal();
