@@ -3837,53 +3837,48 @@
         }
 
         function proceedToPayment() {
-            // Validate form
-            const email = document.getElementById('register-email').value;
-            const mobile = document.getElementById('register-mobile').value.trim();
-            
-            if (!email || !mobile) {
-                showToast("Please complete the form.", 'error');
-                return;
-            }
-            
-            // Validate mobile number
-            if (mobile.length < 10) {
-                showToast("Please enter a valid mobile number.", 'error');
-                return;
-            }
-            
-            // Validate player details based on tournament category
-            let playersValid = true;
-            let playerCount = selectedTournament.category === 'solo' ? 1 : 
-                             selectedTournament.category === 'duo' ? 2 : 4;
-            
-            for (let i = 1; i <= playerCount; i++) {
-                const playerName = document.getElementById(`player${i}-name`).value.trim();
-                
-                if (!playerName || !playerId) {
-                    playersValid = false;
-                    showToast(`Please enter Name and ID for Player ${i}`, 'error');
-                    return;
-                }
-                // Validate Free Fire ID is numbers only
-                if (!/^\d+$/.test(playerId)) {
-                    showToast(`Free Fire ID for Player ${i} must contain only numbers`, 'error');
-                    return;
-                }
-            }
-            
-            // Check team name for duo/squad
-            if ((selectedTournament.category === 'duo' || selectedTournament.category === 'squad') && 
-                !document.getElementById('register-team-name').value.trim()) {
-                showToast("Please enter a team name.", 'error');
-                return;
-            }
-            
-            // Close registration modal and open payment modal
-            closeModal('registration-modal');
-            showPaymentModal();
-        }
+    console.log("Proceed to payment clicked"); // Debugging check
 
+    // 1. Get Basic Info
+    const mobile = document.getElementById('register-mobile').value.trim();
+    if (!mobile || mobile.length < 10) {
+        alert("Please enter a valid 10-digit mobile number.");
+        return;
+    }
+
+    // 2. Validate Player 1 (Always required)
+    const p1Name = document.getElementById('player1-name').value.trim();
+    const p1Id = document.getElementById('player1-id').value.trim();
+
+    if (!p1Name || !p1Id) {
+        alert("Please enter Player 1 Name and ID.");
+        return;
+    }
+
+    // 3. For Duo/Squad, check extra players
+    if (selectedTournament.category === 'duo' || selectedTournament.category === 'squad') {
+        const teamName = document.getElementById('register-team-name').value.trim();
+        if (!teamName) {
+            alert("Team Name is required.");
+            return;
+        }
+        
+        // Quick check for Player 2 if Duo
+        if (selectedTournament.category === 'duo') {
+            const p2Id = document.getElementById('player2-id').value.trim();
+            if (!p2Id) { alert("Player 2 ID required."); return; }
+        }
+    }
+
+    // 4. ACTION: If everything is okay, switch the modals
+    console.log("Validation passed, opening payment...");
+    
+    // Hide registration modal
+    document.getElementById('registration-modal').style.display = 'none';
+    
+    // Show payment modal
+    showPaymentModal();
+}
         function showPaymentModal() {
             const modal = document.getElementById('payment-modal');
             const detailsContainer = document.getElementById('payment-details');
