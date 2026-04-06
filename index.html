@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -342,11 +341,11 @@
             box-shadow: 0 6px 15px rgba(255, 70, 85, 0.3);
         }
 
-        button:disabled { /* This was defined twice, removing one here */
+        .auth-button:disabled {
             background: #666;
-            cursor: not-allowed;
             transform: none;
             box-shadow: none;
+            cursor: not-allowed;
         }
 
         /* Registration Timer */
@@ -1613,49 +1612,6 @@
             border: 1px solid #333;
         }
 
-        /* Google Auth Button Styles */
-        .auth-divider {
-            display: flex;
-            align-items: center;
-            text-align: center;
-            margin: 20px 0;
-            color: #888;
-            font-size: 0.85em;
-        }
-        .auth-divider::before, .auth-divider::after {
-            content: '';
-            flex: 1;
-            border-bottom: 1px solid #333;
-        }
-        .auth-divider span {
-            padding: 0 10px;
-        }
-        .google-btn {
-            width: 100%;
-            padding: 12px;
-            background: #ffffff;
-            color: #444;
-            border: none;
-            border-radius: 6px;
-            font-weight: bold;
-            font-size: 0.95em;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            transition: all 0.3s;
-            margin-bottom: 15px;
-        }
-        .google-btn:hover {
-            background: #f1f1f1;
-            transform: translateY(-2px);
-        }
-        .google-btn img {
-            width: 20px;
-            height: 20px;
-        }
-
         /* Responsive Design */
         @media (max-width: 768px) {
             .tournament-tabs {
@@ -1869,13 +1825,6 @@
                         </div>
                         <button class="auth-button" onclick="handleProfessionalSignup()" id="signup-button">Register</button>
                         
-                        <!-- Google Login Button for Signup Form -->
-                        <div class="auth-divider"><span>OR</span></div>
-                        <button type="button" class="google-btn" onclick="handleGoogleLogin()" id="google-signup-btn">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google Logo">
-                            Continue with Google
-                        </button>
-                        
                         <!-- Already have an account link -->
                         <div style="text-align: center; margin-top: 15px; color: #aaa; font-size: 0.85em;">
                             Already have an account? 
@@ -1896,13 +1845,6 @@
                         </div>
                         <button class="auth-button" onclick="handleProfessionalLogin()" id="login-button">Login</button>
                         
-                        <!-- Google Login Button for Login Form -->
-                        <div class="auth-divider"><span>OR</span></div>
-                        <button type="button" class="google-btn" onclick="handleGoogleLogin()" id="google-login-btn">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google Logo">
-                            Continue with Google
-                        </button>
-
                         <!-- Don't have an account link -->
                         <div style="text-align: center; margin-top: 15px; color: #aaa; font-size: 0.85em;">
                             Don't have an account? 
@@ -1920,9 +1862,9 @@
                 <p style="color: #aaa; font-size: 0.9em; margin-bottom: 15px;">Select language:</p>
                 
                 <div class="language-selector">
-                    <button class="language-btn active" onclick="switchForgotPasswordLanguage('english', event)">English</button>
-                    <button class="language-btn" onclick="switchForgotPasswordLanguage('hindi', event)">हिंदी</button>
-                    <button class="language-btn" onclick="switchForgotPasswordLanguage('telugu', event)">తెలుగు</button>
+                    <button class="language-btn active" onclick="switchForgotPasswordLanguage('english')">English</button>
+                    <button class="language-btn" onclick="switchForgotPasswordLanguage('hindi')">हिंदी</button>
+                    <button class="language-btn" onclick="switchForgotPasswordLanguage('telugu')">తెలుగు</button>
                 </div>
                 
                 <div class="message-content" id="forgot-password-message">
@@ -2302,86 +2244,19 @@
             })
             .catch((error) => {
                 console.error("Error setting auth persistence:", error);
-                // Add a toast here to inform the user if persistence fails, though it's rare
-                showToast("Error setting login session. Please try again.", 'error');
             });
 
-        // పేజీ లోడ్ అయినప్పుడు Google Redirect Result ని చెక్ చేయడం కోసం
-        auth.getRedirectResult().then(async (result) => {
-            // Always hide loading screen once the redirect result is processed (or found to be absent)
-            document.getElementById('loading-screen').style.display = 'none'; 
-
-            if (result.user) {
-                // User successfully logged in via Google redirect
-                const user = result.user;
-                
-                // Firestore లో యూజర్ డేటా ఉందో లేదో చెక్ చేయండి
-                const userDoc = await db.collection("users").doc(user.uid).get();
-                
-                if (!userDoc.exists) {
-                    // కొత్త యూజర్ అయితే డేటాబేస్ లో సేవ్ చేయండి
-                    await db.collection("users").doc(user.uid).set({
-                        username: user.displayName || user.email.split('@')[0], // Default username from Google
-                        phone: user.phoneNumber || "",
-                        email: user.email,
-                        role: 'user',
-                        isBlocked: false,
-                        tournamentsParticipated: 0,
-                        registeredAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                }
-                showToast("Logged in with Google successfully!", 'success');
-                // The auth.onAuthStateChanged listener will handle initializing the app fully
-            } else {
-                // This is not a Google redirect result, or the user cancelled/failed.
-                // Ensure auth screen is visible if no user is logged in
-                if (!auth.currentUser) {
-                    document.getElementById('professional-auth-section').style.display = 'flex';
-                }
-            }
-            
-            // Reset Google button loading states regardless of success/failure
-            setButtonLoading('google-signup-btn', false);
-            setButtonLoading('google-login-btn', false);
-
-        }).catch((error) => {
-            document.getElementById('loading-screen').style.display = 'none';
-            document.getElementById('professional-auth-section').style.display = 'flex'; // Google login failed, show auth screen
-
-            let errorMessage = error.message;
-            if (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request' || error.code === 'auth/cancelled-redirect') {
-                errorMessage = "Google login cancelled or interrupted.";
-                console.log("Google login cancelled:", error.message);
-            } else if (error.code === 'auth/internal-error') {
-                errorMessage = "Google login failed due to an internal error. Check Firebase Console logs for details.";
-                console.error("Google Auth Internal Error:", error);
-            } else if (error.code === 'auth/unauthorized-domain') {
-                errorMessage = "Google login failed: Unauthorized domain. Please add your app's domain to Firebase Authorized Domains.";
-                console.error("Google Auth Unauthorized Domain:", error);
-            }
-            showToast("Google Login Error: " + errorMessage, 'error');
-
-            // Reset Google button loading states regardless of success/failure
-            setButtonLoading('google-signup-btn', false);
-            setButtonLoading('google-login-btn', false);
-        });
-
         // --- MODIFICATION 2: Language switching for forgot password ---
-        // Added 'event' parameter to access event.target
-        function switchForgotPasswordLanguage(language, event) {
+        function switchForgotPasswordLanguage(language) {
             currentForgotPasswordLanguage = language;
             
+            // Update active button
             document.querySelectorAll('.language-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
-            if (event && event.target) { // Check if event and event.target exist
-                event.target.classList.add('active');
-            } else {
-                // Fallback for direct calls if needed, or identify button by language attribute/content
-                const btn = document.querySelector(`.language-btn[onclick*="${language}"]`);
-                if(btn) btn.classList.add('active');
-            }
+            event.target.classList.add('active');
             
+            // Update message
             const messageDiv = document.getElementById('forgot-password-message');
             const messageData = forgotPasswordMessages[language];
             
@@ -2415,9 +2290,6 @@
                     break;
                 case 'info':
                     iconClass = 'fas fa-info-circle';
-                    break;
-                case 'warning': // Added warning icon
-                    iconClass = 'fas fa-exclamation-triangle';
                     break;
             }
             
@@ -2768,7 +2640,6 @@
         function showForgotPasswordAlert() {
             // Reset to English by default
             currentForgotPasswordLanguage = 'english';
-            // Correctly set active class on button
             document.querySelectorAll('.language-btn').forEach(btn => {
                 btn.classList.remove('active');
                 if (btn.textContent === 'English') {
@@ -2811,23 +2682,14 @@
 
         function setButtonLoading(buttonId, isLoading) {
             const button = document.getElementById(buttonId);
-            if (!button) return; // Add null check for button
-            
             if (isLoading) {
                 button.disabled = true;
-                if (buttonId.includes('google')) {
-                    button.innerHTML = '<span class="loading-spinner"></span> Loading...'; // Google button loading text
-                } else {
-                    button.innerHTML = '<span class="loading-spinner"></span> Loading...';
-                }
+                button.innerHTML = '<span class="loading-spinner"></span> Loading...';
             } else {
-                // Restore original button text based on ID
                 if (buttonId === 'login-button') {
                     button.innerHTML = 'Login';
                 } else if (buttonId === 'signup-button') {
                     button.innerHTML = 'Register';
-                } else if (buttonId === 'google-signup-btn' || buttonId === 'google-login-btn') {
-                    button.innerHTML = '<img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google Logo"> Continue with Google';
                 }
                 button.disabled = false;
             }
@@ -3052,17 +2914,6 @@
             }
         }
 
-        // Google Auth Provider
-        const googleProvider = new firebase.auth.GoogleAuthProvider();
-
-        function handleGoogleLogin() { 
-            setButtonLoading('google-signup-btn', true); 
-            setButtonLoading('google-login-btn', true);
-            document.getElementById('loading-screen').style.display = 'flex';
-            
-            auth.signInWithRedirect(googleProvider);
-        }
-
         function showLogoutConfirmation() {
             if (confirm("Are you sure you want to logout?")) {
                 performLogout();
@@ -3234,7 +3085,7 @@
                             if (registration.status === 'approved') {
                                 showToast(
                                     `Your registration for ${registration.tournamentTitle} has been approved!`, 
-                                'success',
+                                    'success',
                                     'Registration Approved!'
                                 );
                                 // Refresh tournaments to update status
@@ -3885,7 +3736,7 @@
             `;
             
             // Create registration form based on tournament category
-            // MODIFIED: Player name and ID fields are dynamic based on category
+            // MODIFIED: Removed Free Fire Name and Game Level fields, kept only Free Fire ID
             let formHTML = `
                 <div class="form-group">
                     <label>Your Email</label>
@@ -3908,26 +3759,69 @@
                 `;
             }
             
-            let numPlayers = 1;
-            if (tournament.category === 'duo') numPlayers = 2;
-            if (tournament.category === 'squad') numPlayers = 4;
-
-            for (let i = 1; i <= numPlayers; i++) {
+             if (tournament.category === 'solo') {
                 formHTML += `
                     <div class="player-details-section">
-                        <h4>Player ${i} Details</h4>
+                        <h4>Player Details</h4>
                         <div class="form-group">
                             <label>Free Fire Name (Copy-Paste Name)</label>
-                            <input type="text" id="player${i}-name" placeholder="Enter Exact In-Game Name" required>
+                            <input type="text" id="player1-name" placeholder="Enter Exact In-Game Name" required>
                         </div>
                         <div class="form-group">
                             <label>Free Fire ID (Numbers only)</label>
-                            <input type="text" id="player${i}-id" placeholder="Player ${i} Free Fire ID" required 
+                            <input type="text" id="player1-id" placeholder="Your Free Fire ID number" required 
                                    pattern="[0-9]*" title="Enter numbers only">
-                            <small style="color: #666; font-size: 0.85em;">Enter Player ${i} Free Fire ID (numeric only)</small>
                         </div>
                     </div>
                 `;
+            } else if (tournament.category === 'duo') {
+                formHTML += `
+                    <div class="player-details-section">
+                        <h4>Player 1 Details</h4>
+                        <div class="form-group">
+                            <label>Free Fire Name (Copy-Paste Name)</label>
+                            <input type="text" id="player1-name" placeholder="Enter Exact In-Game Name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Free Fire ID (Numbers only)</label>
+                            <input type="text" id="player1-id" placeholder="Player 1 Free Fire ID" required 
+                                   pattern="[0-9]*" title="Enter numbers only">
+                            <small style="color: #666; font-size: 0.85em;">Enter Player 1 Free Fire ID (numeric only)</small>
+                        </div>
+                    </div>
+                    
+                    <div class="player-details-section">
+                        <h4>Player 2 Details</h4>
+                          <div class="form-group">
+                            <label>Free Fire Name (Copy-Paste Name)</label>
+                            <input type="text" id="player1-name" placeholder="Enter Exact In-Game Name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Free Fire ID (Numbers only)</label>
+                            <input type="text" id="player2-id" placeholder="Player 2 Free Fire ID" required 
+                                   pattern="[0-9]*" title="Enter numbers only">
+                            <small style="color: #666; font-size: 0.85em;">Enter Player 2 Free Fire ID (numeric only)</small>
+                        </div>
+                    </div>
+                `;
+            } else if (tournament.category === 'squad') {
+                for (let i = 1; i <= 4; i++) {
+                    formHTML += `
+                        <div class="player-details-section">
+                            <h4>Player ${i} Details</h4>
+                               <div class="form-group">
+                            <label>Free Fire Name (Copy-Paste Name)</label>
+                            <input type="text" id="player1-name" placeholder="Enter Exact In-Game Name" required>
+                        </div>
+                            <div class="form-group">
+                                <label>Free Fire ID (Numbers only)</label>
+                                <input type="text" id="player${i}-id" placeholder="Player ${i} Free Fire ID" required 
+                                       pattern="[0-9]*" title="Enter numbers only">
+                                <small style="color: #666; font-size: 0.85em;">Enter Player ${i} Free Fire ID (numeric only)</small>
+                            </div>
+                        </div>
+                    `;
+                }
             }
             
             formHTML += `
@@ -3943,62 +3837,48 @@
         }
 
         function proceedToPayment() {
-            console.log("Proceed to payment clicked"); // Debugging check
+    console.log("Proceed to payment clicked"); // Debugging check
 
-            // 1. Get Basic Info
-            const mobile = document.getElementById('register-mobile').value.trim();
-            if (!mobile || mobile.length < 10) {
-                showToast("Please enter a valid 10-digit mobile number.", "error"); 
-                return;
-            }
+    // 1. Get Basic Info
+    const mobile = document.getElementById('register-mobile').value.trim();
+    if (!mobile || mobile.length < 10) {
+        alert("Please enter a valid 10-digit mobile number.");
+        return;
+    }
 
-            // 2. Validate Player Names and IDs
-            let allPlayerDetailsValid = true;
-            let numPlayers = 1;
-            if (selectedTournament.category === 'duo') numPlayers = 2;
-            if (selectedTournament.category === 'squad') numPlayers = 4;
+    // 2. Validate Player 1 (Always required)
+    const p1Name = document.getElementById('player1-name').value.trim();
+    const p1Id = document.getElementById('player1-id').value.trim();
 
-            for (let i = 1; i <= numPlayers; i++) {
-                const playerNameInput = document.getElementById(`player${i}-name`);
-                const playerIdInput = document.getElementById(`player${i}-id`);
+    if (!p1Name || !p1Id) {
+        alert("Please enter Player 1 Name and ID.");
+        return;
+    }
 
-                const playerName = playerNameInput ? playerNameInput.value.trim() : '';
-                const playerId = playerIdInput ? playerIdInput.value.trim() : '';
-
-                if (!playerName || !playerId) {
-                    showToast(`Please enter Free Fire Name and ID for Player ${i}.`, "error");
-                    allPlayerDetailsValid = false;
-                    break;
-                }
-                 if (!/^\d+$/.test(playerId)) {
-                    showToast(`Free Fire ID for Player ${i} must contain numbers only.`, "error");
-                    allPlayerDetailsValid = false;
-                    break;
-                }
-            }
-
-            if (!allPlayerDetailsValid) {
-                return;
-            }
-
-            // 3. For Duo/Squad, check team name
-            if (selectedTournament.category === 'duo' || selectedTournament.category === 'squad') {
-                const teamName = document.getElementById('register-team-name').value.trim();
-                if (!teamName) {
-                    showToast("Team Name is required.", "error");
-                    return;
-                }
-            }
-
-            // 4. ACTION: If everything is okay, switch the modals
-            console.log("Validation passed, opening payment...");
-            
-            // Hide registration modal
-            closeModal('registration-modal');
-            
-            // Show payment modal
-            showPaymentModal();
+    // 3. For Duo/Squad, check extra players
+    if (selectedTournament.category === 'duo' || selectedTournament.category === 'squad') {
+        const teamName = document.getElementById('register-team-name').value.trim();
+        if (!teamName) {
+            alert("Team Name is required.");
+            return;
         }
+        
+        // Quick check for Player 2 if Duo
+        if (selectedTournament.category === 'duo') {
+            const p2Id = document.getElementById('player2-id').value.trim();
+            if (!p2Id) { alert("Player 2 ID required."); return; }
+        }
+    }
+
+    // 4. ACTION: If everything is okay, switch the modals
+    console.log("Validation passed, opening payment...");
+    
+    // Hide registration modal
+    document.getElementById('registration-modal').style.display = 'none';
+    
+    // Show payment modal
+    showPaymentModal();
+}
         function showPaymentModal() {
             const modal = document.getElementById('payment-modal');
             const detailsContainer = document.getElementById('payment-details');
@@ -4115,16 +3995,24 @@
             const teamName = selectedTournament.category !== 'solo' ? 
                 document.getElementById('register-team-name').value.trim() : null;
             
-            // Collect player details dynamically
+            // Collect player details
             let playerDetails = [];
-            let numPlayers = 1;
-            if (selectedTournament.category === 'duo') numPlayers = 2;
-            if (selectedTournament.category === 'squad') numPlayers = 4;
-
-            for (let i = 1; i <= numPlayers; i++) {
-                const playerName = document.getElementById(`player${i}-name`).value.trim();
+            let playerCount = selectedTournament.category === 'solo' ? 1 : 
+                             selectedTournament.category === 'duo' ? 2 : 4;
+            
+            for (let i = 1; i <= playerCount; i++) {
                 const playerId = document.getElementById(`player${i}-id`).value.trim();
-                playerDetails.push({ name: playerName, freeFireId: playerId, level: 0 });
+                
+                if (!playerId) {
+                    showToast(`Please enter Free Fire ID for Player ${i}`, 'error');
+                    return;
+                }
+                
+                playerDetails.push({ 
+                    name: document.getElementById(`player${i}-name`).value.trim(),
+                    freeFireId: playerId,
+                    level: 0 
+                });
             }
             
             try {
@@ -4159,7 +4047,7 @@
                         tournamentId: selectedTournament.id,
                         tournamentTitle: selectedTournament.title,
                         tournamentCategory: selectedTournament.category,
-                        name: currentUser.displayName || currentUser.email.split('@')[0], // Use current user's display name or email
+                        name: currentUser.displayName || currentUser.email.split('@')[0],
                         email: email,
                         mobile: mobile,
                         teamName: teamName,
@@ -4304,7 +4192,7 @@
             if (type === 'privacy') {
                 title = 'Privacy Policy';
                 content = appConfig.privacyPolicy || 'Privacy policy not set by admin.';
-                alert(`${title}:\n\n${content}`); // You might want to replace alert with a custom modal for a better UX
+                alert(`${title}:\n\n${content}`);
             } else if (type === 'contact') {
                 // Show contact section instead of alert
                 showSection('contact-section');
@@ -4314,7 +4202,7 @@
             } else if (type === 'terms') {
                 title = 'Terms and Conditions';
                 content = appConfig.termsAndConditions || 'Terms and conditions not set by admin.';
-                alert(`${title}:\n\n${content}`); // You might want to replace alert with a custom modal for a better UX
+                alert(`${title}:\n\n${content}`);
             }
         }
 
