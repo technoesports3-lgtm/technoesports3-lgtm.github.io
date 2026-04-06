@@ -1871,7 +1871,7 @@
                         
                         <!-- Google Login Button for Signup Form -->
                         <div class="auth-divider"><span>OR</span></div>
-                        <button type="button" class="google-btn" onclick="handleGoogleLogin()" id="google-signup-button">
+                        <button type="button" class="google-btn" onclick="handleGoogleLogin()" id="google-signup-btn">
                             <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google Logo">
                             Continue with Google
                         </button>
@@ -1898,7 +1898,7 @@
                         
                         <!-- Google Login Button for Login Form -->
                         <div class="auth-divider"><span>OR</span></div>
-                        <button type="button" class="google-btn" onclick="handleGoogleLogin()" id="google-login-button">
+                        <button type="button" class="google-btn" onclick="handleGoogleLogin()" id="google-login-btn">
                             <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google Logo">
                             Continue with Google
                         </button>
@@ -2221,7 +2221,6 @@
 
     <script>
         // *** FIREBASE CONFIGURATION ***
-        // Firebase configuration details for your project.
         const firebaseConfig = {
             apiKey: "AIzaSyC-6ctoVjMq5fO9_ahOILi7rSUmtnmS9EQ",
             authDomain: "techno2-ccc7e.firebaseapp.com",
@@ -2234,15 +2233,12 @@
         };
 
         // *** IMGBB CONFIGURATION - SAME AS ADMIN PANEL ***
-        // API key for the ImgBB image hosting service.
         const IMGBB_API_KEY = "db671a28c5c7d432622dc7e5bc74eecc";
 
-        // Initialize Firebase services.
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // Global variables for application state.
         let currentUser = null;
         let appConfig = {
             authImageUrl: "https://img.icons8.com/color/96/000000/tournament.png",
@@ -2261,29 +2257,29 @@
         let currentTournaments = [];
         let userRegistrations = [];
         let selectedTournament = null;
-        let authStateChecked = false; // Flag to track if Firebase auth state has been checked.
+        let authStateChecked = false;
         let currentTab = 'solo';
         let playerCount = 1;
         let paymentScreenshotUrl = null;
         
-        // Timer variables for managing countdowns.
+        // Timer variables
         let activeTimers = new Map();
         let tournamentTimers = new Map(); // For tournament start time timers
         
-        // Real-time listeners for Firestore data.
+        // Real-time listeners
         let tournamentListener = null;
         let registrationListener = null;
         let appConfigListener = null;
         let appUpdateListener = null;
 
-        // Auto logout timer variables.
+        // Auto logout timer
         let autoLogoutTimer = null;
         const AUTO_LOGOUT_TIME = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
-        // Forgot password language setting.
+        // Forgot password language
         let currentForgotPasswordLanguage = 'english';
 
-        // Password recovery messages in three languages.
+        // Password recovery messages in three languages
         const forgotPasswordMessages = {
             english: {
                 title: "If you forget your password:",
@@ -2299,7 +2295,7 @@
             }
         };
 
-        // Set Firebase authentication persistence to local storage.
+        // Token persistence - Set to LOCAL (won't logout on page refresh)
         auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
             .then(() => {
                 console.log("Auth persistence set to LOCAL");
@@ -2308,23 +2304,19 @@
                 console.error("Error setting auth persistence:", error);
             });
 
-        // Google Auth Provider instance.
-        const googleProvider = new firebase.auth.GoogleAuthProvider();
-
-        // Handle Google sign-in redirect result when the page loads.
+        // పేజీ లోడ్ అయినప్పుడు Google Redirect Result ని చెక్ చేయడం కోసం
         auth.getRedirectResult().then(async (result) => {
             if (result.user) {
-                // Show loading screen while user data is processed.
                 document.getElementById('loading-screen').style.display = 'flex';
                 const user = result.user;
                 
-                // Check if user data exists in Firestore.
+                // Firestore లో యూజర్ డేటా ఉందో లేదో చెక్ చేయండి
                 const userDoc = await db.collection("users").doc(user.uid).get();
                 
                 if (!userDoc.exists) {
-                    // If new user, save their data to Firestore.
+                    // కొత్త యూజర్ అయితే డేటాబేస్ లో సేవ్ చేయండి
                     await db.collection("users").doc(user.uid).set({
-                        username: user.displayName || "Player",
+                        username: user.displayName || user.email.split('@')[0], // Default username from Google
                         phone: user.phoneNumber || "",
                         email: user.email,
                         role: 'user',
@@ -2334,28 +2326,25 @@
                     });
                 }
                 showToast("Logged in with Google successfully!", 'success');
-                // The onAuthStateChanged listener will handle the UI transition from here.
             }
         }).catch((error) => {
-            // If Google login failed, hide loading and show auth screen with an error.
             document.getElementById('loading-screen').style.display = 'none';
-            document.getElementById('professional-auth-section').style.display = 'flex'; 
+            document.getElementById('professional-auth-section').style.display = 'flex'; // Google login failed, show auth screen
             console.error("Google Auth Error:", error);
             showToast("Google Login Error: " + error.message, 'error');
         });
 
         // --- MODIFICATION 2: Language switching for forgot password ---
-        // Function to switch the language of the forgot password message.
         function switchForgotPasswordLanguage(language) {
             currentForgotPasswordLanguage = language;
             
-            // Update active button styling.
+            // Update active button
             document.querySelectorAll('.language-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
             event.target.classList.add('active');
             
-            // Update message content based on selected language.
+            // Update message
             const messageDiv = document.getElementById('forgot-password-message');
             const messageData = forgotPasswordMessages[language];
             
@@ -2368,18 +2357,17 @@
         }
 
         // --- Professional Toast Notification Functions ---
-        // Displays a professional toast notification.
         function showToast(message, type = 'info', title = 'Notification') {
             const toast = document.getElementById('toast-notification');
             const toastIcon = document.getElementById('toast-notification-icon');
             const toastTitle = document.getElementById('toast-notification-title');
             const toastMessage = document.getElementById('toast-notification-message');
             
-            // Reset and apply type-specific styling.
+            // Set toast type
             toast.className = 'toast-notification';
             toast.classList.add(`toast-${type}`);
             
-            // Set icon based on notification type.
+            // Set icon based on type
             let iconClass = 'fas fa-bell';
             switch(type) {
                 case 'success':
@@ -2391,28 +2379,24 @@
                 case 'info':
                     iconClass = 'fas fa-info-circle';
                     break;
-                case 'warning': // Added for update modal logic
-                    iconClass = 'fas fa-exclamation-triangle';
-                    break;
             }
             
             toastIcon.innerHTML = `<i class="${iconClass}"></i>`;
             toastTitle.textContent = title;
             toastMessage.textContent = message;
             
-            // Show toast with a slight delay for animation.
+            // Show toast with animation
             toast.style.display = 'block';
             setTimeout(() => {
                 toast.classList.add('show');
             }, 10);
             
-            // Auto-hide after 5 seconds.
+            // Auto hide after 5 seconds
             setTimeout(() => {
                 hideToast();
             }, 5000);
         }
 
-        // Hides the currently displayed toast notification.
         function hideToast() {
             const toast = document.getElementById('toast-notification');
             toast.classList.remove('show');
@@ -2422,14 +2406,13 @@
         }
 
         // --- Auto Logout Functions ---
-        // Resets the auto-logout timer.
         function resetAutoLogoutTimer() {
-            // Clear any existing timer.
+            // Clear existing timer
             if (autoLogoutTimer) {
                 clearTimeout(autoLogoutTimer);
             }
             
-            // Set a new timer for 24 hours.
+            // Set new timer for 24 hours
             autoLogoutTimer = setTimeout(() => {
                 showToast("Session expired. Please login again.", 'info', 'Session Expired');
                 performLogout();
@@ -2438,18 +2421,19 @@
             console.log("Auto logout timer reset for 24 hours");
         }
 
-        // Sets up event listeners to reset the auto-logout timer on user activity.
         function setupActivityListeners() {
+            // Reset timer on user activity
             const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
             
             activityEvents.forEach(eventName => {
                 document.addEventListener(eventName, resetAutoLogoutTimer);
             });
             
-            // Override signOut to ensure timer is cleared on manual logout.
+            // Also reset timer when making Firebase calls
             const originalFirebaseAuth = auth;
             const originalSignOut = originalFirebaseAuth.signOut;
             
+            // Override signOut to clear timer
             originalFirebaseAuth.signOut = function() {
                 if (autoLogoutTimer) {
                     clearTimeout(autoLogoutTimer);
@@ -2459,7 +2443,6 @@
         }
 
         // --- App Update Functions ---
-        // Checks if an app update is required and displays the update modal if blocked.
         function checkAppUpdate() {
             if (appConfig.isAppBlocked) {
                 showAppUpdateModal();
@@ -2468,7 +2451,6 @@
             return false;
         }
 
-        // Displays the app update modal with information from appConfig.
         function showAppUpdateModal() {
             const modal = document.getElementById('app-update-modal');
             const title = document.getElementById('app-update-title');
@@ -2478,9 +2460,10 @@
             title.textContent = appConfig.appUpdateTitle || "App Update Required";
             message.textContent = appConfig.appUpdateMessage || "A new version of the app is available. Please update to continue.";
             
-            linkContainer.innerHTML = ''; // Clear previous links.
+            // Clear previous links
+            linkContainer.innerHTML = '';
             
-            // Add update link button if a link is provided.
+            // Add link if provided
             if (appConfig.appUpdateLink && appConfig.appUpdateLink.trim() !== '') {
                 const linkBtn = document.createElement('a');
                 linkBtn.href = appConfig.appUpdateLink;
@@ -2490,7 +2473,7 @@
                 linkContainer.appendChild(linkBtn);
             }
             
-            // Add a close button if no update link is present.
+            // Add close button if no link
             if (!appConfig.appUpdateLink || appConfig.appUpdateLink.trim() === '') {
                 const closeBtn = document.createElement('button');
                 closeBtn.className = 'update-link-button';
@@ -2504,7 +2487,7 @@
             
             modal.style.display = 'block';
             
-            // Prevent closing the modal via the standard close button if app is blocked.
+            // Prevent closing the modal
             const closeButton = modal.querySelector('.close-button');
             if (closeButton) {
                 closeButton.style.display = 'none';
@@ -2512,7 +2495,6 @@
         }
 
         // --- Timer Functions ---
-        // Calculates the time remaining until a specified end datetime.
         function calculateTimeRemaining(endDateTime) {
             const now = new Date();
             const endTime = new Date(endDateTime);
@@ -2542,12 +2524,10 @@
             };
         }
 
-        // Formats hours, minutes, and seconds into a display string.
         function formatTime(hours, minutes, seconds) {
             return `${hours.toString().padStart(2, '0')}hr ${minutes.toString().padStart(2, '0')}min ${seconds.toString().padStart(2, '0')}s`;
         }
 
-        // Updates the registration timer for a specific tournament.
         function updateTimer(tournamentId, endDateTime) {
             const timerElement = document.getElementById(`timer-${tournamentId}`);
             if (!timerElement) return;
@@ -2561,7 +2541,7 @@
                 `;
                 timerElement.classList.add('timer-expired');
                 
-                // Stop the timer for this tournament.
+                // Stop this timer
                 if (activeTimers.has(tournamentId)) {
                     clearInterval(activeTimers.get(tournamentId));
                     activeTimers.delete(tournamentId);
@@ -2575,7 +2555,6 @@
             }
         }
 
-        // Updates the tournament start timer for a specific tournament.
         function updateTournamentTimer(tournamentId, tournamentDateTime) {
             const timerElement = document.getElementById(`tournament-timer-${tournamentId}`);
             if (!timerElement) return;
@@ -2589,7 +2568,7 @@
                 `;
                 timerElement.classList.add('tournament-timer-expired');
                 
-                // Stop the timer for this tournament.
+                // Stop this timer
                 if (tournamentTimers.has(tournamentId)) {
                     clearInterval(tournamentTimers.get(tournamentId));
                     tournamentTimers.delete(tournamentId);
@@ -2603,20 +2582,21 @@
             }
         }
 
-        // Starts the registration countdown timer for a given tournament.
         function startTournamentTimer(tournament) {
             if (!tournament.registrationEndTime) return;
             
             const endDateTime = new Date(tournament.registrationEndTime);
             const tournamentId = tournament.id;
             
-            // Clear any existing timer for this tournament.
+            // Clear existing timer for this tournament
             if (activeTimers.has(tournamentId)) {
                 clearInterval(activeTimers.get(tournamentId));
             }
             
-            // Perform initial update and then set interval.
+            // Initial update
             updateTimer(tournamentId, endDateTime);
+            
+            // Set up interval for updates
             const timerInterval = setInterval(() => {
                 updateTimer(tournamentId, endDateTime);
             }, 1000);
@@ -2624,24 +2604,25 @@
             activeTimers.set(tournamentId, timerInterval);
         }
 
-        // Starts the tournament start countdown timer for a given tournament.
         function startTournamentStartTimer(tournament) {
             if (!tournament.conductingDate || !tournament.conductingTime) return;
             
-            // Combine date and time to create a single Date object.
+            // Combine date and time
             const tournamentDate = new Date(tournament.conductingDate);
             const [hours, minutes] = tournament.conductingTime.split(':');
             tournamentDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
             
             const tournamentId = tournament.id;
             
-            // Clear any existing timer for this tournament.
+            // Clear existing timer for this tournament
             if (tournamentTimers.has(tournamentId)) {
                 clearInterval(tournamentTimers.get(tournamentId));
             }
             
-            // Perform initial update and then set interval.
+            // Initial update
             updateTournamentTimer(tournamentId, tournamentDate);
+            
+            // Set up interval for updates
             const timerInterval = setInterval(() => {
                 updateTournamentTimer(tournamentId, tournamentDate);
             }, 1000);
@@ -2649,7 +2630,6 @@
             tournamentTimers.set(tournamentId, timerInterval);
         }
 
-        // Stops all active countdown timers (registration and tournament start).
         function stopAllTimers() {
             for (const timerId of activeTimers.values()) {
                 clearInterval(timerId);
@@ -2663,7 +2643,6 @@
         }
 
         // --- Contact Functions ---
-        // Opens the Instagram profile link stored in appConfig.
         function openInstagram() {
             const instagramUrl = appConfig.instagramUrl;
             if (instagramUrl) {
@@ -2673,7 +2652,6 @@
             }
         }
 
-        // Opens the default email client with the contact email stored in appConfig.
         function openEmail() {
             const contactEmail = appConfig.contactEmail;
             if (contactEmail) {
@@ -2683,7 +2661,6 @@
             }
         }
 
-        // Copies the contact email to the clipboard.
         function copyContactEmail() {
             const contactEmail = appConfig.contactEmail;
             if (!contactEmail) {
@@ -2708,7 +2685,6 @@
             });
         }
 
-        // Updates the contact information displayed in the contact section.
         function updateContactInfo() {
             const instagramText = document.getElementById('instagram-text');
             const contactEmailText = document.getElementById('contact-email-text');
@@ -2716,32 +2692,29 @@
             const socialInstagram = document.getElementById('social-instagram');
             const socialEmail = document.getElementById('social-email');
             
-            // Update Instagram details.
+            // Update Instagram
             if (appConfig.instagramUrl) {
                 const instagramUsername = appConfig.instagramUrl.split('/').pop();
                 instagramText.textContent = `@${instagramUsername}`;
                 instagramBtn.style.display = 'flex';
                 socialInstagram.href = appConfig.instagramUrl;
-                socialInstagram.style.display = 'flex'; // Ensure social icon is visible
             } else {
                 instagramText.textContent = 'Not available';
                 instagramBtn.style.display = 'none';
-                socialInstagram.style.display = 'none'; // Hide social icon if no URL
+                socialInstagram.style.display = 'none';
             }
             
-            // Update Email details.
+            // Update Email
             if (appConfig.contactEmail) {
                 contactEmailText.textContent = appConfig.contactEmail;
                 socialEmail.href = `mailto:${appConfig.contactEmail}`;
-                socialEmail.style.display = 'flex'; // Ensure social icon is visible
             } else {
                 contactEmailText.textContent = 'Not available';
-                socialEmail.style.display = 'none'; // Hide social icon if no email
+                socialEmail.style.display = 'none';
             }
         }
 
         // --- MODIFICATION 1: Updated Auth Tab Switching ---
-        // Switches between Login and Sign Up tabs on the authentication screen.
         function switchAuthTab(tab) {
             document.getElementById('login-tab').classList.remove('active');
             document.getElementById('signup-tab').classList.remove('active');
@@ -2752,9 +2725,8 @@
             document.getElementById(`${tab}-form`).classList.add('active');
         }
 
-        // Displays the forgot password alert modal.
         function showForgotPasswordAlert() {
-            // Reset to English by default.
+            // Reset to English by default
             currentForgotPasswordLanguage = 'english';
             document.querySelectorAll('.language-btn').forEach(btn => {
                 btn.classList.remove('active');
@@ -2763,7 +2735,7 @@
                 }
             });
             
-            // Set English message.
+            // Set English message
             const messageDiv = document.getElementById('forgot-password-message');
             const messageData = forgotPasswordMessages.english;
             
@@ -2777,12 +2749,10 @@
             document.getElementById('forgot-password-alert').style.display = 'flex';
         }
 
-        // Closes the forgot password alert modal.
         function closeForgotPasswordAlert() {
             document.getElementById('forgot-password-alert').style.display = 'none';
         }
 
-        // Toggles the visibility of password input fields.
         function togglePasswordVisibility(inputId) {
             const input = document.getElementById(inputId);
             const icon = input.nextElementSibling.querySelector('i');
@@ -2798,20 +2768,21 @@
             }
         }
 
-        // Sets the loading state for a button.
         function setButtonLoading(buttonId, isLoading) {
             const button = document.getElementById(buttonId);
-            if (!button) return; // Add null check for button
-            
             if (isLoading) {
                 button.disabled = true;
-                button.innerHTML = '<span class="loading-spinner"></span> Loading...';
+                if (buttonId.includes('google')) {
+                    button.innerHTML = '<span class="loading-spinner"></span> Loading...'; // Google button loading text
+                } else {
+                    button.innerHTML = '<span class="loading-spinner"></span> Loading...';
+                }
             } else {
                 if (buttonId === 'login-button') {
                     button.innerHTML = 'Login';
                 } else if (buttonId === 'signup-button') {
                     button.innerHTML = 'Register';
-                } else if (buttonId === 'google-signup-button' || buttonId === 'google-login-button') { // Specific IDs for Google buttons
+                } else if (buttonId === 'google-signup-btn' || buttonId === 'google-login-btn') {
                     button.innerHTML = '<img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google Logo"> Continue with Google';
                 }
                 button.disabled = false;
@@ -2819,11 +2790,10 @@
         }
 
         // --- EXACT IMAGE UPLOAD FUNCTION FROM ADMIN PANEL ---
-        // Uploads an image file to ImgBB and returns the URL.
         async function uploadImageToImgBB(file) {
             if (!file) return null;
 
-            if (IMGBB_API_KEY) { // Check if API key is configured
+            if (IMGBB_API_KEY === "db671a28c5c7d432622dc7e5bc74eecc") {
                 const formData = new FormData();
                 formData.append("image", file);
 
@@ -2849,13 +2819,12 @@
                     return null;
                 }
             } else {
-                showToast("Please configure imgBB API key for image uploads.", 'error');
+                showToast("Please configure imgBB API key.", 'error');
                 return null;
             }
         }
 
         // --- EXACT FILE UPLOAD HANDLER FROM ADMIN PANEL ---
-        // Handles the selection of a file, validates it, uploads it, and updates UI.
         async function handleFileSelection(event, targetId) {
             const file = event.target.files[0];
             if (file) {
@@ -2892,30 +2861,21 @@
             }
         }
 
-        // Triggers the hidden file input element's click event.
         function triggerFileUpload(inputName) {
             document.getElementById(`${inputName}-file`).click();
         }
 
-        // Displays the pending verification popup.
         function showPendingVerificationPopup() {
             document.getElementById('pending-verification-popup').style.display = 'block';
         }
 
-        // Closes the pending verification popup.
         function closePendingVerificationPopup() {
             document.getElementById('pending-verification-popup').style.display = 'none';
         }
 
         // --- UPI ID Copy Function ---
-        // Copies the UPI ID to the clipboard.
         function copyUPIId() {
-            const upiIdTextElement = document.getElementById('upi-id-text');
-            if (!upiIdTextElement) {
-                showToast('UPI ID not found.', 'error');
-                return;
-            }
-            const upiIdText = upiIdTextElement.textContent;
+            const upiIdText = document.getElementById('upi-id-text').textContent;
             const copyBtn = document.getElementById('copy-upi-btn');
             
             navigator.clipboard.writeText(upiIdText).then(() => {
@@ -2934,18 +2894,14 @@
         }
 
         // --- Refresh Page Function ---
-        // Refreshes the tournament list and displays toasts.
         function refreshPage() {
             showToast('Refreshing tournaments...', 'info', 'Refreshing');
             loadTournaments().then(() => {
                 showToast('Tournaments refreshed successfully!', 'success');
-            }).catch(() => {
-                 showToast('Failed to refresh tournaments.', 'error');
             });
         }
 
-        // --- Professional Authentication (Email/Password & Google) ---
-        // Handles user registration with email and password.
+        // --- Professional Authentication ---
         async function handleProfessionalSignup() {
             const username = document.getElementById('signup-username').value.trim();
             const phone = document.getElementById('signup-phone').value.trim();
@@ -3004,13 +2960,12 @@
             }
         }
 
-        // Handles user login with email/phone/username and password.
         async function handleProfessionalLogin() {
             const identifier = document.getElementById('login-identifier').value.trim();
             const password = document.getElementById('login-password').value;
 
             if (!identifier || !password) {
-                showToast("Please enter both email/phone/username and password.", 'error');
+                showToast("Please enter both email/phone and password.", 'error');
                 return;
             }
 
@@ -3019,7 +2974,6 @@
             let loginEmail = identifier;
 
             try {
-                // If identifier is not an email, try to find user by phone or username.
                 if (!identifier.includes('@')) {
                     const usersRef = db.collection('users');
                     const snapshot = await usersRef.where('phone', '==', identifier).limit(1).get();
@@ -3030,8 +2984,6 @@
                         const usernameSnapshot = await usersRef.where('username', '==', identifier).limit(1).get();
                         if (!usernameSnapshot.empty) {
                             loginEmail = usernameSnapshot.docs[0].data().email;
-                        } else {
-                             throw new Error("User not found by phone or username. Please use email or register.");
                         }
                     }
                 }
@@ -3056,49 +3008,48 @@
             }
         }
 
-        // Handles Google login using signInWithRedirect.
+        // Google Auth Provider
+        const googleProvider = new firebase.auth.GoogleAuthProvider();
+
         function handleGoogleLogin() {
-            // Display loading screen while redirecting to Google.
+            setButtonLoading('google-signup-btn', true); // Set loading state for Google buttons too
+            setButtonLoading('google-login-btn', true);
             document.getElementById('loading-screen').style.display = 'flex';
-            // Use signInWithRedirect for better compatibility with various web views.
+            // Kodular లాంటి WebViews కి 'signInWithRedirect' బెస్ట్
             auth.signInWithRedirect(googleProvider);
         }
 
-        // Shows a confirmation dialog before logging out.
         function showLogoutConfirmation() {
             if (confirm("Are you sure you want to logout?")) {
                 performLogout();
             }
         }
 
-        // Performs the logout operation and resets the app state.
         function performLogout() {
-            // Stop all active timers.
+            // Stop all timers
             stopAllTimers();
             
-            // Clear the auto-logout timer.
+            // Clear auto logout timer
             if (autoLogoutTimer) {
                 clearTimeout(autoLogoutTimer);
                 autoLogoutTimer = null;
             }
             
-            // Unsubscribe from all real-time Firestore listeners to prevent memory leaks.
+            // Remove real-time listeners
             if (tournamentListener) tournamentListener();
             if (registrationListener) registrationListener();
             if (appConfigListener) appConfigListener();
             if (appUpdateListener) appUpdateListener();
             
-            // Sign out from Firebase.
+            // Sign out
             auth.signOut().then(() => {
                 showToast("Logged out successfully", 'success');
             }).catch((error) => {
                 console.error("Logout error:", error);
-                showToast("Logout failed: " + error.message, 'error');
             });
         }
 
         // --- App Initialization ---
-        // Initializes the main application UI and data after successful authentication.
         async function initializeApp(user, userData) {
             currentUser = user;
 
@@ -3106,31 +3057,30 @@
             document.getElementById('professional-auth-section').style.display = 'none';
             document.getElementById('main-app').style.display = 'block';
 
-            // Load app configuration from Firestore.
+            // Load app config
             await loadAppConfig();
             
-            // Check for critical app updates/blocks before proceeding.
+            // Check if app is blocked/needs update
             if (checkAppUpdate()) {
-                // If app is blocked, hide main app and show update modal.
+                // Hide main app if update required
                 document.getElementById('main-app').style.display = 'none';
                 return;
             }
 
-            // Display the home section by default.
             showSection('home-section', document.querySelector('.nav-item'));
             
-            // Load and render tournaments.
+            // Load tournaments and user registrations
             await loadTournaments();
             
-            // Set up real-time Firestore listeners for dynamic updates.
+            // Set up real-time listeners
             setupRealTimeListeners();
             
-            // Initialize and manage the auto-logout timer.
+            // Setup auto logout timer
             resetAutoLogoutTimer();
             setupActivityListeners();
         }
 
-        // Loads global application configuration from Firestore.
+        // Load app configuration
         async function loadAppConfig() {
             try {
                 const configDoc = await db.collection("app_config").doc("main").get();
@@ -3138,7 +3088,7 @@
                     appConfig = { ...appConfig, ...configDoc.data() };
                     document.getElementById('auth-slogan').textContent = appConfig.appName || "TECHNO E-SPORTS";
                     
-                    // Update contact information dynamically.
+                    // Update contact information
                     updateContactInfo();
                     
                     showToast("App configuration loaded successfully!", 'success');
@@ -3151,11 +3101,11 @@
             }
         }
 
-        // Sets up real-time listeners for app configuration, updates, tournaments, and user registrations.
+        // Setup real-time listeners for tournaments and registrations
         function setupRealTimeListeners() {
             if (!currentUser) return;
 
-            // Real-time listener for app config changes.
+            // Real-time listener for app config changes
             appConfigListener = db.collection("app_config").doc("main")
                 .onSnapshot((doc) => {
                     if (doc.exists) {
@@ -3163,9 +3113,10 @@
                         appConfig = { ...appConfig, ...newConfig };
                         document.getElementById('auth-slogan').textContent = appConfig.appName || "TECHNO E-SPORTS";
                         
+                        // Update contact information
                         updateContactInfo();
                         
-                        // Check if app is now blocked due to config changes.
+                        // Check if app is now blocked
                         if (newConfig.isAppBlocked && newConfig.isAppBlocked === true) {
                             showToast("App update required. Please update to continue.", 'warning');
                             showAppUpdateModal();
@@ -3176,13 +3127,13 @@
                     }
                 });
 
-            // Real-time listener for app update status.
+            // Real-time listener for app update status
             appUpdateListener = db.collection("app_update").doc("current")
                 .onSnapshot((doc) => {
                     if (doc.exists) {
                         const updateData = doc.data();
                         if (updateData.isBlocked && updateData.isBlocked === true) {
-                            // Update appConfig with update details.
+                            // Update app config with update data
                             appConfig.isAppBlocked = true;
                             appConfig.appUpdateMessage = updateData.message || "App update required.";
                             appConfig.appUpdateLink = updateData.link || "";
@@ -3190,18 +3141,11 @@
                             
                             showAppUpdateModal();
                             document.getElementById('main-app').style.display = 'none';
-                        } else {
-                            // If update is no longer blocked, refresh the page to unblock.
-                            if (appConfig.isAppBlocked) {
-                                appConfig.isAppBlocked = false; // Unblock locally
-                                showToast("App is now unblocked. Refreshing...", 'info');
-                                location.reload();
-                            }
                         }
                     }
                 });
 
-            // Real-time listener for tournaments.
+            // Real-time listener for tournaments
             tournamentListener = db.collection("tournaments")
                 .where("isActive", "!=", false)
                 .onSnapshot((snapshot) => {
@@ -3211,10 +3155,10 @@
                         ...doc.data()
                     }));
                     
-                    // Re-render tournaments based on new data.
+                    // Re-render tournaments
                     renderTournaments();
                     
-                    // Notify user about new tournaments.
+                    // Show professional notification for new tournaments
                     changes.forEach(change => {
                         if (change.type === "added") {
                             const tournament = change.doc.data();
@@ -3227,7 +3171,7 @@
                     });
                 });
 
-            // Real-time listener for user registrations.
+            // Real-time listener for user registrations
             registrationListener = db.collection("tournament_registrations")
                 .where("userId", "==", currentUser.uid)
                 .onSnapshot((snapshot) => {
@@ -3236,30 +3180,36 @@
                         ...doc.data()
                     }));
                     
-                    // Check for status changes in registrations.
+                    // Check for status changes
                     snapshot.docChanges().forEach((change) => {
                         if (change.type === "modified") {
                             const registration = change.doc.data();
                             const tournamentId = registration.tournamentId;
                             
+                            // Check if status changed to approved or rejected
                             if (registration.status === 'approved') {
                                 showToast(
                                     `Your registration for ${registration.tournamentTitle} has been approved!`, 
                                     'success',
                                     'Registration Approved!'
                                 );
+                                // Refresh tournaments to update status
                                 renderTournaments();
                             } else if (registration.status === 'rejected') {
+                                // Store rejection details for display
                                 const rejectionReason = registration.rejectionMessage || 
                                                       "Your registration has been rejected by the administrator.";
                                 const tournamentTitle = registration.tournamentTitle || "the tournament";
                                 
+                                // Show rejection modal with reason
                                 document.getElementById('rejection-reason').textContent = 
                                     `Your registration for ${tournamentTitle} has been rejected.`;
                                 
+                                // Clear previous rejection details
                                 const detailsContainer = document.getElementById('rejection-details-container');
                                 detailsContainer.innerHTML = '';
                                 
+                                // Add rejection reason if available
                                 if (registration.rejectionMessage) {
                                     detailsContainer.innerHTML = `
                                         <div class="rejection-details-box">
@@ -3268,22 +3218,21 @@
                                         </div>
                                     `;
                                     detailsContainer.style.display = 'block';
-                                } else {
-                                    detailsContainer.style.display = 'none';
                                 }
                                 
                                 document.getElementById('rejection-modal').style.display = 'block';
+                                // Refresh tournaments to update status
                                 renderTournaments();
                             }
                         }
                     });
                     
-                    renderTournaments(); // Re-render to reflect any status changes.
+                    // Re-render tournaments to update status
+                    renderTournaments();
                 });
         }
 
         // --- Tournament Functions ---
-        // Loads tournament data and user registrations from Firestore.
         async function loadTournaments() {
             try {
                 const tournamentsSnapshot = await db.collection("tournaments")
@@ -3312,34 +3261,32 @@
             }
         }
 
-        // Switches between tournament category tabs (Solo, Duo, Squad).
         function switchTournamentTab(tab) {
             currentTab = tab;
             
-            // Update active tab styling.
+            // Update tabs
             document.querySelectorAll('.tournament-tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tournament-tab')[tab === 'solo' ? 0 : tab === 'duo' ? 1 : 2].classList.add('active');
             
-            // Show/hide tournament containers based on selected tab.
+            // Update tournament displays
             document.getElementById('solo-tournaments').style.display = tab === 'solo' ? 'block' : 'none';
             document.getElementById('duo-tournaments').style.display = tab === 'duo' ? 'block' : 'none';
             document.getElementById('squad-tournaments').style.display = tab === 'squad' ? 'block' : 'none';
             
-            renderTournaments(); // Re-render tournaments for the active tab.
+            renderTournaments();
         }
 
-        // Renders tournament cards for all categories.
         function renderTournaments() {
             const soloContainer = document.getElementById('solo-tournaments');
             const duoContainer = document.getElementById('duo-tournaments');
             const squadContainer = document.getElementById('squad-tournaments');
             
-            // Clear existing content in containers.
+            // Clear containers
             soloContainer.innerHTML = '';
             duoContainer.innerHTML = '';
             squadContainer.innerHTML = '';
             
-            // Filter tournaments by category and active status.
+            // Filter tournaments by category and active status
             const soloTournaments = currentTournaments.filter(t => 
                 t.category === 'solo'
             );
@@ -3352,7 +3299,7 @@
                 t.category === 'squad'
             );
             
-            // Render solo tournaments or empty state.
+            // Render solo tournaments
             if (soloTournaments.length === 0) {
                 soloContainer.innerHTML = `
                     <div class="empty-state">
@@ -3367,7 +3314,7 @@
                 });
             }
             
-            // Render duo tournaments or empty state.
+            // Render duo tournaments
             if (duoTournaments.length === 0) {
                 duoContainer.innerHTML = `
                     <div class="empty-state">
@@ -3382,7 +3329,7 @@
                 });
             }
             
-            // Render squad tournaments or empty state.
+            // Render squad tournaments
             if (squadTournaments.length === 0) {
                 squadContainer.innerHTML = `
                     <div class="empty-state">
@@ -3398,12 +3345,11 @@
             }
         }
 
-        // Creates a HTML card element for a given tournament.
         function createTournamentCard(tournament) {
             const card = document.createElement('div');
             card.className = 'tournament-card';
             
-            // Determine user's registration status for this tournament.
+            // Find user registration for this tournament
             const userRegistration = userRegistrations.find(reg => reg.tournamentId === tournament.id);
             const isRegistered = !!userRegistration;
             const isApproved = userRegistration && userRegistration.status === 'approved';
@@ -3411,14 +3357,14 @@
             const isRejected = userRegistration && userRegistration.status === 'rejected';
             const isFull = tournament.participants >= tournament.maxParticipants;
             
-            // Check if registration period has ended.
+            // Check registration timer
             let registrationEnded = false;
             if (tournament.registrationEndTime) {
                 const endTime = new Date(tournament.registrationEndTime);
                 registrationEnded = endTime <= new Date();
             }
             
-            // Determine current tournament status (active, ongoing, completed, etc.).
+            // Check if tournament has started
             let tournamentStarted = false;
             let tournamentStatus = 'Active';
             let statusClass = 'status-active';
@@ -3459,12 +3405,12 @@
                 } else if (isRejected) {
                     statusClass = 'status-rejected';
                     tournamentStatus = 'Rejected';
-                    // User can re-apply if rejected.
+                    // User can re-apply if rejected
                     showJoinButton = true;
                 }
             }
             
-            // Format tournament time to 12-hour format.
+            // Convert 24-hour time to 12-hour format
             let tournamentTime = tournament.conductingTime || 'TBA';
             if (tournamentTime !== 'TBA' && tournamentTime.includes(':')) {
                 const [hours, minutes] = tournamentTime.split(':');
@@ -3481,11 +3427,12 @@
             const maxParticipants = tournament.maxParticipants || 0;
             const currentParticipants = tournament.participants || 0;
             
-            // Display prize information, truncating for non-solo categories.
+            // For duo/squad tournaments, truncate long prize lists
             let displayValue = tournament.category === 'solo' ? 
                 (tournament.perKill || 'N/A') : 
                 (tournament.prizes ? tournament.prizes.split('\n')[0] : 'N/A');
             
+            // For duo/squad tournaments, show only first prize line to prevent overflow
             if (tournament.category !== 'solo' && tournament.prizes) {
                 const prizeLines = tournament.prizes.split('\n');
                 if (prizeLines.length > 1) {
@@ -3495,7 +3442,7 @@
             
             const displayLabel = tournament.category === 'solo' ? 'Per Kill' : 'Prizes';
             
-            // HTML for registration countdown timer.
+            // Add registration timer element if registration end time is set
             const registrationTimerHTML = tournament.registrationEndTime ? `
                 <div class="registration-timer" id="timer-${tournament.id}">
                     <div class="timer-label">Registration ends in:</div>
@@ -3503,7 +3450,7 @@
                 </div>
             ` : '';
             
-            // HTML for tournament start countdown timer.
+            // Add tournament start timer if date and time are set
             const tournamentTimerHTML = (tournament.conductingDate && tournament.conductingTime && !tournamentStarted) ? `
                 <div class="tournament-timer" id="tournament-timer-${tournament.id}">
                     <div class="tournament-timer-label">Starts in:</div>
@@ -3565,7 +3512,7 @@
                 </div>
             `;
             
-            // Start timers for this tournament card.
+            // Start timers for this tournament
             if (tournament.registrationEndTime) {
                 setTimeout(() => {
                     startTournamentTimer(tournament);
@@ -3581,7 +3528,6 @@
             return card;
         }
 
-        // Displays a modal with detailed information about a tournament.
         function showTournamentDetails(tournamentId) {
             const tournament = currentTournaments.find(t => t.id === tournamentId);
             if (!tournament) return;
@@ -3594,7 +3540,7 @@
             
             title.textContent = tournament.title;
             
-            // Format tournament time and date for display.
+            // Convert 24-hour time to 12-hour format
             let tournamentTime = tournament.conductingTime || 'TBA';
             if (tournamentTime !== 'TBA' && tournamentTime.includes(':')) {
                 const [hours, minutes] = tournamentTime.split(':');
@@ -3607,7 +3553,7 @@
             const tournamentDate = tournament.conductingDate ? 
                 new Date(tournament.conductingDate).toLocaleDateString() : 'TBA';
             
-            // Generate HTML for registration timer details.
+            // Show registration timer in details if available
             let timerDetails = '';
             if (tournament.registrationEndTime) {
                 const endTime = new Date(tournament.registrationEndTime);
@@ -3643,7 +3589,7 @@
                 }
             }
             
-            // Generate HTML for tournament start timer.
+            // Show tournament start timer if date and time are set
             let tournamentStartTimer = '';
             if (tournament.conductingDate && tournament.conductingTime) {
                 const tournamentDateTime = new Date(tournament.conductingDate);
@@ -3684,7 +3630,6 @@
                 }
             }
             
-            // Populate modal content with tournament details.
             content.innerHTML = `
                 <div style="text-align: center; margin-bottom: 15px;">
                     <img src="${tournament.imageUrl || 'https://via.placeholder.com/400x200?text=Tournament+Banner'}" 
@@ -3735,25 +3680,24 @@
                 </div>
             `;
             
-            modal.style.display = 'block'; // Show the modal.
+            modal.style.display = 'block';
         }
 
-        // Displays a modal showing players/teams registered for a specific tournament.
         function showTournamentPlayers(tournamentId) {
             const tournament = currentTournaments.find(t => t.id === tournamentId);
             if (!tournament) return;
             
             selectedTournament = tournament;
             
-            loadTournamentRegistrations(tournamentId); // Load and display registered players/teams.
+            // Load registered players/teams
+            loadTournamentRegistrations(tournamentId);
         }
 
-        // Loads and displays approved registrations for a specific tournament.
         async function loadTournamentRegistrations(tournamentId) {
             try {
                 const registrationsSnapshot = await db.collection("tournament_registrations")
                     .where("tournamentId", "==", tournamentId)
-                    .where("status", "==", "approved") // Only show approved registrations.
+                    .where("status", "==", "approved")
                     .get();
                 
                 const approvedRegistrations = registrationsSnapshot.docs.map(doc => doc.data());
@@ -3787,7 +3731,6 @@
                         registrationDiv.style.marginBottom = '8px';
                         registrationDiv.style.border = '1px solid #333';
                         
-                        // Display details based on tournament category.
                         if (selectedTournament.category === 'solo') {
                             registrationDiv.innerHTML = `
                                 <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -3813,7 +3756,7 @@
                     });
                 }
                 
-                modal.style.display = 'block'; // Show the modal.
+                modal.style.display = 'block';
                 
             } catch (error) {
                 console.error("Error loading registrations:", error);
@@ -3821,7 +3764,6 @@
             }
         }
 
-        // Initiates the registration process for a selected tournament.
         function registerForTournament(tournamentId) {
             if (!currentUser) {
                 showToast("Please login to register for tournaments.", 'error');
@@ -3831,7 +3773,7 @@
             const tournament = currentTournaments.find(t => t.id === tournamentId);
             if (!tournament) return;
             
-            // Validate registration conditions.
+            // Check if registration has ended
             if (tournament.registrationEndTime) {
                 const endTime = new Date(tournament.registrationEndTime);
                 if (endTime <= new Date()) {
@@ -3840,11 +3782,13 @@
                 }
             }
             
+            // Check if tournament is full
             if (tournament.participants >= tournament.maxParticipants) {
                 showToast("This tournament is full. No more registrations are being accepted.", 'error');
                 return;
             }
             
+            // Check if user has already registered
             const userRegistration = userRegistrations.find(reg => reg.tournamentId === tournament.id);
             if (userRegistration) {
                 if (userRegistration.status === 'pending') {
@@ -3854,19 +3798,21 @@
                     showToast('You have already registered for this tournament.', 'info');
                     return;
                 } else if (userRegistration.status === 'rejected') {
+                    // Allow re-registration after rejection
                     showToast('Your previous registration was rejected. You can re-apply.', 'info');
+                    // Continue with registration
                 }
             }
             
             selectedTournament = tournament;
             playerCount = 1;
-            paymentScreenshotUrl = null; // Reset payment screenshot.
+            paymentScreenshotUrl = null; // Reset payment screenshot
             
             const modal = document.getElementById('registration-modal');
             const detailsContainer = document.getElementById('registration-details');
             const formContainer = document.getElementById('registration-form-container');
             
-            // Generate HTML for registration countdown timer in modal.
+            // Show registration timer in modal if available
             let timerHTML = '';
             if (tournament.registrationEndTime) {
                 const endTime = new Date(tournament.registrationEndTime);
@@ -3894,7 +3840,8 @@
                 ${timerHTML}
             `;
             
-            // Generate registration form based on tournament category.
+            // Create registration form based on tournament category
+            // MODIFIED: Player name and ID fields are dynamic based on category
             let formHTML = `
                 <div class="form-group">
                     <label>Your Email</label>
@@ -3917,69 +3864,26 @@
                 `;
             }
             
-             if (tournament.category === 'solo') {
+            let numPlayers = 1;
+            if (tournament.category === 'duo') numPlayers = 2;
+            if (tournament.category === 'squad') numPlayers = 4;
+
+            for (let i = 1; i <= numPlayers; i++) {
                 formHTML += `
                     <div class="player-details-section">
-                        <h4>Player Details</h4>
+                        <h4>Player ${i} Details</h4>
                         <div class="form-group">
-                            <label>Free Fire Name (Copy-Paste Name)</label>
-                            <input type="text" id="player1-name" placeholder="Enter Exact In-Game Name" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Free Fire ID (Numbers only)</label>
-                            <input type="text" id="player1-id" placeholder="Your Free Fire ID number" required 
-                                   pattern="[0-9]*" title="Enter numbers only">
-                        </div>
-                    </div>
-                `;
-            } else if (tournament.category === 'duo') {
-                formHTML += `
-                    <div class="player-details-section">
-                        <h4>Player 1 Details</h4>
-                        <div class="form-group">
-                            <label>Free Fire Name (Copy-Paste Name)</label>
-                            <input type="text" id="player1-name" placeholder="Enter Exact In-Game Name" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Free Fire ID (Numbers only)</label>
-                            <input type="text" id="player1-id" placeholder="Player 1 Free Fire ID" required 
-                                   pattern="[0-9]*" title="Enter numbers only">
-                            <small style="color: #666; font-size: 0.85em;">Enter Player 1 Free Fire ID (numeric only)</small>
-                        </div>
-                    </div>
-                    
-                    <div class="player-details-section">
-                        <h4>Player 2 Details</h4>
-                          <div class="form-group">
-                            <label>Free Fire Name (Copy-Paste Name)</label>
-                            <input type="text" id="player2-name" placeholder="Enter Exact In-Game Name" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Free Fire ID (Numbers only)</label>
-                            <input type="text" id="player2-id" placeholder="Player 2 Free Fire ID" required 
-                                   pattern="[0-9]*" title="Enter numbers only">
-                            <small style="color: #666; font-size: 0.85em;">Enter Player 2 Free Fire ID (numeric only)</small>
-                        </div>
-                    </div>
-                `;
-            } else if (tournament.category === 'squad') {
-                for (let i = 1; i <= 4; i++) {
-                    formHTML += `
-                        <div class="player-details-section">
-                            <h4>Player ${i} Details</h4>
-                               <div class="form-group">
                             <label>Free Fire Name (Copy-Paste Name)</label>
                             <input type="text" id="player${i}-name" placeholder="Enter Exact In-Game Name" required>
                         </div>
-                            <div class="form-group">
-                                <label>Free Fire ID (Numbers only)</label>
-                                <input type="text" id="player${i}-id" placeholder="Player ${i} Free Fire ID" required 
-                                       pattern="[0-9]*" title="Enter numbers only">
-                                <small style="color: #666; font-size: 0.85em;">Enter Player ${i} Free Fire ID (numeric only)</small>
-                            </div>
+                        <div class="form-group">
+                            <label>Free Fire ID (Numbers only)</label>
+                            <input type="text" id="player${i}-id" placeholder="Player ${i} Free Fire ID" required 
+                                   pattern="[0-9]*" title="Enter numbers only">
+                            <small style="color: #666; font-size: 0.85em;">Enter Player ${i} Free Fire ID (numeric only)</small>
                         </div>
-                    `;
-                }
+                    </div>
+                `;
             }
             
             formHTML += `
@@ -3994,18 +3898,19 @@
             modal.style.display = 'block';
         }
 
-        // Validates registration form inputs and then proceeds to the payment modal.
         function proceedToPayment() {
+            console.log("Proceed to payment clicked"); // Debugging check
+
             // 1. Get Basic Info
             const mobile = document.getElementById('register-mobile').value.trim();
             if (!mobile || mobile.length < 10) {
-                showToast("Please enter a valid 10-digit mobile number.", "error");
+                showToast("Please enter a valid 10-digit mobile number.", "error"); 
                 return;
             }
 
             // 2. Validate Player Names and IDs
             let allPlayerDetailsValid = true;
-            let playerDetails = []; // This array is populated but not directly used here; it will be used in submitRegistration.
+            let playerDetails = []; // This array is filled here, but re-generated in submitRegistration. Could be optimized.
             let numPlayers = 1;
             if (selectedTournament.category === 'duo') numPlayers = 2;
             if (selectedTournament.category === 'squad') numPlayers = 4;
@@ -4027,7 +3932,7 @@
                     allPlayerDetailsValid = false;
                     break;
                 }
-                playerDetails.push({ name: playerName, freeFireId: playerId, level: 0 }); 
+                playerDetails.push({ name: playerName, freeFireId: playerId, level: 0 }); // Not actually used later, just for validation.
             }
 
             if (!allPlayerDetailsValid) {
@@ -4044,20 +3949,19 @@
             }
 
             // 4. ACTION: If everything is okay, switch the modals
+            console.log("Validation passed, opening payment...");
             
-            // Hide registration modal.
+            // Hide registration modal
             document.getElementById('registration-modal').style.display = 'none';
             
-            // Show payment modal.
+            // Show payment modal
             showPaymentModal();
         }
-
-        // Displays the payment modal, showing QR code and UPI ID for payment.
         function showPaymentModal() {
             const modal = document.getElementById('payment-modal');
             const detailsContainer = document.getElementById('payment-details');
             
-            // Use global QR code and UPI ID from app config.
+            // Use global QR code and UPI ID from app config
             const qrCodeUrl = appConfig.qrCodeImage || 'https://via.placeholder.com/250?text=QR+Code+Not+Set';
             const upiId = appConfig.upiId || 'upi-id-not-set@example';
             
@@ -4121,39 +4025,27 @@
                 </div>
             `;
             
-            // If a screenshot was already uploaded (e.g., from a rejected re-registration), display it.
-            if (paymentScreenshotUrl) {
-                const preview = document.getElementById('payment-screenshot-preview');
-                if (preview) {
-                    preview.src = paymentScreenshotUrl;
-                    preview.style.display = 'block';
-                    document.getElementById('payment-screenshot-url').value = paymentScreenshotUrl;
-                }
-            }
-            
-            modal.style.display = 'block'; // Show the modal.
+            modal.style.display = 'block';
         }
 
-        // Displays a fullscreen QR code for easier scanning.
+        // Show fullscreen QR code
         function showFullscreenQR(qrCodeUrl, upiId) {
             const modal = document.getElementById('fullscreen-qr-modal');
             const qrImage = document.getElementById('fullscreen-qr-image');
-            const upiIdTextElement = modal.querySelector('.upi-id-text'); // Select UPI ID text inside fullscreen modal
-            const copyBtn = modal.querySelector('.copy-upi-btn'); // Select copy button inside fullscreen modal
+            const upiIdText = document.getElementById('upi-id-text');
             
             qrImage.src = qrCodeUrl;
-            if (upiIdTextElement) upiIdTextElement.textContent = upiId;
+            upiIdText.textContent = upiId;
             
-            // Reset copy button state for the fullscreen modal.
-            if (copyBtn) {
-                copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy';
-                copyBtn.classList.remove('copied');
-            }
+            // Reset copy button
+            const copyBtn = document.getElementById('copy-upi-btn');
+            copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy';
+            copyBtn.classList.remove('copied');
             
-            modal.style.display = 'block'; // Show the modal.
+            modal.style.display = 'block';
         }
 
-        // Handles files dropped onto the upload container.
+        // Handle dropped files
         async function handleDroppedFile(event) {
             event.preventDefault();
             const file = event.dataTransfer.files[0];
@@ -4163,25 +4055,25 @@
                 dataTransfer.items.add(file);
                 input.files = dataTransfer.files;
                 
-                // Trigger the file selection handler.
+                // Trigger the file selection handler
                 await handleFileSelection({ target: input }, 'payment-screenshot-url');
             }
         }
 
-        // Submits the tournament registration data to Firestore.
         async function submitRegistration() {
-            // Ensure a payment screenshot has been uploaded.
+            // Check if payment screenshot is uploaded
             if (!paymentScreenshotUrl) {
                 showToast('Please upload payment screenshot.', 'error');
                 return;
             }
             
-            // Collect registration data from the form.
+            // Collect registration data
             const email = document.getElementById('register-email').value;
             const mobile = document.getElementById('register-mobile').value.trim();
             const teamName = selectedTournament.category !== 'solo' ? 
                 document.getElementById('register-team-name').value.trim() : null;
             
+            // Collect player details dynamically
             let playerDetails = [];
             let numPlayers = 1;
             if (selectedTournament.category === 'duo') numPlayers = 2;
@@ -4198,14 +4090,14 @@
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = '<span class="loading-spinner"></span> Submitting...';
                 
-                // Check if user has a previous registration for this tournament.
+                // Check if user has a previous registration for this tournament
                 const previousRegistration = userRegistrations.find(reg => 
                     reg.tournamentId === selectedTournament.id
                 );
                 
                 let registrationDocId;
                 if (previousRegistration && previousRegistration.id) {
-                    // Update existing registration if one exists.
+                    // Update existing registration
                     registrationDocId = previousRegistration.id;
                     await db.collection("tournament_registrations").doc(registrationDocId).update({
                         email: email,
@@ -4214,18 +4106,18 @@
                         playerDetails: playerDetails,
                         paymentScreenshotUrl: paymentScreenshotUrl,
                         status: 'pending',
-                        rejectionMessage: null, // Clear any previous rejection message.
+                        rejectionMessage: null, // Clear any previous rejection message
                         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
                     showToast('Registration updated successfully!', 'success');
                 } else {
-                    // Create a new registration entry.
+                    // Create new registration
                     const registrationData = {
                         userId: currentUser.uid,
                         tournamentId: selectedTournament.id,
                         tournamentTitle: selectedTournament.title,
                         tournamentCategory: selectedTournament.category,
-                        name: currentUser.displayName || currentUser.email.split('@')[0],
+                        name: currentUser.displayName || currentUser.email.split('@')[0], // Use current user's display name or email
                         email: email,
                         mobile: mobile,
                         teamName: teamName,
@@ -4240,10 +4132,13 @@
                     showToast('Registration submitted successfully!', 'success');
                 }
                 
-                // Close payment modal and show success/pending verification messages.
+                // Close payment modal
                 closeModal('payment-modal');
+                
+                // Show success modal
                 document.getElementById('success-modal').style.display = 'block';
                 
+                // Show pending verification popup
                 setTimeout(() => {
                     document.getElementById('success-modal').style.display = 'none';
                     showPendingVerificationPopup();
@@ -4253,7 +4148,6 @@
                 console.error("Error submitting registration:", error);
                 showToast("Registration failed. Please try again.", 'error');
                 
-                // Re-enable submit button on error.
                 const submitBtn = document.getElementById('submit-registration-btn');
                 if (submitBtn) {
                     submitBtn.disabled = false;
@@ -4262,14 +4156,14 @@
             }
         }
 
-        // FIXED FUNCTION: Show tournament credentials only for approved users.
+        // FIXED FUNCTION: Show tournament credentials only for approved users
         async function showTournamentCredentials(tournamentId) {
             const tournament = currentTournaments.find(t => t.id === tournamentId);
             if (!tournament) return;
             
             selectedTournament = tournament;
             
-            // Check if the current user is approved for this tournament.
+            // Check if user is approved for this tournament
             const userRegistration = userRegistrations.find(reg => 
                 reg.tournamentId === tournamentId && reg.status === 'approved'
             );
@@ -4282,14 +4176,16 @@
             const modal = document.getElementById('credentials-modal');
             const content = document.getElementById('credentials-content');
             
-            // Check if credentials are set by the admin.
+            // Check if admin has set credentials and made them visible
             if (!tournament.tournamentId || !tournament.tournamentPassword) {
+                // Credentials not set by admin
                 document.getElementById('credentials-not-set-modal').style.display = 'block';
                 return;
             }
             
-            // Check if admin has explicitly hidden the credentials.
+            // Check if admin has hidden the credentials
             if (tournament.showCredentials === false) {
+                // Admin has hidden the credentials
                 content.innerHTML = `
                     <div style="text-align: center; padding: 30px 15px;">
                         <i class="fas fa-lock" style="font-size: 50px; color: #ff4655; margin-bottom: 15px;"></i>
@@ -4299,7 +4195,7 @@
                     </div>
                 `;
             } else {
-                // Display the tournament credentials.
+                // Show the credentials
                 content.innerHTML = `
                     <div class="credentials-box">
                         <div style="margin-bottom: 15px; color: #26a269; font-size: 0.9em;">
@@ -4325,15 +4221,13 @@
                 `;
             }
             
-            modal.style.display = 'block'; // Show the modal.
+            modal.style.display = 'block';
         }
 
-        // Closes a specified modal.
         function closeModal(modalId) {
             document.getElementById(modalId).style.display = 'none';
         }
 
-        // Shows a specific content section and updates navigation styling.
         function showSection(sectionId, navElement) {
             document.querySelectorAll('.section').forEach(section => section.style.display = 'none');
             document.getElementById(sectionId).style.display = 'block';
@@ -4343,10 +4237,9 @@
                 navElement.classList.add('active');
             }
             
-            toggleSidebar(false); // Close sidebar after selecting a section.
+            toggleSidebar(false);
         }
 
-        // Toggles the visibility of the sidebar menu.
         function toggleSidebar(open) {
             const sidebar = document.getElementById('sidebar-menu');
             const overlay = document.querySelector('.sidebar-overlay');
@@ -4360,7 +4253,6 @@
             }
         }
 
-        // Displays alerts for privacy policy, terms & conditions, or navigates to contact section.
         function showContent(type) {
             toggleSidebar(false);
 
@@ -4372,10 +4264,11 @@
                 content = appConfig.privacyPolicy || 'Privacy policy not set by admin.';
                 alert(`${title}:\n\n${content}`);
             } else if (type === 'contact') {
+                // Show contact section instead of alert
                 showSection('contact-section');
-                // Ensure no navigation item is active other than home when showing contact.
+                // Remove active class from all nav items and add to home
                 document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-                document.querySelector('.nav-item[data-section="home-section"]').classList.add('active');
+                // Note: We don't have a contact nav item, so we don't add active class
             } else if (type === 'terms') {
                 title = 'Terms and Conditions';
                 content = appConfig.termsAndConditions || 'Terms and conditions not set by admin.';
@@ -4384,84 +4277,69 @@
         }
 
         // --- Firebase Auth State Listener ---
-        // This listener fires whenever the user's sign-in state changes.
         auth.onAuthStateChanged(async user => {
-            authStateChecked = true; // Mark that auth state has been checked.
+            authStateChecked = true;
 
             if (user) {
                 try {
-                    // Fetch user-specific data from Firestore.
                     const doc = await db.collection("users").doc(user.uid).get();
                     const userData = doc.data() || {};
 
-                    // If user is blocked, sign them out and show an error.
                     if (userData.isBlocked) {
-                        await auth.signOut(); // Ensure user is signed out from Firebase.
+                        auth.signOut();
                         showToast("Your account has been blocked by the administrator.", 'error');
-                        // Show auth section after blocking
-                        document.getElementById('loading-screen').style.display = 'none';
-                        document.getElementById('professional-auth-section').style.display = 'flex';
-                        document.getElementById('main-app').style.display = 'none';
                         return;
                     }
 
                     currentUser = user;
                     
-                    // Load app config (important for app update checks).
+                    // Check app update status before initializing
                     await loadAppConfig();
                     
-                    // Check if app update is required.
                     if (checkAppUpdate()) {
+                        // App is blocked, show update modal
                         document.getElementById('loading-screen').style.display = 'none';
-                        return; // Stop initialization if update is required.
+                        return;
                     }
                     
-                    initializeApp(user, userData); // Initialize the main application.
+                    initializeApp(user, userData);
 
                 } catch (error) {
-                    console.error("Error fetching user data or initializing app:", error);
-                    await auth.signOut(); // Sign out on error to clear state.
-                    showToast("An error occurred. Please log in again.", 'error');
-                    // Ensure UI reverts to auth screen.
-                    document.getElementById('loading-screen').style.display = 'none';
-                    document.getElementById('professional-auth-section').style.display = 'flex';
-                    document.getElementById('main-app').style.display = 'none';
+                    console.error("Error fetching user data:", error);
+                    auth.signOut();
                     return;
                 }
             } else {
-                // No user is signed in.
                 currentUser = null;
-                // Stop all timers and remove listeners to prevent background operations.
+                // Stop all timers
                 stopAllTimers();
                 
+                // Clear auto logout timer
                 if (autoLogoutTimer) {
                     clearTimeout(autoLogoutTimer);
                     autoLogoutTimer = null;
                 }
                 
-                if (tournamentListener) { tournamentListener(); tournamentListener = null; }
-                if (registrationListener) { registrationListener(); registrationListener = null; }
-                if (appConfigListener) { appConfigListener(); appConfigListener = null; }
-                if (appUpdateListener) { appUpdateListener(); appUpdateListener = null; }
+                // Remove real-time listeners
+                if (tournamentListener) tournamentListener();
+                if (registrationListener) registrationListener();
+                if (appConfigListener) appConfigListener();
+                if (appUpdateListener) appUpdateListener();
                 
-                // Show the authentication screen and hide other parts of the UI.
                 document.getElementById('loading-screen').style.display = 'none';
                 document.getElementById('professional-auth-section').style.display = 'flex';
                 document.getElementById('main-app').style.display = 'none';
             }
         });
 
-        // Fallback: If auth state check takes too long (e.g., network issues),
-        // show auth section after a timeout to prevent infinite loading.
+        // Fallback: If auth state check takes too long, show auth section after 3 seconds
         setTimeout(() => {
             if (!authStateChecked) {
-                console.warn("Auth state check timed out. Displaying authentication screen.");
                 document.getElementById('loading-screen').style.display = 'none';
                 document.getElementById('professional-auth-section').style.display = 'flex';
                 document.getElementById('main-app').style.display = 'none';
-                showToast("Failed to load user session. Please log in.", 'error');
             }
-        }, 5000); // 5 seconds timeout.
+        }, 3000);
     </script>
 </body>
 </html>
