@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -347,6 +348,39 @@
             box-shadow: none;
             cursor: not-allowed;
         }
+
+        /* --- NEW: Google Login Button Styles --- */
+        .google-login-btn {
+            background: #fff;
+            color: #444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+            margin-top: 0; /* Override default margin */
+        }
+
+        .google-login-btn:hover {
+            background: #f1f1f1;
+            color: #444; /* Keep text color same on hover */
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+        }
+        
+        .google-login-btn:disabled {
+            background: #ccc;
+            color: #888;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .google-login-btn img {
+            width: 20px;
+            height: 20px;
+        }
+        /* --- END NEW --- */
 
         /* Registration Timer */
         .registration-timer {
@@ -1799,12 +1833,12 @@
 
                 <div class="auth-body">
                     <div class="auth-tabs">
-                        <!-- MODIFICATION 1: Switched order - Sign Up first, then Login -->
+                        <!-- MODIFICATION: Sign Up first, then Login -->
                         <div class="auth-tab active" id="signup-tab" onclick="switchAuthTab('signup')">Sign Up</div>
                         <div class="auth-tab" id="login-tab" onclick="switchAuthTab('login')">Login</div>
                     </div>
 
-                    <!-- MODIFICATION 1: Sign Up form is now active by default -->
+                    <!-- Sign Up form is active by default -->
                     <div id="signup-form" class="auth-form active">
                         <div class="form-group">
                             <input type="text" id="signup-username" placeholder="Username" required>
@@ -1832,18 +1866,16 @@
                         </div>
                     </div>
 
+                    <!-- MODIFICATION: Login form now only contains Google Sign-in -->
                     <div id="login-form" class="auth-form">
-                        <div class="form-group">
-                            <input type="text" id="login-identifier" placeholder="Email" required>
-                        </div>
-                        <div class="form-group password-input-group">
-                            <input type="password" id="login-password" placeholder="Password" required>
-                            <span class="toggle-password" onclick="togglePasswordVisibility('login-password')"><i class="fas fa-eye"></i></span>
-                        </div>
-                        <div style="text-align: right; margin: 8px 0 15px;">
-                            <a href="#" onclick="showForgotPasswordAlert()" style="color: #ff4655; text-decoration: none; font-size: 0.85em;">Forgot Password?</a>
-                        </div>
-                        <button class="auth-button" onclick="handleProfessionalLogin()" id="login-button">Login</button>
+                        <p style="text-align: center; color: #aaa; font-size: 0.95em; margin-top: 0; margin-bottom: 20px;">
+                            Quickly and securely sign in with your Google account.
+                        </p>
+                        <!-- Google Login Button -->
+                        <button class="auth-button google-login-btn" onclick="handleGoogleLogin()" id="google-login-button">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1200px-Google_%22G%22_logo.svg.png" alt="Google G Logo">
+                            <span>Sign in with Google</span>
+                        </button>
                         
                         <!-- Don't have an account link -->
                         <div style="text-align: center; margin-top: 15px; color: #aaa; font-size: 0.85em;">
@@ -1855,7 +1887,6 @@
             </div>
         </div>
 
-        <!-- MODIFICATION 2: Updated Forgot Password Alert with multilingual support -->
         <div id="forgot-password-alert" class="fullscreen-alert">
             <div class="fullscreen-alert-content">
                 <h3>Forgotten Password</h3>
@@ -2246,7 +2277,6 @@
                 console.error("Error setting auth persistence:", error);
             });
 
-        // --- MODIFICATION 2: Language switching for forgot password ---
         function switchForgotPasswordLanguage(language) {
             currentForgotPasswordLanguage = language;
             
@@ -2626,7 +2656,7 @@
             }
         }
 
-        // --- MODIFICATION 1: Updated Auth Tab Switching ---
+        // --- Auth Tab Switching ---
         function switchAuthTab(tab) {
             document.getElementById('login-tab').classList.remove('active');
             document.getElementById('signup-tab').classList.remove('active');
@@ -2846,8 +2876,7 @@
                 document.getElementById('signup-email').value = '';
                 document.getElementById('signup-password').value = '';
                 document.getElementById('signup-confirm-password').value = '';
-
-                // MODIFICATION 1: Auto switch to login tab after successful registration
+                
                 switchAuthTab('login');
 
             } catch (error) {
@@ -2865,53 +2894,60 @@
                 setButtonLoading('signup-button', false);
             }
         }
-
-        async function handleProfessionalLogin() {
-            const identifier = document.getElementById('login-identifier').value.trim();
-            const password = document.getElementById('login-password').value;
-
-            if (!identifier || !password) {
-                showToast("Please enter both email/phone and password.", 'error');
-                return;
-            }
-
-            setButtonLoading('login-button', true);
-
-            let loginEmail = identifier;
-
+        
+        // --- NEW: Google Sign-in Function ---
+        async function handleGoogleLogin() {
+            const button = document.getElementById('google-login-button');
+            const originalContent = button.innerHTML;
+            
             try {
-                if (!identifier.includes('@')) {
-                    const usersRef = db.collection('users');
-                    const snapshot = await usersRef.where('phone', '==', identifier).limit(1).get();
+                // Set loading state for the Google button
+                button.disabled = true;
+                // Use a spinner that fits the white button theme
+                button.innerHTML = '<span class="loading-spinner" style="border: 3px solid rgba(0,0,0,0.2); border-top-color: #4285F4;"></span> <span>Signing in...</span>';
 
-                    if (!snapshot.empty) {
-                        loginEmail = snapshot.docs[0].data().email;
-                    } else {
-                        const usernameSnapshot = await usersRef.where('username', '==', identifier).limit(1).get();
-                        if (!usernameSnapshot.empty) {
-                            loginEmail = usernameSnapshot.docs[0].data().email;
-                        }
-                    }
-                }
-
-                document.getElementById('professional-auth-section').style.display = 'none';
-                document.getElementById('loading-screen').style.display = 'flex';
-
-                await auth.signInWithEmailAndPassword(loginEmail, password);
-
-            } catch (error) {
-                document.getElementById('loading-screen').style.display = 'none';
-                document.getElementById('professional-auth-section').style.display = 'flex';
-
-                let errorMessage = error.message;
-                if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-email') {
-                    showToast("Incorrect username/email or password", 'error');
+                const provider = new firebase.auth.GoogleAuthProvider();
+                const result = await auth.signInWithPopup(provider);
+                const user = result.user;
+                const isNewUser = result.additionalUserInfo.isNewUser;
+                
+                // The onAuthStateChanged listener will handle redirecting to the main app,
+                // but we need to create a user document in Firestore if it's a new user.
+                
+                if (isNewUser) {
+                    // Create a user profile in Firestore for the new user
+                    await db.collection("users").doc(user.uid).set({
+                        username: user.displayName,
+                        email: user.email,
+                        phone: '', // Phone number is not provided by Google Auth
+                        role: 'user',
+                        isBlocked: false,
+                        isGoogleUser: true, // Flag to identify Google-signed-up users
+                        tournamentsParticipated: 0,
+                        registeredAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    showToast("Welcome! Your account has been created.", 'success');
                 } else {
-                    showToast("Login Error: " + errorMessage, 'error');
+                    showToast(`Welcome back, ${user.displayName}!`, 'success');
                 }
-            } finally {
-                setButtonLoading('login-button', false);
-            }
+                
+                // Note: The app will automatically proceed because the onAuthStateChanged listener will fire.
+                // We don't need to manually hide/show elements or restore the button on success.
+                
+            } catch (error) {
+                console.error("Google Login Error:", error);
+                let errorMessage = "An error occurred during sign-in. Please try again.";
+                if (error.code === 'auth/popup-closed-by-user') {
+                    errorMessage = "Sign-in cancelled. Please try again.";
+                } else if (error.code === 'auth/account-exists-with-different-credential') {
+                    errorMessage = "An account already exists with the same email address. Please sign in using the original method.";
+                }
+                showToast(errorMessage, 'error');
+                
+                // Restore button state ONLY on error
+                button.disabled = false;
+                button.innerHTML = originalContent;
+            } 
         }
 
         function showLogoutConfirmation() {
@@ -3794,7 +3830,7 @@
                         <h4>Player 2 Details</h4>
                           <div class="form-group">
                             <label>Free Fire Name (Copy-Paste Name)</label>
-                            <input type="text" id="player1-name" placeholder="Enter Exact In-Game Name" required>
+                            <input type="text" id="player2-name" placeholder="Enter Exact In-Game Name" required>
                         </div>
                         <div class="form-group">
                             <label>Free Fire ID (Numbers only)</label>
@@ -3811,7 +3847,7 @@
                             <h4>Player ${i} Details</h4>
                                <div class="form-group">
                             <label>Free Fire Name (Copy-Paste Name)</label>
-                            <input type="text" id="player1-name" placeholder="Enter Exact In-Game Name" required>
+                            <input type="text" id="player${i}-name" placeholder="Enter Exact In-Game Name" required>
                         </div>
                             <div class="form-group">
                                 <label>Free Fire ID (Numbers only)</label>
@@ -3837,48 +3873,39 @@
         }
 
         function proceedToPayment() {
-    console.log("Proceed to payment clicked"); // Debugging check
+            // Validate all required fields before proceeding.
+            const mobile = document.getElementById('register-mobile').value.trim();
+            if (!mobile || !/^\d{10}$/.test(mobile)) {
+                showToast("Please enter a valid 10-digit mobile number.", "error");
+                return;
+            }
 
-    // 1. Get Basic Info
-    const mobile = document.getElementById('register-mobile').value.trim();
-    if (!mobile || mobile.length < 10) {
-        alert("Please enter a valid 10-digit mobile number.");
-        return;
-    }
+            if (selectedTournament.category !== 'solo') {
+                const teamName = document.getElementById('register-team-name').value.trim();
+                if (!teamName) {
+                    showToast("Team Name is required for Duo/Squad tournaments.", "error");
+                    return;
+                }
+            }
 
-    // 2. Validate Player 1 (Always required)
-    const p1Name = document.getElementById('player1-name').value.trim();
-    const p1Id = document.getElementById('player1-id').value.trim();
+            const playerCount = selectedTournament.category === 'solo' ? 1 : (selectedTournament.category === 'duo' ? 2 : 4);
+            for (let i = 1; i <= playerCount; i++) {
+                const name = document.getElementById(`player${i}-name`).value.trim();
+                const id = document.getElementById(`player${i}-id`).value.trim();
+                if (!name || !id) {
+                    showToast(`Player ${i}'s Name and ID are both required.`, "error");
+                    return;
+                }
+                if (!/^\d+$/.test(id)) {
+                    showToast(`Player ${i}'s ID must be numeric.`, "error");
+                    return;
+                }
+            }
 
-    if (!p1Name || !p1Id) {
-        alert("Please enter Player 1 Name and ID.");
-        return;
-    }
-
-    // 3. For Duo/Squad, check extra players
-    if (selectedTournament.category === 'duo' || selectedTournament.category === 'squad') {
-        const teamName = document.getElementById('register-team-name').value.trim();
-        if (!teamName) {
-            alert("Team Name is required.");
-            return;
+            // If all validations pass, show the payment modal
+            document.getElementById('registration-modal').style.display = 'none';
+            showPaymentModal();
         }
-        
-        // Quick check for Player 2 if Duo
-        if (selectedTournament.category === 'duo') {
-            const p2Id = document.getElementById('player2-id').value.trim();
-            if (!p2Id) { alert("Player 2 ID required."); return; }
-        }
-    }
-
-    // 4. ACTION: If everything is okay, switch the modals
-    console.log("Validation passed, opening payment...");
-    
-    // Hide registration modal
-    document.getElementById('registration-modal').style.display = 'none';
-    
-    // Show payment modal
-    showPaymentModal();
-}
         function showPaymentModal() {
             const modal = document.getElementById('payment-modal');
             const detailsContainer = document.getElementById('payment-details');
