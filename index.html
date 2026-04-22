@@ -94,22 +94,35 @@
         input[type="tel"],
         select,
         textarea {
-            padding: 10px;
+            padding: 14px 16px;
             margin: 8px 0;
-            border: 2px solid #333;
-            border-radius: 6px;
+            border: 2px solid rgba(255, 70, 85, 0.2);
+            border-radius: 10px;
             box-sizing: border-box;
             width: 100%;
             font-size: 14px;
-            background-color: #222;
+            background: rgba(255, 255, 255, 0.05);
             color: #fff;
-            transition: border-color 0.3s;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            backdrop-filter: blur(10px);
+            font-weight: 500;
+        }
+
+        input::placeholder,
+        textarea::placeholder {
+            color: #888;
         }
 
         input:focus, select:focus, textarea:focus {
             border-color: #ff4655;
             outline: none;
-            box-shadow: 0 0 0 2px rgba(255, 70, 85, 0.2);
+            box-shadow: 0 0 0 3px rgba(255, 70, 85, 0.15), inset 0 0 10px rgba(255, 70, 85, 0.05);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        input:hover, select:hover, textarea:hover {
+            border-color: rgba(255, 70, 85, 0.4);
+            background: rgba(255, 255, 255, 0.06);
         }
 
         .form-group {
@@ -125,17 +138,24 @@
 
         .password-input-group input {
             width: 100%;
-            padding-right: 40px;
+            padding-right: 45px;
             margin: 0;
         }
 
         .toggle-password {
             position: absolute;
-            right: 10px;
+            right: 14px;
             cursor: pointer;
-            color: #888;
+            color: #999;
             font-size: 1.1em;
             padding: 8px;
+            transition: all 0.3s;
+            border-radius: 6px;
+        }
+
+        .toggle-password:hover {
+            color: #ff4655;
+            background: rgba(255, 70, 85, 0.1);
         }
 
         /* Loading Screen Styling */
@@ -223,79 +243,181 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Professional Login/Registration */
+        /* Professional Login/Registration - Premium Design */
         .professional-auth-container {
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            background: linear-gradient(-45deg, #1a0033, #0a0a0a, #1a1a2e, #0f3460);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
             padding: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Animated background elements */
+        .auth-background-blur {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255, 70, 85, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            filter: blur(60px);
+            animation: float1 6s ease-in-out infinite;
+        }
+
+        .auth-background-blur:nth-child(2) {
+            width: 200px;
+            height: 200px;
+            animation: float2 8s ease-in-out infinite;
+            background: radial-gradient(circle, rgba(28, 113, 216, 0.1) 0%, transparent 70%);
+            top: 20%;
+            right: 10%;
+        }
+
+        .auth-background-blur:nth-child(3) {
+            width: 250px;
+            height: 250px;
+            animation: float3 10s ease-in-out infinite;
+            background: radial-gradient(circle, rgba(38, 162, 105, 0.1) 0%, transparent 70%);
+            bottom: 10%;
+            left: 5%;
+        }
+
+        @keyframes float1 {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(30px, -30px) scale(1.1); }
+        }
+
+        @keyframes float2 {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(-40px, 30px) scale(1.05); }
+        }
+
+        @keyframes float3 {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(40px, 40px) scale(0.95); }
         }
 
         .professional-auth-box {
-            background: rgba(30, 30, 30, 0.95);
-            border-radius: 12px;
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+            background: rgba(20, 20, 30, 0.85);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7), 0 0 30px rgba(255, 70, 85, 0.1);
             width: 100%;
-            max-width: 380px;
+            max-width: 420px;
             overflow: hidden;
-            border: 1px solid #333;
-        }
-
-        .auth-header {
-            background: linear-gradient(135deg, #ff4655 0%, #d91a2a 100%);
-            padding: 30px 15px;
-            text-align: center;
+            border: 1px solid rgba(255, 70, 85, 0.2);
+            animation: slideInUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
             position: relative;
-            overflow: hidden;
+            z-index: 10;
         }
 
-        .auth-icon {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 15px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            position: relative;
-            z-index: 2;
-        }
-
-        .auth-icon .login-icon {
-            font-size: 50px;
-            color: white;
-            text-shadow: 0 4px 8px rgba(0,0,0,0.3);
-        }
-
-        .auth-slogan {
-            font-size: 1.2em;
-            color: white;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            position: relative;
-            z-index: 2;
-        }
-
-        .auth-body {
-            padding: 25px;
-            animation: slideUp 0.6s ease-out;
-        }
-
-        @keyframes slideUp {
+        @keyframes slideInUp {
             from {
                 opacity: 0;
-                transform: translateY(30px);
+                transform: translateY(60px);
             }
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
+        }
+
+        .auth-header {
+            background: linear-gradient(135deg, #ff4655 0%, #d91a2a 100%);
+            padding: 40px 25px 35px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            animation: slideInLeft 1.2s ease-out;
+        }
+
+        @keyframes slideInLeft {
+            from {
+                transform: translateX(-100%);
+            }
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        .auth-icon {
+            width: 90px;
+            height: 90px;
+            margin: 0 auto 15px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            position: relative;
+            z-index: 2;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            animation: scaleInDown 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes scaleInDown {
+            from {
+                opacity: 0;
+                transform: scale(0.5) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .auth-icon .login-icon {
+            font-size: 50px;
+            color: white;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .auth-slogan {
+            font-size: 1.4em;
+            color: white;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+            z-index: 2;
+            animation: fadeInDown 0.8s ease-out 0.2s both;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .auth-body {
+            padding: 35px;
+            animation: fadeIn 0.6s ease-out 0.3s both;
         }
 
         @keyframes fadeIn {
@@ -307,78 +429,120 @@
             }
         }
 
-        @keyframes pulse-glow {
-            0%, 100% {
-                box-shadow: 0 0 10px rgba(255, 70, 85, 0.3);
-            }
-            50% {
-                box-shadow: 0 0 20px rgba(255, 70, 85, 0.6);
-            }
-        }
-
-        .professional-auth-box {
-            animation: slideUp 0.8s ease-out;
-        }
-
         .auth-tabs {
             display: flex;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #333;
-            background: #222;
-            border-radius: 6px 6px 0 0;
-            overflow: hidden;
-            animation: fadeIn 0.5s ease-out 0.2s both;
+            margin-bottom: 25px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 4px;
+            gap: 8px;
+            animation: fadeIn 0.5s ease-out 0.4s both;
         }
 
         .auth-tab {
             flex: 1;
             text-align: center;
-            padding: 12px;
+            padding: 12px 16px;
             cursor: pointer;
             font-weight: 600;
-            transition: all 0.3s;
-            color: #888;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            color: #aaa;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-size: 0.9em;
+            letter-spacing: 0.7px;
+            font-size: 0.85em;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .auth-tab::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #ff4655 0%, #d91a2a 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: -1;
         }
 
         .auth-tab.active {
+            color: white;
+            font-weight: 700;
+        }
+
+        .auth-tab.active::before {
+            opacity: 1;
+        }
+
+        .auth-tab:hover {
             color: #ff4655;
-            background: #1a1a1a;
         }
 
         .auth-form {
             display: none;
+            animation: slideInUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .auth-form.active {
             display: block;
         }
 
+        .form-group {
+            margin-bottom: 18px;
+            animation: fadeIn 0.5s ease-out backwards;
+        }
+
+        .form-group:nth-child(1) { animation-delay: 0.5s; }
+        .form-group:nth-child(2) { animation-delay: 0.55s; }
+        .form-group:nth-child(3) { animation-delay: 0.6s; }
+        .form-group:nth-child(4) { animation-delay: 0.65s; }
+        .form-group:nth-child(5) { animation-delay: 0.7s; }
+
         .auth-button {
             width: 100%;
-            padding: 12px;
+            padding: 14px;
             background: linear-gradient(135deg, #ff4655 0%, #d91a2a 100%);
             color: white;
             border: none;
-            border-radius: 6px;
-            font-weight: 600;
+            border-radius: 10px;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 1.2px;
             cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 10px;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            margin-top: 15px;
             font-size: 0.95em;
+            position: relative;
+            overflow: hidden;
+            animation: fadeIn 0.5s ease-out 0.75s both;
+        }
+
+        .auth-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: left 0.3s ease;
+        }
+
+        .auth-button:hover::before {
+            left: 100%;
         }
 
         .auth-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(255, 70, 85, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 70, 85, 0.4);
+        }
+
+        .auth-button:active {
+            transform: translateY(-1px);
         }
 
         .auth-button:disabled {
-            background: #666;
+            background: #555;
             transform: none;
             box-shadow: none;
             cursor: not-allowed;
@@ -386,38 +550,60 @@
 
         /* Google Sign-In Button */
         .google-signin-container {
-            margin: 15px 0;
+            margin: 20px 0;
             display: flex;
             justify-content: center;
-            animation: fadeIn 0.5s ease-out 0.3s both;
+            animation: fadeIn 0.5s ease-out 0.8s both;
         }
 
         .google-signin-btn {
-            background: linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%);
-            border: 2px solid #ff4655;
-            border-radius: 6px;
-            padding: 12px 24px;
-            font-weight: 600;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f8f8 100%);
+            border: 2px solid rgba(255, 70, 85, 0.3);
+            border-radius: 10px;
+            padding: 13px 20px;
+            font-weight: 700;
             color: #333;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
-            font-size: 0.95em;
+            font-size: 0.9em;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            box-shadow: 0 4px 15px rgba(255, 70, 85, 0.2);
+            letter-spacing: 0.7px;
+            box-shadow: 0 4px 15px rgba(255, 70, 85, 0.15);
             width: 100%;
-            max-width: 250px;
+            max-width: 280px;
+            font-weight: 700;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .google-signin-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #ff4655 0%, #d91a2a 100%);
+            transition: left 0.3s ease;
+            z-index: -1;
+        }
+
+        .google-signin-btn:hover::before {
+            left: 0;
         }
 
         .google-signin-btn:hover {
-            background: linear-gradient(135deg, #ffffff 0%, #ffffff 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(255, 70, 85, 0.3);
-            border-color: #ff5a67;
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 70, 85, 0.3);
+        }
+
+        .google-signin-btn:active {
+            transform: translateY(-1px);
         }
 
         .google-signin-btn:disabled {
@@ -429,17 +615,18 @@
         }
 
         .google-signin-btn i {
-            font-size: 1.2em;
+            font-size: 1.1em;
         }
 
         .divider {
             display: flex;
             align-items: center;
-            margin: 20px 0;
+            margin: 22px 0;
             color: #666;
-            font-size: 0.9em;
+            font-size: 0.85em;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.7px;
+            animation: fadeIn 0.5s ease-out 0.75s both;
         }
 
         .divider::before,
@@ -447,12 +634,57 @@
             content: '';
             flex: 1;
             height: 1px;
-            background: #333;
+            background: linear-gradient(to right, rgba(255, 70, 85, 0), rgba(255, 70, 85, 0.3), rgba(255, 70, 85, 0));
         }
 
         .divider-text {
-            padding: 0 10px;
-            color: #aaa;
+            padding: 0 12px;
+            color: #999;
+            font-weight: 600;
+        }
+
+        /* Link hover animations */
+        a:hover .underline-hover {
+            width: 100% !important;
+        }
+
+        /* Form group staggered animation */
+        @keyframes slideInFade {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Success/info message animations */
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Loading spinner with glow */
+        .loading-spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #ff4655;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         /* Registration Timer */
@@ -1721,140 +1953,201 @@
 
         /* Responsive Design */
         @media (max-width: 768px) {
-            .tournament-tabs {
-                margin: 12px;
+            .professional-auth-box {
+                max-width: 95%;
+                border-radius: 16px;
             }
-            
-            .tournament-tab {
-                padding: 12px 5px;
+
+            .auth-header {
+                padding: 35px 20px 30px;
+            }
+
+            .auth-icon {
+                width: 80px;
+                height: 80px;
+            }
+
+            .auth-icon .login-icon {
+                font-size: 45px;
+            }
+
+            .auth-slogan {
+                font-size: 1.2em;
+                letter-spacing: 1px;
+            }
+
+            .auth-body {
+                padding: 28px;
+            }
+
+            .auth-tabs {
+                margin-bottom: 20px;
+                padding: 3px;
+            }
+
+            .auth-tab {
+                padding: 11px 14px;
                 font-size: 0.8em;
             }
-            
-            .tournament-card {
-                margin: 10px 12px;
-                min-height: 260px;
+
+            .form-group {
+                margin-bottom: 15px;
             }
-            
-            .tournament-banner {
-                width: 100px;
-                height: 260px;
+
+            input[type="text"],
+            input[type="email"],
+            input[type="password"],
+            input[type="number"],
+            input[type="date"],
+            input[type="tel"] {
+                padding: 13px 15px;
+                font-size: 16px;
             }
-            
-            .tournament-title {
-                font-size: 0.95em;
-            }
-            
-            .stat-value {
+
+            .auth-button {
+                padding: 13px;
                 font-size: 0.9em;
-                max-height: 32px;
             }
-            
-            .stat-label {
-                font-size: 0.65em;
+
+            .google-signin-btn {
+                max-width: 100%;
+                padding: 12px 18px;
+                font-size: 0.85em;
             }
-            
-            .action-btn {
-                font-size: 0.75em;
-                padding: 7px 8px;
-            }
-            
-            .view-credentials-btn {
-                padding: 9px 10px;
+
+            .divider {
+                margin: 18px 0;
                 font-size: 0.8em;
             }
-            
-            .modal-content {
-                width: 95%;
-                padding: 15px;
-                margin: 10% auto;
+
+            .toggle-password {
+                right: 12px;
+                font-size: 1em;
+                padding: 6px;
             }
-            
-            .toast-notification {
-                top: 60px;
-                right: 10px;
-                min-width: 250px;
-                max-width: 300px;
+
+            .auth-background-blur {
+                width: 200px;
+                height: 200px;
             }
-            
-            .language-selector {
-                flex-wrap: wrap;
+
+            .auth-background-blur:nth-child(2) {
+                width: 150px;
+                height: 150px;
             }
-            
-            .language-btn {
-                padding: 6px 12px;
-                font-size: 0.8em;
+
+            .auth-background-blur:nth-child(3) {
+                width: 180px;
+                height: 180px;
             }
         }
 
         @media (max-width: 480px) {
-            .app-header {
-                padding: 8px 12px;
-                height: 45px;
+            .professional-auth-container {
+                padding: 10px;
+                min-height: auto;
+                padding-top: 20px;
+                padding-bottom: 20px;
             }
-            
-            .app-name {
-                font-size: 1em;
+
+            .professional-auth-box {
+                max-width: 100%;
+                border-radius: 14px;
             }
-            
-            .tournament-card {
-                min-height: 250px;
-                margin: 8px 10px;
+
+            .auth-header {
+                padding: 28px 18px 24px;
             }
-            
-            .tournament-banner {
-                width: 90px;
-                height: 250px;
+
+            .auth-icon {
+                width: 75px;
+                height: 75px;
+                margin-bottom: 12px;
             }
-            
-            .tournament-title {
-                font-size: 0.9em;
+
+            .auth-icon .login-icon {
+                font-size: 42px;
             }
-            
-            .tournament-stats {
-                padding: 6px;
-                min-height: 55px;
+
+            .auth-slogan {
+                font-size: 1.1em;
+                letter-spacing: 1px;
             }
-            
-            .stat-value {
-                font-size: 0.85em;
-                max-height: 30px;
-                -webkit-line-clamp: 2;
+
+            .auth-body {
+                padding: 22px;
             }
-            
-            .stat-label {
-                font-size: 0.6em;
-            }
-            
-            .tournament-actions {
+
+            .auth-tabs {
+                margin-bottom: 18px;
+                padding: 2px;
                 gap: 4px;
             }
-            
-            .action-btn {
-                padding: 6px 7px;
-                font-size: 0.7em;
+
+            .auth-tab {
+                padding: 10px 12px;
+                font-size: 0.75em;
+                letter-spacing: 0.5px;
             }
-            
-            .action-btn i {
+
+            .form-group {
+                margin-bottom: 12px;
+            }
+
+            input[type="text"],
+            input[type="email"],
+            input[type="password"],
+            input[type="number"],
+            input[type="date"],
+            input[type="tel"] {
+                padding: 12px 14px;
+                font-size: 16px;
+                border-radius: 8px;
+            }
+
+            .auth-button {
+                padding: 12px;
+                font-size: 0.88em;
+                margin-top: 12px;
+                border-radius: 8px;
+            }
+
+            .google-signin-btn {
+                max-width: 100%;
+                padding: 11px 16px;
                 font-size: 0.8em;
+                gap: 8px;
             }
-            
-            .view-credentials-btn {
-                padding: 8px 9px;
+
+            .divider {
+                margin: 16px 0;
                 font-size: 0.75em;
             }
-            
-            .contact-action-btn {
-                padding: 5px 8px;
-                font-size: 0.75em;
+
+            .divider::before,
+            .divider::after {
+                height: 0.5px;
             }
-            
-            .language-selector {
-                gap: 5px;
+
+            .toggle-password {
+                right: 11px;
+                font-size: 0.95em;
+                padding: 5px;
             }
-            
-            .language-btn {
-                padding: 5px 10px;
-                font-size: 0.75em;
+
+            .auth-background-blur {
+                width: 150px;
+                height: 150px;
+            }
+
+            .auth-background-blur:nth-child(2) {
+                width: 120px;
+                height: 120px;
+            }
+
+            .auth-background-blur:nth-child(3) {
+                width: 140px;
+                height: 140px;
             }
         }
     </style>
@@ -1894,6 +2187,11 @@
 
         <!-- Professional Login/Registration Screen -->
         <div id="professional-auth-section" class="professional-auth-container">
+            <!-- Animated background elements -->
+            <div class="auth-background-blur"></div>
+            <div class="auth-background-blur"></div>
+            <div class="auth-background-blur"></div>
+            
             <div class="professional-auth-box">
                 <div class="auth-header">
                     <div class="auth-icon">
@@ -1923,61 +2221,61 @@
                             <input type="email" id="signup-email" placeholder="Email Address" required>
                         </div>
                         <div class="form-group password-input-group">
-                            <input type="password" id="signup-password" placeholder="Password" required>
+                            <input type="password" id="signup-password" placeholder="Password (Min. 6 chars)" required>
                             <span class="toggle-password" onclick="togglePasswordVisibility('signup-password')"><i class="fas fa-eye"></i></span>
                         </div>
                         <div class="form-group password-input-group">
                             <input type="password" id="signup-confirm-password" placeholder="Confirm Password" required>
                             <span class="toggle-password" onclick="togglePasswordVisibility('signup-confirm-password')"><i class="fas fa-eye"></i></span>
                         </div>
-                        <button class="auth-button" onclick="handleProfessionalSignup()" id="signup-button">Register</button>
+                        <button class="auth-button" onclick="handleProfessionalSignup()" id="signup-button">Create Account</button>
                         
                         <!-- Google Sign-In Button -->
                         <div class="divider">
-                            <div class="divider-text">Or</div>
+                            <div class="divider-text">Or Continue With</div>
                         </div>
                         
                         <div class="google-signin-container">
                             <button class="google-signin-btn" onclick="handleGoogleSignUp()" id="google-signup-btn">
-                                <i class="fab fa-google"></i> Sign Up with Google
+                                <i class="fab fa-google"></i> Google
                             </button>
                         </div>
                         
                         <!-- Already have an account link -->
-                        <div style="text-align: center; margin-top: 15px; color: #aaa; font-size: 0.85em;">
+                        <div style="text-align: center; margin-top: 18px; color: #aaa; font-size: 0.85em; animation: fadeIn 0.5s ease-out 0.85s both;">
                             Already have an account? 
-                            <a href="#" onclick="switchAuthTab('login')" style="color: #ff4655; text-decoration: none; font-weight: bold;">Login here</a>
+                            <a href="#" onclick="switchAuthTab('login')" style="color: #ff4655; text-decoration: none; font-weight: 700; transition: all 0.3s; position: relative;">Login here<span style="position: absolute; bottom: -2px; left: 0; width: 0; height: 2px; background: #ff4655; transition: width 0.3s;" class="underline-hover"></span></a>
                         </div>
                     </div>
 
                     <div id="login-form" class="auth-form">
                         <div class="form-group">
-                            <input type="text" id="login-identifier" placeholder="Email" required>
+                            <input type="text" id="login-identifier" placeholder="Email or Username" required>
                         </div>
                         <div class="form-group password-input-group">
                             <input type="password" id="login-password" placeholder="Password" required>
                             <span class="toggle-password" onclick="togglePasswordVisibility('login-password')"><i class="fas fa-eye"></i></span>
                         </div>
-                        <div style="text-align: right; margin: 8px 0 15px;">
-                            <a href="#" onclick="showForgotPasswordAlert()" style="color: #ff4655; text-decoration: none; font-size: 0.85em;">Forgot Password?</a>
+                        <div style="text-align: right; margin: 12px 0 18px; animation: fadeIn 0.5s ease-out 0.65s both;">
+                            <a href="#" onclick="showForgotPasswordAlert()" style="color: #ff4655; text-decoration: none; font-size: 0.85em; font-weight: 600; transition: all 0.3s;">Forgot Password?</a>
                         </div>
-                        <button class="auth-button" onclick="handleProfessionalLogin()" id="login-button">Login</button>
+                        <button class="auth-button" onclick="handleProfessionalLogin()" id="login-button">Sign In</button>
                         
                         <!-- Google Sign-In Button -->
                         <div class="divider">
-                            <div class="divider-text">Or</div>
+                            <div class="divider-text">Or Continue With</div>
                         </div>
                         
                         <div class="google-signin-container">
                             <button class="google-signin-btn" onclick="handleGoogleLogin()" id="google-login-btn">
-                                <i class="fab fa-google"></i> Sign In with Google
+                                <i class="fab fa-google"></i> Google
                             </button>
                         </div>
                         
                         <!-- Don't have an account link -->
-                        <div style="text-align: center; margin-top: 15px; color: #aaa; font-size: 0.85em;">
+                        <div style="text-align: center; margin-top: 18px; color: #aaa; font-size: 0.85em; animation: fadeIn 0.5s ease-out 0.85s both;">
                             Don't have an account? 
-                            <a href="#" onclick="switchAuthTab('signup')" style="color: #ff4655; text-decoration: none; font-weight: bold;">Sign up here</a>
+                            <a href="#" onclick="switchAuthTab('signup')" style="color: #ff4655; text-decoration: none; font-weight: 700; transition: all 0.3s;">Sign up here</a>
                         </div>
                     </div>
                 </div>
