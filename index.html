@@ -7,6 +7,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- OneSignal SDK Integration Start -->
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
@@ -283,6 +284,40 @@
 
         .auth-body {
             padding: 25px;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% {
+                box-shadow: 0 0 10px rgba(255, 70, 85, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 20px rgba(255, 70, 85, 0.6);
+            }
+        }
+
+        .professional-auth-box {
+            animation: slideUp 0.8s ease-out;
         }
 
         .auth-tabs {
@@ -292,6 +327,7 @@
             background: #222;
             border-radius: 6px 6px 0 0;
             overflow: hidden;
+            animation: fadeIn 0.5s ease-out 0.2s both;
         }
 
         .auth-tab {
@@ -346,6 +382,77 @@
             transform: none;
             box-shadow: none;
             cursor: not-allowed;
+        }
+
+        /* Google Sign-In Button */
+        .google-signin-container {
+            margin: 15px 0;
+            display: flex;
+            justify-content: center;
+            animation: fadeIn 0.5s ease-out 0.3s both;
+        }
+
+        .google-signin-btn {
+            background: linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%);
+            border: 2px solid #ff4655;
+            border-radius: 6px;
+            padding: 12px 24px;
+            font-weight: 600;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 0.95em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(255, 70, 85, 0.2);
+            width: 100%;
+            max-width: 250px;
+        }
+
+        .google-signin-btn:hover {
+            background: linear-gradient(135deg, #ffffff 0%, #ffffff 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 70, 85, 0.3);
+            border-color: #ff5a67;
+        }
+
+        .google-signin-btn:disabled {
+            background: #ddd;
+            color: #999;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .google-signin-btn i {
+            font-size: 1.2em;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+            color: #666;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #333;
+        }
+
+        .divider-text {
+            padding: 0 10px;
+            color: #aaa;
         }
 
         /* Registration Timer */
@@ -1825,6 +1932,17 @@
                         </div>
                         <button class="auth-button" onclick="handleProfessionalSignup()" id="signup-button">Register</button>
                         
+                        <!-- Google Sign-In Button -->
+                        <div class="divider">
+                            <div class="divider-text">Or</div>
+                        </div>
+                        
+                        <div class="google-signin-container">
+                            <button class="google-signin-btn" onclick="handleGoogleSignUp()" id="google-signup-btn">
+                                <i class="fab fa-google"></i> Sign Up with Google
+                            </button>
+                        </div>
+                        
                         <!-- Already have an account link -->
                         <div style="text-align: center; margin-top: 15px; color: #aaa; font-size: 0.85em;">
                             Already have an account? 
@@ -1844,6 +1962,17 @@
                             <a href="#" onclick="showForgotPasswordAlert()" style="color: #ff4655; text-decoration: none; font-size: 0.85em;">Forgot Password?</a>
                         </div>
                         <button class="auth-button" onclick="handleProfessionalLogin()" id="login-button">Login</button>
+                        
+                        <!-- Google Sign-In Button -->
+                        <div class="divider">
+                            <div class="divider-text">Or</div>
+                        </div>
+                        
+                        <div class="google-signin-container">
+                            <button class="google-signin-btn" onclick="handleGoogleLogin()" id="google-login-btn">
+                                <i class="fab fa-google"></i> Sign In with Google
+                            </button>
+                        </div>
                         
                         <!-- Don't have an account link -->
                         <div style="text-align: center; margin-top: 15px; color: #aaa; font-size: 0.85em;">
@@ -2683,12 +2812,24 @@
             const button = document.getElementById(buttonId);
             if (isLoading) {
                 button.disabled = true;
-                button.innerHTML = '<span class="loading-spinner"></span> Loading...';
+                if (buttonId === 'signup-button') {
+                    button.innerHTML = '<span class="loading-spinner"></span> Registering...';
+                } else if (buttonId === 'login-button') {
+                    button.innerHTML = '<span class="loading-spinner"></span> Logging in...';
+                } else if (buttonId === 'google-login-btn') {
+                    button.innerHTML = '<span class="loading-spinner"></span> Signing in...';
+                } else if (buttonId === 'google-signup-btn') {
+                    button.innerHTML = '<span class="loading-spinner"></span> Signing up...';
+                }
             } else {
                 if (buttonId === 'login-button') {
                     button.innerHTML = 'Login';
                 } else if (buttonId === 'signup-button') {
                     button.innerHTML = 'Register';
+                } else if (buttonId === 'google-login-btn') {
+                    button.innerHTML = '<i class="fab fa-google"></i> Sign In with Google';
+                } else if (buttonId === 'google-signup-btn') {
+                    button.innerHTML = '<i class="fab fa-google"></i> Sign Up with Google';
                 }
                 button.disabled = false;
             }
@@ -2910,6 +3051,92 @@
                 }
             } finally {
                 setButtonLoading('login-button', false);
+            }
+        }
+
+        // --- Google Authentication Functions ---
+        async function handleGoogleLogin() {
+            try {
+                setButtonLoading('google-login-btn', true);
+
+                // Initialize Google Sign-In provider
+                const provider = new firebase.auth.GoogleAuthProvider();
+                
+                // Sign in with redirect or popup (using popup for mobile compatibility)
+                const result = await auth.signInWithPopup(provider);
+                
+                if (result.user) {
+                    document.getElementById('professional-auth-section').style.display = 'none';
+                    document.getElementById('loading-screen').style.display = 'flex';
+                    showToast("Google login successful!", 'success');
+                }
+            } catch (error) {
+                console.error("Google login error:", error);
+                let errorMessage = error.message;
+                
+                if (error.code === 'auth/popup-closed-by-user') {
+                    showToast("Login cancelled", 'info');
+                } else if (error.code === 'auth/popup-blocked') {
+                    showToast("Please enable popups for this website", 'error');
+                } else {
+                    showToast("Google Login Error: " + errorMessage, 'error');
+                }
+            } finally {
+                setButtonLoading('google-login-btn', false);
+            }
+        }
+
+        async function handleGoogleSignUp() {
+            try {
+                setButtonLoading('google-signup-btn', true);
+
+                // Initialize Google Sign-In provider
+                const provider = new firebase.auth.GoogleAuthProvider();
+                
+                // Sign in with popup
+                const result = await auth.signInWithPopup(provider);
+                const user = result.user;
+                
+                if (user) {
+                    // Check if user already exists in Firestore
+                    const userDoc = await db.collection("users").doc(user.uid).get();
+                    
+                    if (!userDoc.exists) {
+                        // New user - create user document
+                        const displayName = user.displayName || user.email.split('@')[0];
+                        
+                        await db.collection("users").doc(user.uid).set({
+                            username: displayName,
+                            phone: '',
+                            email: user.email,
+                            role: 'user',
+                            isBlocked: false,
+                            tournamentsParticipated: 0,
+                            registeredAt: firebase.firestore.FieldValue.serverTimestamp(),
+                            googleAuth: true
+                        });
+                        
+                        showToast("Account created successfully with Google!", 'success');
+                    } else {
+                        showToast("Welcome back!", 'success');
+                    }
+                    
+                    document.getElementById('professional-auth-section').style.display = 'none';
+                    document.getElementById('loading-screen').style.display = 'flex';
+                }
+            } catch (error) {
+                console.error("Google signup error:", error);
+                let errorMessage = error.message;
+                
+                if (error.code === 'auth/popup-closed-by-user') {
+                    showToast("Sign up cancelled", 'info');
+                } else if (error.code === 'auth/popup-blocked') {
+                    showToast("Please enable popups for this website", 'error');
+                } else {
+                    showToast("Google Sign Up Error: " + errorMessage, 'error');
+                }
+            } finally {
+                setButtonLoading('google-signup-btn', false);
             }
         }
 
