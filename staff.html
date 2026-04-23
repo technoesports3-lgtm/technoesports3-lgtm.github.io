@@ -2874,41 +2874,52 @@
             if (!currentStaff) return;
             
             tournamentListener = db.collection("tournaments")
-                .orderBy("createdAt", "desc")
                 .onSnapshot((snapshot) => {
-                    tournaments = snapshot.docs.map(doc => ({
-                        id: doc.id,
-                        ...doc.data()
-                    }));
-                    
-                    document.getElementById('total-tournaments').textContent = tournaments.length;
-                    
-                    if (document.getElementById('tournaments-section').style.display === 'block') {
-                        renderTournaments();
+                    try {
+                        tournaments = snapshot.docs.map(doc => ({
+                            id: doc.id,
+                            ...doc.data()
+                        }));
+                        tournaments.sort((a, b) => (b.createdAt?.toDate?.() || b.createdAt || 0) - (a.createdAt?.toDate?.() || a.createdAt || 0));
+                        
+                        document.getElementById('total-tournaments').textContent = tournaments.length;
+                        
+                        if (document.getElementById('tournaments-section').style.display === 'block') {
+                            renderTournaments();
+                        }
+                        
+                        populateTournamentSelection();
+                    } catch (e) {
+                        console.error('Error processing tournaments:', e);
                     }
-                    
-                    populateTournamentSelection();
-                    
+                }, (error) => {
+                    console.error('Tournament listener error:', error);
                 });
             
             if (hasPermissions.verifyApplications) {
                 applicationListener = db.collection("tournament_registrations")
                     .where("status", "==", "pending")
                     .onSnapshot((snapshot) => {
-                        pendingApplications = snapshot.docs.map(doc => ({
-                            id: doc.id,
-                            ...doc.data()
-                        }));
-                        
-                        document.getElementById('pending-applications').textContent = pendingApplications.length;
-                        
-                        if (document.getElementById('application-verification-section').style.display === 'block') {
-                            renderPendingApplications();
+                        try {
+                            pendingApplications = snapshot.docs.map(doc => ({
+                                id: doc.id,
+                                ...doc.data()
+                            }));
+                            
+                            document.getElementById('pending-applications').textContent = pendingApplications.length;
+                            
+                            if (document.getElementById('application-verification-section').style.display === 'block') {
+                                renderPendingApplications();
+                            }
+                            
+                            if (snapshot.docChanges().length > 0) {
+                                showToast("New applications available!", 'info', 'New Applications');
+                            }
+                        } catch (e) {
+                            console.error('Error processing applications:', e);
                         }
-                        
-                        if (snapshot.docChanges().length > 0) {
-                            showToast("New applications available!", 'info', 'New Applications');
-                        }
+                    }, (error) => {
+                        console.error('Application listener error:', error);
                     });
             }
             
@@ -2916,16 +2927,22 @@
                 userListener = db.collection("users")
                     .where("role", "==", "user")
                     .onSnapshot((snapshot) => {
-                        allUsers = snapshot.docs.map(doc => ({
-                            id: doc.id,
-                            ...doc.data()
-                        }));
-                        
-                        document.getElementById('total-users').textContent = allUsers.length;
-                        
-                        if (document.getElementById('manage-users-section').style.display === 'block') {
-                            renderUsersTable();
+                        try {
+                            allUsers = snapshot.docs.map(doc => ({
+                                id: doc.id,
+                                ...doc.data()
+                            }));
+                            
+                            document.getElementById('total-users').textContent = allUsers.length;
+                            
+                            if (document.getElementById('manage-users-section').style.display === 'block') {
+                                renderUsersTable();
+                            }
+                        } catch (e) {
+                            console.error('Error processing users:', e);
                         }
+                    }, (error) => {
+                        console.error('User listener error:', error);
                     });
             }
         }
@@ -2939,8 +2956,9 @@
                     document.getElementById('total-users').textContent = allUsers.length;
                 }
                 
-                const tournamentsSnapshot = await db.collection("tournaments").orderBy("createdAt", "desc").get();
+                const tournamentsSnapshot = await db.collection("tournaments").get();
                 tournaments = tournamentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                tournaments.sort((a, b) => (b.createdAt?.toDate?.() || b.createdAt || 0) - (a.createdAt?.toDate?.() || a.createdAt || 0));
                 document.getElementById('total-tournaments').textContent = tournaments.length;
                 
                 if (hasPermissions.verifyApplications) {
@@ -2988,8 +3006,20 @@
             document.getElementById('stats-users').textContent = staffData.usersManaged || 0;
             document.getElementById('stats-perf').textContent = `${staffData.performance || 0}%`;
             
-            const joinDate = staffData.registeredAt ? new Date(staffData.registeredAt.toDate()).toLocaleDateString() : 'N/A';
-            const lastActive = staffData.lastActive ? new Date(staffData.lastActive.toDate()).toLocaleString() : 'Never';
+            let joinDate = 'N/A';
+            let lastActive = 'Never';
+            try {
+                if (staffData.registeredAt) {
+                    const timestamp = typeof staffData.registeredAt.toDate === 'function' ? staffData.registeredAt.toDate() : staffData.registeredAt;
+                    joinDate = new Date(timestamp).toLocaleDateString();
+                }
+                if (staffData.lastActive) {
+                    const timestamp = typeof staffData.lastActive.toDate === 'function' ? staffData.lastActive.toDate() : staffData.lastActive;
+                    lastActive = new Date(timestamp).toLocaleString();
+                }
+            } catch (e) {
+                console.warn('Error converting timestamps:', e);
+            }
             
             document.getElementById('join-date').textContent = joinDate;
             document.getElementById('last-active').textContent = lastActive;
