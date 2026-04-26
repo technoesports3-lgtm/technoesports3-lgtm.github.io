@@ -3930,28 +3930,29 @@
 
             // Real-time listener for tournaments
             tournamentListener = db.collection("tournaments")
-                .where("isActive", "!=", false)
                 .onSnapshot((snapshot) => {
                     const changes = snapshot.docChanges();
                     currentTournaments = snapshot.docs.map(doc => ({
                         id: doc.id,
                         ...doc.data()
-                    }));
+                    })).filter(t => t.isActive !== false && t.status !== 'completed');
                     
-                    // Re-render tournaments
                     renderTournaments();
                     
-                    // Show professional notification for new tournaments
                     changes.forEach(change => {
                         if (change.type === "added") {
                             const tournament = change.doc.data();
-                            showToast(
-                                `New ${tournament.category} tournament: ${tournament.title}`, 
-                                'info',
-                                'New Tournament Available!'
-                            );
+                            if(tournament.isActive !== false) {
+                                showToast(
+                                    `New tournament available: ${tournament.title}`, 
+                                    'info',
+                                    'New Tournament!'
+                                );
+                            }
                         }
                     });
+                }, (error) => {
+                    console.error("Tournament listener error:", error);
                 });
 
             // Real-time listener for user registrations
@@ -4018,13 +4019,12 @@
         // --- Tournament Functions ---
         async function loadTournaments() {
             try {
-                const tournamentsSnapshot = await db.collection("tournaments")
-                    .where("isActive", "!=", false)
-                    .get();
+                // Fetch all tournaments, filter active ones safely in JS
+                const tournamentsSnapshot = await db.collection("tournaments").get();
                 currentTournaments = tournamentsSnapshot.docs.map(doc => ({
                     id: doc.id,
                     ...doc.data()
-                }));
+                })).filter(t => t.isActive !== false && t.status !== 'completed');
 
                 if (currentUser) {
                     const registrationsSnapshot = await db.collection("tournament_registrations")
@@ -4064,67 +4064,39 @@
             const duoContainer = document.getElementById('duo-tournaments');
             const squadContainer = document.getElementById('squad-tournaments');
             
-            // Clear containers
             soloContainer.innerHTML = '';
             duoContainer.innerHTML = '';
             squadContainer.innerHTML = '';
             
-            // Filter tournaments by category and active status
+            // Use toLowerCase() to prevent case-sensitivity issues
             const soloTournaments = currentTournaments.filter(t => 
-                t.category === 'solo'
+                t.category && t.category.toLowerCase() === 'solo'
             );
             
             const duoTournaments = currentTournaments.filter(t => 
-                t.category === 'duo'
+                t.category && t.category.toLowerCase() === 'duo'
             );
             
             const squadTournaments = currentTournaments.filter(t => 
-                t.category === 'squad'
+                t.category && t.category.toLowerCase() === 'squad'
             );
             
-            // Render solo tournaments
             if (soloTournaments.length === 0) {
-                soloContainer.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-gamepad"></i>
-                        <h3>No Solo Tournaments</h3>
-                        <p>Check back later for new solo tournaments.</p>
-                    </div>
-                `;
+                soloContainer.innerHTML = '<div class="empty-state"><i class="fas fa-gamepad"></i><h3>No Solo Tournaments</h3><p>Check back later for new solo tournaments.</p></div>';
             } else {
-                soloTournaments.forEach(tournament => {
-                    soloContainer.appendChild(createTournamentCard(tournament));
-                });
+                soloTournaments.forEach(tournament => soloContainer.appendChild(createTournamentCard(tournament)));
             }
             
-            // Render duo tournaments
             if (duoTournaments.length === 0) {
-                duoContainer.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-user-friends"></i>
-                        <h3>No Duo Tournaments</h3>
-                        <p>Check back later for new duo tournaments.</p>
-                    </div>
-                `;
+                duoContainer.innerHTML = '<div class="empty-state"><i class="fas fa-user-friends"></i><h3>No Duo Tournaments</h3><p>Check back later for new duo tournaments.</p></div>';
             } else {
-                duoTournaments.forEach(tournament => {
-                    duoContainer.appendChild(createTournamentCard(tournament));
-                });
+                duoTournaments.forEach(tournament => duoContainer.appendChild(createTournamentCard(tournament)));
             }
             
-            // Render squad tournaments
             if (squadTournaments.length === 0) {
-                squadContainer.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-users"></i>
-                        <h3>No Squad Tournaments</h3>
-                        <p>Check back later for new squad tournaments.</p>
-                    </div>
-                `;
+                squadContainer.innerHTML = '<div class="empty-state"><i class="fas fa-users"></i><h3>No Squad Tournaments</h3><p>Check back later for new squad tournaments.</p></div>';
             } else {
-                squadTournaments.forEach(tournament => {
-                    squadContainer.appendChild(createTournamentCard(tournament));
-                });
+                squadTournaments.forEach(tournament => squadContainer.appendChild(createTournamentCard(tournament)));
             }
         }
 
