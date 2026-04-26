@@ -3677,123 +3677,150 @@
         }
 
         // --- Google Authentication Functions ---
-        async function handleGoogleSignUp() {
-            try {
-                const enteredReferralCode = document.getElementById('signup-referral-code').value.trim();
-                setButtonLoading('google-signup-btn', true);
+        const GOOGLE_AUTH_MODE_KEY = 'googleAuthMode';
+        const GOOGLE_AUTH_REFERRAL_KEY = 'googleSignupReferralCode';
 
-                const provider = new firebase.auth.GoogleAuthProvider();
-                const result = await auth.signInWithPopup(provider);
-                const user = result.user;
-                
-                if (user) {
-                    const userDoc = await db.collection("users").doc(user.uid).get();
-                    
-                    if (!userDoc.exists) {
-                        const displayName = user.displayName || user.email.split('@')[0];
-                        
-                        const prefix = (displayName || 'TEC').substring(0, 3).toUpperCase().replace(/[^A-Z]/g, 'TEC');
-                        const randomNum = Math.floor(10000 + Math.random() * 90000); 
-                        const generatedReferralCode = `${prefix}${randomNum}`;
-                        
-                        await db.collection("users").doc(user.uid).set({
-                            username: displayName,
-                            phone: '',
-                            email: user.email,
-                            role: 'user',
-                            isBlocked: false,
-                            tournamentsParticipated: 0,
-                            referralCode: generatedReferralCode,
-                            registeredAt: firebase.firestore.FieldValue.serverTimestamp(),
-                            googleAuth: true
-                        });
+        function getGoogleAuthErrorMessage(error) {
+            const code = error?.code || '';
+            switch (code) {
+                case 'auth/popup-blocked':
+                    return 'Google sign-in popup was blocked by the browser.';
+                case 'auth/operation-not-allowed':
+                    return 'Google sign-in is not enabled for this Firebase project.';
+                case 'auth/unauthorized-domain':
+                    return 'This domain is not authorized for Google sign-in.';
+                case 'auth/network-request-failed':
+                    return 'Network error. Please check your internet connection and try again.';
+                default:
+                    return error?.message || 'Google authentication failed. Please try again.';
+            }
+        }
 
-                        if (enteredReferralCode) {
-                            try {
-                                await applyReferralForNewUser(user.uid, enteredReferralCode);
-                                showToast("Referral code applied successfully!", 'success');
-                            } catch (applyError) {
-                                console.error("Google signup referral error:", applyError);
-                                showToast(applyError.message || "Failed to apply referral code.", 'error');
-                            }
-                        }
-                        
-                        showToast("Account created successfully with Google!", 'success');
-                    } else {
-                        showToast("Welcome back!", 'success');
+        function shouldFallbackToRedirect(error) {
+            const code = error?.code || '';
+            return code === 'auth/popup-blocked' || code === 'auth/cancelled-popup-request';
+        }
+
+        function generateClientReferralCode(nameValue) {
+            const prefix = (nameValue || 'TEC').substring(0, 3).toUpperCase().replace(/[^A-Z]/g, 'TEC');
+            const randomNum = Math.floor(10000 + Math.random() * 90000);
+            return `${prefix}${randomNum}`;
+        }
+
+        async function ensureGoogleUserProfile(user, mode, enteredReferralCode = '') {
+            const userRef = db.collection("users").doc(user.uid);
+            const userDoc = await userRef.get();
+
+            if (!userDoc.exists) {
+                const displayName = user.displayName || user.email.split('@')[0];
+                const generatedReferralCode = generateClientReferralCode(displayName);
+
+                await userRef.set({
+                    username: displayName,
+                    phone: '',
+                    email: user.email,
+                    role: 'user',
+                    isBlocked: false,
+                    tournamentsParticipated: 0,
+                    referralCode: generatedReferralCode,
+                    registeredAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    googleAuth: true
+                });
+
+                if (mode === 'signup' && enteredReferralCode) {
+                    try {
+                        await applyReferralForNewUser(user.uid, enteredReferralCode);
+                        showToast("Referral code applied successfully!", 'success');
+                    } catch (applyError) {
+                        console.error("Google signup referral error:", applyError);
+                        showToast(applyError.message || "Failed to apply referral code.", 'error');
                     }
-                    
+                }
+
+                showToast("Account created successfully with Google!", 'success');
+            } else {
+                showToast(mode === 'signup' ? "Welcome back!" : "Google login successful!", 'success');
+            }
+        }
+
+        async function startGoogleAuth(mode) {
+            const isSignup = mode === 'signup';
+            const buttonId = isSignup ? 'google-signup-btn' : 'google-login-btn';
+            const enteredReferralCode = isSignup ? (document.getElementById('signup-referral-code')?.value.trim() || '') : '';
+
+            sessionStorage.setItem(GOOGLE_AUTH_MODE_KEY, mode);
+            if (isSignup) {
+                sessionStorage.setItem(GOOGLE_AUTH_REFERRAL_KEY, enteredReferralCode);
+            } else {
+                sessionStorage.removeItem(GOOGLE_AUTH_REFERRAL_KEY);
+            }
+
+            setButtonLoading(buttonId, true);
+            const provider = new firebase.auth.GoogleAuthProvider();
+
+            try {
+                const result = await auth.signInWithPopup(provider);
+                const user = result?.user;
+                if (user) {
+                    await ensureGoogleUserProfile(user, mode, enteredReferralCode);
                     document.getElementById('professional-auth-section').style.display = 'none';
                     document.getElementById('loading-screen').style.display = 'flex';
                 }
             } catch (error) {
-                console.error("Google signup error:", error);
-                let errorMessage = error.message;
-                
-                if (error.code === 'auth/popup-closed-by-user') {
-                    showToast("Sign up cancelled", 'info');
-                } else if (error.code === 'auth/popup-blocked') {
-                    showToast("Please enable popups for this website", 'error');
+                console.error("Google auth error:", error);
+                if (shouldFallbackToRedirect(error)) {
+                    try {
+                        showToast("Popup blocked. Redirecting to Google sign-in...", 'info');
+                        await auth.signInWithRedirect(provider);
+                        return;
+                    } catch (redirectError) {
+                        console.error("Google redirect error:", redirectError);
+                        showToast(getGoogleAuthErrorMessage(redirectError), 'error');
+                    }
+                } else if (error.code === 'auth/popup-closed-by-user') {
+                    showToast(mode === 'signup' ? "Sign up cancelled" : "Login cancelled", 'info');
                 } else {
-                    showToast("Google Sign Up Error: " + errorMessage, 'error');
+                    showToast(getGoogleAuthErrorMessage(error), 'error');
                 }
             } finally {
+                setButtonLoading(buttonId, false);
+            }
+        }
+
+        async function handleGoogleSignUp() {
+            await startGoogleAuth('signup');
+        }
+
+        async function handleGoogleLogin() {
+            await startGoogleAuth('login');
+        }
+
+        async function handleGoogleRedirectResult() {
+            try {
+                const result = await auth.getRedirectResult();
+                const user = result.user;
+
+                if (user) {
+                    const mode = sessionStorage.getItem(GOOGLE_AUTH_MODE_KEY) || 'login';
+                    const referralCode = sessionStorage.getItem(GOOGLE_AUTH_REFERRAL_KEY) || '';
+                    await ensureGoogleUserProfile(user, mode, referralCode);
+                    document.getElementById('professional-auth-section').style.display = 'none';
+                    document.getElementById('loading-screen').style.display = 'flex';
+                }
+            } catch (error) {
+                console.error("Google redirect result error:", error);
+                if (error.code) {
+                    showToast(getGoogleAuthErrorMessage(error), 'error');
+                }
+            } finally {
+                sessionStorage.removeItem(GOOGLE_AUTH_MODE_KEY);
+                sessionStorage.removeItem(GOOGLE_AUTH_REFERRAL_KEY);
+                setButtonLoading('google-login-btn', false);
                 setButtonLoading('google-signup-btn', false);
             }
         }
 
-        async function handleGoogleLogin() {
-            try {
-                setButtonLoading('google-login-btn', true);
-
-                const provider = new firebase.auth.GoogleAuthProvider();
-                const result = await auth.signInWithPopup(provider);
-                const user = result.user;
-                
-                if (user) {
-                    const userDoc = await db.collection("users").doc(user.uid).get();
-                    
-                    if (!userDoc.exists) {
-                        const displayName = user.displayName || user.email.split('@')[0];
-                        
-                        const prefix = (displayName || 'TEC').substring(0, 3).toUpperCase().replace(/[^A-Z]/g, 'TEC');
-                        const randomNum = Math.floor(10000 + Math.random() * 90000); 
-                        const generatedReferralCode = `${prefix}${randomNum}`;
-                        
-                        await db.collection("users").doc(user.uid).set({
-                            username: displayName,
-                            phone: '',
-                            email: user.email,
-                            role: 'user',
-                            isBlocked: false,
-                            tournamentsParticipated: 0,
-                            referralCode: generatedReferralCode,
-                            registeredAt: firebase.firestore.FieldValue.serverTimestamp(),
-                            googleAuth: true
-                        });
-                        showToast("Account created successfully with Google!", 'success');
-                    } else {
-                        showToast("Google login successful!", 'success');
-                    }
-                    
-                    document.getElementById('professional-auth-section').style.display = 'none';
-                    document.getElementById('loading-screen').style.display = 'flex';
-                }
-            } catch (error) {
-                console.error("Google login error:", error);
-                let errorMessage = error.message;
-                
-                if (error.code === 'auth/popup-closed-by-user') {
-                    showToast("Login cancelled", 'info');
-                } else if (error.code === 'auth/popup-blocked') {
-                    showToast("Please enable popups for this website", 'error');
-                } else {
-                    showToast("Google Login Error: " + errorMessage, 'error');
-                }
-            } finally {
-                setButtonLoading('google-login-btn', false);
-            }
-        }
+        handleGoogleRedirectResult();
 
         function showLogoutConfirmation() {
             if (confirm("Are you sure you want to logout?")) {
