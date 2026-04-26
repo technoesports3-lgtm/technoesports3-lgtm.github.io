@@ -1654,11 +1654,14 @@
                 <div class="sidebar-menu-item" onclick="showSection('tournaments-section')" id="tournaments-menu-item" style="display: none;">
                     <span class="menu-icon-symbol"><i class="fas fa-gamepad"></i></span> Tournaments
                 </div>
-                <div class="sidebar-menu-item" onclick="showSection('application-verification-section')" id="applications-menu-item" style="display: none;">
-                    <span class="menu-icon-symbol"><i class="fas fa-clipboard-check"></i></span> Verify Applications
-                </div>
                 <div class="sidebar-menu-item" onclick="showSection('registered-users-section')" id="view-menu-item" style="display: none;">
                     <span class="menu-icon-symbol"><i class="fas fa-list-alt"></i></span> View Registrations
+                </div>
+                <div class="sidebar-menu-item" onclick="showSection('prize-distribution-section')" id="prize-menu-item" style="display: none;">
+                    <span class="menu-icon-symbol"><i class="fas fa-trophy"></i></span> Prize Distribution
+                </div>
+                <div class="sidebar-menu-item" onclick="showSection('match-results-section')" id="match-results-menu-item" style="display: none;">
+                    <span class="menu-icon-symbol"><i class="fas fa-list-check"></i></span> Match Results
                 </div>
                 <div class="sidebar-menu-item" onclick="showLogoutConfirmation()">
                     <span class="menu-icon-symbol"><i class="fas fa-sign-out-alt"></i></span> Logout
@@ -1695,13 +1698,18 @@
                             </div>
                             <div class="stat-card">
                                 <div class="stat-icon"><i class="fas fa-clipboard-list"></i></div>
-                                <div class="stat-value" id="pending-applications">0</div>
-                                <div class="stat-label">PENDING APPS</div>
+                                <div class="stat-value" id="total-revenue">₹0.00</div>
+                                <div class="stat-label">TOTAL REVENUE</div>
                             </div>
                             <div class="stat-card">
                                 <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
                                 <div class="stat-value" id="my-performance">0%</div>
                                 <div class="stat-label">PERFORMANCE</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon"><i class="fas fa-coins"></i></div>
+                                <div class="stat-value" id="total-prizes-distributed">₹0.00</div>
+                                <div class="stat-label">TOTAL PRIZES DISTRIBUTED</div>
                             </div>
                         </div>
 
@@ -1716,11 +1724,6 @@
                         <div class="quick-actions">
                             <div class="quick-actions-title">Quick Actions</div>
                             <div class="actions-grid">
-                                <a class="action-card" onclick="showSection('application-verification-section')" id="quick-verify">
-                                    <div class="action-icon"><i class="fas fa-clipboard-check"></i></div>
-                                    <div class="action-title">Verify Applications</div>
-                                    <div class="action-subtitle">Review and approve applications</div>
-                                </a>
                                 <a class="action-card" onclick="showSection('tournaments-section')" id="quick-tournament">
                                     <div class="action-icon"><i class="fas fa-plus-circle"></i></div>
                                     <div class="action-title">Create Tournament</div>
@@ -1731,6 +1734,16 @@
                                     <div class="action-title">Manage Users</div>
                                     <div class="action-subtitle">User management tools</div>
                                 </a>
+                            </div>
+                        </div>
+                        <div class="content-card" style="margin-top: 15px;">
+                            <div class="content-header">
+                                <h3>Recent Activity</h3>
+                            </div>
+                            <div class="content-body">
+                                <div id="recent-activity-log">
+                                    <p style="color:#888;">No recent activity yet.</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1832,12 +1845,13 @@
                                         <th>Phone</th>
                                         <th>Email</th>
                                         <th>Tournaments</th>
+                                        <th>Wallet Balance</th>
                                         <th>Status</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody id="users-table-body">
-                                    <tr><td colspan="6">Loading users...</td></tr>
+                                    <tr><td colspan="7">Loading users...</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -1900,6 +1914,10 @@
                                                 <label>CONDUCTED TIME (12-HOUR)</label>
                                                 <input type="time" id="solo-time" required>
                                             </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>REGISTRATION END TIME</label>
+                                            <input type="datetime-local" id="solo-registration-end-time">
                                         </div>
                                         
                                         <div class="form-group">
@@ -2019,6 +2037,10 @@
                                                 <input type="time" id="duo-time" required>
                                             </div>
                                         </div>
+                                        <div class="form-group">
+                                            <label>REGISTRATION END TIME</label>
+                                            <input type="datetime-local" id="duo-registration-end-time">
+                                        </div>
                                         
                                         <div class="form-group">
                                             <label>TOURNAMENT DETAILS</label>
@@ -2135,6 +2157,10 @@
                                                 <input type="time" id="squad-time" required>
                                             </div>
                                         </div>
+                                        <div class="form-group">
+                                            <label>REGISTRATION END TIME</label>
+                                            <input type="datetime-local" id="squad-registration-end-time">
+                                        </div>
                                         
                                         <div class="form-group">
                                             <label>TOURNAMENT DETAILS</label>
@@ -2210,23 +2236,6 @@
                     </div>
                 </section>
 
-                <!-- Application Verification Section -->
-                <section id="application-verification-section" class="section">
-                    <div class="content-card">
-                        <div class="content-header">
-                            <h3>Application Verification</h3>
-                        </div>
-                        <div class="content-body">
-                            <div style="color: #ffc700; background: rgba(255, 199, 0, 0.1); padding: 10px; border-radius: 6px; margin-bottom: 15px;">
-                                <i class="fas fa-exclamation-triangle"></i> Verify and approve/reject tournament registration applications.
-                            </div>
-                            <div id="pending-applications-list">
-                                <p style="text-align: center; color: #888; padding: 30px;">Loading pending applications...</p>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
                 <!-- Registered Users Section -->
                 <section id="registered-users-section" class="section">
                     <div class="content-card">
@@ -2257,6 +2266,103 @@
                                     <p>Please select a tournament from the dropdown above.</p>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Prize Distribution Section -->
+                <section id="prize-distribution-section" class="section">
+                    <div class="content-card">
+                        <div class="content-header">
+                            <h3>Prize Distribution</h3>
+                        </div>
+                        <div class="content-body">
+                            <div style="color: #00a8ff; background: rgba(0, 168, 255, 0.1); border: 1px solid rgba(0, 168, 255, 0.35); padding: 10px; border-radius: 6px; margin-bottom: 15px;">
+                                <i class="fas fa-info-circle"></i> Step 1: Select tournament. Step 2: Enter kills/positions. Step 3: Configure place prizes. Step 4: Preview and distribute.
+                            </div>
+
+                            <div class="form-group">
+                                <label>Select Tournament</label>
+                                <select id="prize-tournament-selection" onchange="loadPrizeDistributionPlayers()">
+                                    <option value="">-- Select a Tournament --</option>
+                                </select>
+                            </div>
+                            <div id="prize-tournament-details" style="display:none; margin-bottom:12px; color:#ccc; background: rgba(0,0,0,0.25); border:1px solid #333; border-radius:8px; padding:10px;"></div>
+
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px;">
+                                <div class="form-group">
+                                    <label>1st Prize (₹)</label>
+                                    <input type="number" id="first-prize-amount" min="0" value="0" oninput="recalculatePrizePreview()">
+                                </div>
+                                <div class="form-group">
+                                    <label>2nd Prize (₹)</label>
+                                    <input type="number" id="second-prize-amount" min="0" value="0" oninput="recalculatePrizePreview()">
+                                </div>
+                                <div class="form-group">
+                                    <label>3rd Prize (₹)</label>
+                                    <input type="number" id="third-prize-amount" min="0" value="0" oninput="recalculatePrizePreview()">
+                                </div>
+                            </div>
+                            <div style="margin-bottom:12px; color:#aaa;">
+                                Per Kill Prize: <strong id="per-kill-readonly" style="color:#00a8ff;">₹0.00</strong>
+                            </div>
+
+                            <div id="prize-distribution-players-container">
+                                <div class="empty-state">
+                                    <i class="fas fa-trophy"></i>
+                                    <h3>No Tournament Selected</h3>
+                                    <p>Select a tournament to load approved players.</p>
+                                </div>
+                            </div>
+
+                            <div id="prize-preview-container" style="display: none; margin-top: 15px; background: rgba(0,0,0,0.25); border: 1px solid #333; border-radius: 8px; padding: 12px;">
+                                <h4 style="margin-top: 0; color: #00a8ff;">Prize Preview</h4>
+                                <div id="prize-preview-list" style="margin-bottom: 10px;"></div>
+                                <div style="display: flex; justify-content: space-between; font-size: 1.05em;">
+                                    <strong>Total Distribution</strong>
+                                    <strong id="prize-preview-total" style="color: #00a8ff;">₹0.00</strong>
+                                </div>
+                            </div>
+                            <button id="preview-prizes-btn" onclick="recalculatePrizePreview()" style="width:100%; margin-top:12px; background: #333;">
+                                <i class="fas fa-eye"></i> Preview Prizes
+                            </button>
+
+                            <button id="distribute-prizes-btn" onclick="distributePrizes()" style="width: 100%; margin-top: 15px; background: linear-gradient(135deg, #00a8ff 0%, #0088cc 100%); display: none;">
+                                <i class="fas fa-coins"></i> Distribute Now
+                            </button>
+
+                            <div id="distribution-result-container" style="display:none; margin-top:15px; background: rgba(38,162,105,0.1); border:1px solid #26a269; border-radius:8px; padding:12px;"></div>
+                        </div>
+                    </div>
+                </section>
+                <section id="match-results-section" class="section">
+                    <div class="content-card">
+                        <div class="content-header">
+                            <h3>Match Results</h3>
+                        </div>
+                        <div class="content-body">
+                            <div style="color: #00a8ff; background: rgba(0, 168, 255, 0.1); border: 1px solid rgba(0, 168, 255, 0.35); padding: 10px; border-radius: 6px; margin-bottom: 15px;">
+                                <i class="fas fa-info-circle"></i> Quick entry for kills and positions, then calculate and distribute prizes.
+                            </div>
+                            <div class="form-group">
+                                <label>Select Tournament</label>
+                                <select id="match-results-tournament-selection" onchange="loadMatchResultsPlayers()">
+                                    <option value="">-- Select a Tournament --</option>
+                                </select>
+                            </div>
+                            <div id="match-results-players-container">
+                                <div class="empty-state">
+                                    <i class="fas fa-list-check"></i>
+                                    <h3>No Tournament Selected</h3>
+                                    <p>Please select a tournament to continue.</p>
+                                </div>
+                            </div>
+                            <button onclick="recalculatePrizePreview()" style="width:100%; margin-top:12px; background:#333;">
+                                <i class="fas fa-calculator"></i> Calculate & Preview
+                            </button>
+                            <button onclick="distributePrizes()" style="width:100%; margin-top:12px;">
+                                <i class="fas fa-check-circle"></i> Confirm & Distribute
+                            </button>
                         </div>
                     </div>
                 </section>
@@ -2444,6 +2550,32 @@
         let applicationListener = null;
         let userListener = null;
         let authStateChecked = false;
+        let prizeDistributionPlayers = [];
+        let selectedPrizeTournament = null;
+        let recentActivity = [];
+        const BACKEND_BASE_URL = "https://techno-esports-backend.onrender.com";
+
+        function logRecentActivity(action) {
+            const time = new Date().toLocaleString();
+            recentActivity.unshift({ action, time });
+            recentActivity = recentActivity.slice(0, 5);
+            renderRecentActivity();
+        }
+
+        function renderRecentActivity() {
+            const container = document.getElementById('recent-activity-log');
+            if (!container) return;
+            if (!recentActivity.length) {
+                container.innerHTML = '<p style="color:#888;">No recent activity yet.</p>';
+                return;
+            }
+            container.innerHTML = recentActivity.map(item => `
+                <div style="padding:8px 0; border-bottom:1px solid #333;">
+                    <div style="color:#fff;">${item.action}</div>
+                    <div style="color:#888; font-size:0.85em;">${item.time}</div>
+                </div>
+            `).join('');
+        }
 
         // --- Toast Notification Functions ---
         function showToast(message, type = 'info', title = 'Notification') {
@@ -2842,30 +2974,33 @@
         }
         
         function updateMenuPermissions() {
+            const usersMenu = document.getElementById('users-menu-item');
+            const quickUsers = document.getElementById('quick-users');
+            const tournamentsMenu = document.getElementById('tournaments-menu-item');
+            const quickTournament = document.getElementById('quick-tournament');
+            const viewMenu = document.getElementById('view-menu-item');
+            const prizeMenu = document.getElementById('prize-menu-item');
+            const matchResultsMenu = document.getElementById('match-results-menu-item');
+
             if (hasPermissions.manageUsers) {
-                document.getElementById('users-menu-item').style.display = 'flex';
-                document.getElementById('quick-users').style.display = 'block';
+                if (usersMenu) usersMenu.style.display = 'flex';
+                if (quickUsers) quickUsers.style.display = 'block';
             }
             if (hasPermissions.manageTournaments) {
-                document.getElementById('tournaments-menu-item').style.display = 'flex';
-                document.getElementById('quick-tournament').style.display = 'block';
-            }
-            if (hasPermissions.verifyApplications) {
-                document.getElementById('applications-menu-item').style.display = 'flex';
-                document.getElementById('quick-verify').style.display = 'block';
+                if (tournamentsMenu) tournamentsMenu.style.display = 'flex';
+                if (quickTournament) quickTournament.style.display = 'block';
             }
             if (hasPermissions.viewReports) {
-                document.getElementById('view-menu-item').style.display = 'flex';
+                if (viewMenu) viewMenu.style.display = 'flex';
+                if (prizeMenu) prizeMenu.style.display = 'flex';
+                if (matchResultsMenu) matchResultsMenu.style.display = 'flex';
             }
             
-            if (!hasPermissions.verifyApplications) {
-                document.getElementById('quick-verify').style.display = 'none';
-            }
             if (!hasPermissions.manageTournaments) {
-                document.getElementById('quick-tournament').style.display = 'none';
+                if (quickTournament) quickTournament.style.display = 'none';
             }
             if (!hasPermissions.manageUsers) {
-                document.getElementById('quick-users').style.display = 'none';
+                if (quickUsers) quickUsers.style.display = 'none';
             }
         }
 
@@ -2895,33 +3030,6 @@
                 }, (error) => {
                     console.error('Tournament listener error:', error);
                 });
-            
-            if (hasPermissions.verifyApplications) {
-                applicationListener = db.collection("tournament_registrations")
-                    .where("status", "==", "pending")
-                    .onSnapshot((snapshot) => {
-                        try {
-                            pendingApplications = snapshot.docs.map(doc => ({
-                                id: doc.id,
-                                ...doc.data()
-                            }));
-                            
-                            document.getElementById('pending-applications').textContent = pendingApplications.length;
-                            
-                            if (document.getElementById('application-verification-section').style.display === 'block') {
-                                renderPendingApplications();
-                            }
-                            
-                            if (snapshot.docChanges().length > 0) {
-                                showToast("New applications available!", 'info', 'New Applications');
-                            }
-                        } catch (e) {
-                            console.error('Error processing applications:', e);
-                        }
-                    }, (error) => {
-                        console.error('Application listener error:', error);
-                    });
-            }
             
             if (hasPermissions.manageUsers) {
                 userListener = db.collection("users")
@@ -2961,20 +3069,31 @@
                 tournaments.sort((a, b) => (b.createdAt?.toDate?.() || b.createdAt || 0) - (a.createdAt?.toDate?.() || a.createdAt || 0));
                 document.getElementById('total-tournaments').textContent = tournaments.length;
                 
-                if (hasPermissions.verifyApplications) {
-                    const applicationsSnapshot = await db.collection("tournament_registrations")
-                        .where("status", "==", "pending")
-                        .get();
-                    pendingApplications = applicationsSnapshot.docs.map(doc => ({
-                        id: doc.id,
-                        ...doc.data()
-                    }));
-                    document.getElementById('pending-applications').textContent = pendingApplications.length;
-                }
+                const registrationsSnapshot = await db.collection("tournament_registrations").get();
+                const registrations = registrationsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                const tournamentFeeMap = new Map(tournaments.map(t => [t.id, Number(t.entryFee || 0)]));
+                const revenue = registrations.reduce((sum, reg) => {
+                    if (reg.status === 'approved' || reg.paymentMethod === 'wallet') {
+                        return sum + Number(tournamentFeeMap.get(reg.tournamentId) || 0);
+                    }
+                    return sum;
+                }, 0);
+                const revenueEl = document.getElementById('total-revenue');
+                if (revenueEl) revenueEl.textContent = `₹${revenue.toFixed(2)}`;
+
+                const walletTxSnapshot = await db.collection("wallet_transactions").get();
+                const totalPrizes = walletTxSnapshot.docs.reduce((sum, doc) => {
+                    const tx = doc.data() || {};
+                    const isTournamentPrize = (tx.type || '').toLowerCase() === 'credit' && !!tx.tournamentId;
+                    return isTournamentPrize ? sum + Number(tx.amount || 0) : sum;
+                }, 0);
+                const prizesEl = document.getElementById('total-prizes-distributed');
+                if (prizesEl) prizesEl.textContent = `₹${totalPrizes.toFixed(2)}`;
                 
                 populateTournamentSelection();
                 
                 updateProfileInfo();
+                renderRecentActivity();
                 
             } catch (error) {
                 console.error("Error loading dashboard data:", error);
@@ -3055,10 +3174,15 @@
             
             if (sectionId === 'manage-users-section' && hasPermissions.manageUsers) {
                 renderUsersTable();
-            } else if (sectionId === 'application-verification-section' && hasPermissions.verifyApplications) {
-                renderPendingApplications();
             } else if (sectionId === 'tournaments-section' && hasPermissions.manageTournaments) {
                 renderTournaments();
+            } else if (sectionId === 'registered-users-section' && hasPermissions.viewReports) {
+                populateTournamentSelection();
+            } else if (sectionId === 'prize-distribution-section' && hasPermissions.viewReports) {
+                populateTournamentSelection();
+                resetPrizeDistributionSection();
+            } else if (sectionId === 'match-results-section' && hasPermissions.viewReports) {
+                populateTournamentSelection();
             }
         }
         
@@ -3118,6 +3242,7 @@
                     imageUrl: imageUrl,
                     conductingDate: document.getElementById('solo-date').value,
                     conductingTime: document.getElementById('solo-time').value,
+                    registrationEndTime: document.getElementById('solo-registration-end-time').value || null,
                     details: document.getElementById('solo-details').value.trim(),
                     maxParticipants: parseInt(document.getElementById('solo-max-players').value),
                     entryFee: parseInt(document.getElementById('solo-entry-fee').value),
@@ -3141,6 +3266,7 @@
                     imageUrl: imageUrl,
                     conductingDate: document.getElementById('duo-date').value,
                     conductingTime: document.getElementById('duo-time').value,
+                    registrationEndTime: document.getElementById('duo-registration-end-time').value || null,
                     details: document.getElementById('duo-details').value.trim(),
                     maxParticipants: parseInt(document.getElementById('duo-max-teams').value),
                     entryFee: parseInt(document.getElementById('duo-entry-fee').value),
@@ -3164,6 +3290,7 @@
                     imageUrl: imageUrl,
                     conductingDate: document.getElementById('squad-date').value,
                     conductingTime: document.getElementById('squad-time').value,
+                    registrationEndTime: document.getElementById('squad-registration-end-time').value || null,
                     details: document.getElementById('squad-details').value.trim(),
                     maxParticipants: parseInt(document.getElementById('squad-max-squads').value),
                     entryFee: parseInt(document.getElementById('squad-entry-fee').value),
@@ -3219,6 +3346,7 @@
                 await db.collection("tournaments").add(formData);
                 sendPushNotification("New Tournament!", "New Match: " + formData.title + " is live! Join fast.");
                 showToast(`${category} tournament created successfully!`, 'success');
+                logRecentActivity(`Created ${category.toUpperCase()} tournament: ${formData.title}`);
                 
                 await updateStaffPerformance(1, 0, 0);
                 
@@ -3234,6 +3362,8 @@
             document.getElementById(`${category}-title`).value = '';
             document.getElementById(`${category}-image-url`).value = '';
             document.getElementById(`${category}-details`).value = '';
+            const registrationEndInput = document.getElementById(`${category}-registration-end-time`);
+            if (registrationEndInput) registrationEndInput.value = '';
             
             if (category === 'solo') {
                 document.getElementById('solo-per-kill').value = '';
@@ -3549,7 +3679,7 @@
             tbody.innerHTML = '';
 
             if (allUsers.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6">No users found.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7">No users found.</td></tr>';
                 return;
             }
 
@@ -3574,10 +3704,44 @@
                     <td>${user.phone || 'N/A'}</td>
                     <td>${user.email}</td>
                     <td>${user.tournamentsParticipated || 0}</td>
+                    <td>₹${Number(user.walletBalance || 0).toFixed(2)}</td>
                     <td>${statusBadge}</td>
-                    <td>${blockButton}</td>
+                    <td>
+                        ${blockButton}
+                        <button onclick="addWalletCredit('${user.id}')" style="background:#26a269; padding:6px 12px; font-size:0.8em; margin-left:6px;">
+                            <i class="fas fa-plus-circle"></i> Add ₹
+                        </button>
+                    </td>
                 `;
             });
+        }
+
+        async function addWalletCredit(userId) {
+            if (!hasPermissions.manageUsers) {
+                showToast("You don't have permission to manage users.", 'error');
+                return;
+            }
+            const amountInput = prompt("Enter amount to add to wallet (₹):");
+            if (amountInput === null) return;
+            const amount = Number(amountInput);
+            if (!Number.isFinite(amount) || amount <= 0) {
+                showToast("Please enter a valid amount.", 'error');
+                return;
+            }
+
+            try {
+                const userRef = db.collection("users").doc(userId);
+                await userRef.update({
+                    walletBalance: FieldValue.increment(amount),
+                    updatedAt: FieldValue.serverTimestamp()
+                });
+                showToast(`₹${amount.toFixed(2)} added to wallet.`, 'success');
+                logRecentActivity(`Manual wallet credit of ₹${amount.toFixed(2)} completed`);
+                await updateStaffPerformance(0, 1, 0);
+            } catch (error) {
+                console.error("Error adding wallet credit:", error);
+                showToast("Failed to update wallet balance.", 'error');
+            }
         }
 
         async function toggleUserBlock(userId, currentBlockedStatus) {
@@ -3598,6 +3762,7 @@
                         await updateStaffPerformance(0, 1, 0);
                         
                         showToast(`User ${newBlockedStatus ? 'blocked' : 'unblocked'} successfully!`, 'success');
+                        logRecentActivity(`User ${newBlockedStatus ? 'blocked' : 'unblocked'} successfully`);
                     } catch (error) {
                         console.error("Error toggling user block status:", error);
                         showToast("Error updating user status.", 'error');
@@ -3700,7 +3865,7 @@
                             verifiedAt: FieldValue.serverTimestamp(),
                             verifiedBy: currentStaff.uid,
                             verifiedByName: staffData.name
-                        }); // Correctly closing the update object
+                        });
                         
                         sendPushNotification("Approved!", "Admin verified your payment. You are in!");
                         const tournament = tournaments.find(t => t.id === application.tournamentId);
@@ -3708,13 +3873,7 @@
                             await db.collection("tournaments").doc(tournament.id).update({
                                 participants: (tournament.participants || 0) + 1,
                                 updatedAt: FieldValue.serverTimestamp()
-                }); // Correctly closing the update object
-                
-                if(newVisibility) { 
-                    sendPushNotification("Credentials Released!", "Room ID & Password for the match are now visible."); 
-                }
-
-                showToast(`Credentials ${newVisibility ? 'shown' : 'hidden'} to users!`, 'success');
+                            });
                             const userDoc = await db.collection("users").doc(application.userId).get();
                             if (userDoc.exists) {
                                 const userData = userDoc.data();
@@ -3728,6 +3887,7 @@
                         await updateStaffPerformance(0, 0, 1);
                         
                         showToast("Application approved successfully!", 'success');
+                        logRecentActivity("Approved tournament application");
                         
                     } catch (error) {
                         console.error("Error approving application:", error);
@@ -3805,14 +3965,376 @@
         // --- Registered Users Section ---
         function populateTournamentSelection() {
             const select = document.getElementById('tournament-selection');
-            select.innerHTML = '<option value="">-- Select a Tournament --</option>';
+            if (select) {
+                select.innerHTML = '<option value="">-- Select a Tournament --</option>';
+            }
+            const prizeSelect = document.getElementById('prize-tournament-selection');
+            if (prizeSelect) {
+                prizeSelect.innerHTML = '<option value="">-- Select a Tournament --</option>';
+            }
+            const matchSelect = document.getElementById('match-results-tournament-selection');
+            if (matchSelect) {
+                matchSelect.innerHTML = '<option value="">-- Select a Tournament --</option>';
+            }
             
             tournaments.forEach(tournament => {
                 const option = document.createElement('option');
                 option.value = tournament.id;
                 option.textContent = `${tournament.title} (${tournament.category.toUpperCase()}) - ${tournament.tournamentId || ''}`;
-                select.appendChild(option);
+                if (select) {
+                    select.appendChild(option);
+                }
+                if (prizeSelect) {
+                    const prizeOption = document.createElement('option');
+                    prizeOption.value = tournament.id;
+                    prizeOption.textContent = option.textContent;
+                    prizeSelect.appendChild(prizeOption);
+                }
+                if (matchSelect) {
+                    const matchOption = document.createElement('option');
+                    matchOption.value = tournament.id;
+                    matchOption.textContent = option.textContent;
+                    matchSelect.appendChild(matchOption);
+                }
             });
+        }
+
+        function resetPrizeDistributionSection() {
+            prizeDistributionPlayers = [];
+            selectedPrizeTournament = null;
+
+            const playersContainer = document.getElementById('prize-distribution-players-container');
+            const previewContainer = document.getElementById('prize-preview-container');
+            const resultContainer = document.getElementById('distribution-result-container');
+            const distributeBtn = document.getElementById('distribute-prizes-btn');
+            const detailsEl = document.getElementById('prize-tournament-details');
+            const perKillReadonly = document.getElementById('per-kill-readonly');
+
+            if (playersContainer) {
+                playersContainer.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-trophy"></i>
+                        <h3>No Tournament Selected</h3>
+                        <p>Select a tournament to load approved players.</p>
+                    </div>
+                `;
+            }
+            if (previewContainer) previewContainer.style.display = 'none';
+            if (resultContainer) {
+                resultContainer.style.display = 'none';
+                resultContainer.innerHTML = '';
+            }
+            if (distributeBtn) distributeBtn.style.display = 'none';
+            if (detailsEl) {
+                detailsEl.style.display = 'none';
+                detailsEl.innerHTML = '';
+            }
+            if (perKillReadonly) perKillReadonly.textContent = '₹0.00';
+        }
+
+        async function loadPrizeDistributionPlayers() {
+            if (!hasPermissions.viewReports) {
+                showToast("You don't have permission to distribute prizes.", 'error');
+                return;
+            }
+
+            const tournamentId = document.getElementById('prize-tournament-selection').value;
+            const playersContainer = document.getElementById('prize-distribution-players-container');
+            const distributeBtn = document.getElementById('distribute-prizes-btn');
+            const resultContainer = document.getElementById('distribution-result-container');
+
+            if (resultContainer) {
+                resultContainer.style.display = 'none';
+                resultContainer.innerHTML = '';
+            }
+
+            if (!tournamentId) {
+                resetPrizeDistributionSection();
+                return;
+            }
+
+            selectedPrizeTournament = tournaments.find(t => t.id === tournamentId) || null;
+            playersContainer.innerHTML = '<p style="text-align:center; color:#888; padding:20px;">Loading approved players...</p>';
+            const detailsEl = document.getElementById('prize-tournament-details');
+            const perKillReadonly = document.getElementById('per-kill-readonly');
+
+            if (selectedPrizeTournament && detailsEl) {
+                const perKillAmount = Number(selectedPrizeTournament.perKill || 0);
+                detailsEl.style.display = 'block';
+                detailsEl.innerHTML = `
+                    <strong style="color:#00a8ff;">${selectedPrizeTournament.title}</strong><br>
+                    Category: ${String(selectedPrizeTournament.category || '').toUpperCase()} |
+                    Entry Fee: ₹${Number(selectedPrizeTournament.entryFee || 0).toFixed(2)} |
+                    Per Kill: ₹${perKillAmount.toFixed(2)}
+                `;
+                if (perKillReadonly) perKillReadonly.textContent = `₹${perKillAmount.toFixed(2)}`;
+            }
+
+            try {
+                const registrationsSnapshot = await db.collection("tournament_registrations")
+                    .where("tournamentId", "==", tournamentId)
+                    .where("status", "==", "approved")
+                    .get();
+
+                const registrations = registrationsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                const flattenedPlayers = [];
+
+                registrations.forEach((reg, registrationIndex) => {
+                    if (Array.isArray(reg.playerDetails) && reg.playerDetails.length > 0) {
+                        reg.playerDetails.forEach((player, playerIndex) => {
+                            flattenedPlayers.push({
+                                key: `${reg.id}_${playerIndex}`,
+                                registrationId: reg.id,
+                                userId: reg.userId || '',
+                                name: player?.name || reg.name || `Player ${registrationIndex + 1}`,
+                                freeFireId: player?.freeFireId || 'N/A',
+                                kills: 0,
+                                position: 'none',
+                                amount: 0
+                            });
+                        });
+                    } else {
+                        flattenedPlayers.push({
+                            key: `${reg.id}_0`,
+                            registrationId: reg.id,
+                            userId: reg.userId || '',
+                            name: reg.name || `Player ${registrationIndex + 1}`,
+                            freeFireId: 'N/A',
+                            kills: 0,
+                            position: 'none',
+                            amount: 0
+                        });
+                    }
+                });
+
+                prizeDistributionPlayers = flattenedPlayers;
+                renderPrizeDistributionPlayers();
+                distributeBtn.style.display = flattenedPlayers.length > 0 ? 'block' : 'none';
+                recalculatePrizePreview();
+            } catch (error) {
+                console.error("Error loading prize distribution players:", error);
+                playersContainer.innerHTML = '<p style="color: #d72638; text-align:center; padding:20px;">Failed to load players.</p>';
+            }
+        }
+
+        function renderPrizeDistributionPlayers() {
+            const container = document.getElementById('prize-distribution-players-container');
+            if (!container) return;
+
+            if (!prizeDistributionPlayers.length) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-user-slash"></i>
+                        <h3>No Approved Players</h3>
+                        <p>No approved players found for this tournament.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const perKillAmount = Number(selectedPrizeTournament?.perKill || 0);
+            const perKillText = Number.isFinite(perKillAmount) ? perKillAmount : 0;
+
+            container.innerHTML = `
+                <div style="color:#aaa; margin-bottom:10px;">
+                    Players: ${prizeDistributionPlayers.length} | Per Kill: <span style="color:#00a8ff; font-weight:600;">₹${perKillText}</span>
+                </div>
+                <div style="overflow-x:auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Player</th>
+                                <th>FF UID</th>
+                                <th>Kills</th>
+                                <th>Position</th>
+                                <th>Total Prize</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${prizeDistributionPlayers.map((player, idx) => `
+                                <tr>
+                                    <td>${player.name}</td>
+                                    <td>${player.freeFireId}</td>
+                                    <td>
+                                        <input type="number" min="0" value="${player.kills}" onchange="updatePlayerKills(${idx}, this.value)" style="min-width:90px;">
+                                    </td>
+                                    <td>
+                                        <select onchange="updatePlayerPosition(${idx}, this.value)" style="min-width:120px;">
+                                            <option value="none" ${player.position === 'none' ? 'selected' : ''}>None</option>
+                                            <option value="1st" ${player.position === '1st' ? 'selected' : ''}>1st</option>
+                                            <option value="2nd" ${player.position === '2nd' ? 'selected' : ''}>2nd</option>
+                                            <option value="3rd" ${player.position === '3rd' ? 'selected' : ''}>3rd</option>
+                                        </select>
+                                    </td>
+                                    <td style="color:#00a8ff; font-weight:700;">₹${Number(player.amount || 0).toFixed(2)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            const matchContainer = document.getElementById('match-results-players-container');
+            if (matchContainer && document.getElementById('match-results-section')?.style.display === 'block') {
+                matchContainer.innerHTML = container.innerHTML;
+            }
+        }
+
+        function updatePlayerKills(index, killsValue) {
+            const kills = Math.max(0, Number(killsValue || 0));
+            if (!prizeDistributionPlayers[index]) return;
+            prizeDistributionPlayers[index].kills = kills;
+            recalculatePrizePreview();
+        }
+
+        function updatePlayerPosition(index, positionValue) {
+            if (!prizeDistributionPlayers[index]) return;
+            prizeDistributionPlayers[index].position = positionValue || 'none';
+            recalculatePrizePreview();
+        }
+
+        function getPositionPrize(position) {
+            const first = Number(document.getElementById('first-prize-amount')?.value || 0);
+            const second = Number(document.getElementById('second-prize-amount')?.value || 0);
+            const third = Number(document.getElementById('third-prize-amount')?.value || 0);
+            if (position === '1st') return first;
+            if (position === '2nd') return second;
+            if (position === '3rd') return third;
+            return 0;
+        }
+
+        function recalculatePrizePreview() {
+            if (!prizeDistributionPlayers.length) return;
+
+            const perKillAmount = Math.max(0, Number(selectedPrizeTournament?.perKill || 0));
+            const previewContainer = document.getElementById('prize-preview-container');
+            const previewList = document.getElementById('prize-preview-list');
+            const previewTotal = document.getElementById('prize-preview-total');
+
+            const positionTaken = { '1st': null, '2nd': null, '3rd': null };
+            let total = 0;
+            let previewRows = '';
+
+            prizeDistributionPlayers.forEach((player, idx) => {
+                if (player.position !== 'none' && positionTaken[player.position] !== null && positionTaken[player.position] !== idx) {
+                    player.position = 'none';
+                } else if (player.position !== 'none') {
+                    positionTaken[player.position] = idx;
+                }
+
+                const killPrize = Number(player.kills || 0) * perKillAmount;
+                const positionPrize = getPositionPrize(player.position);
+                const totalPrize = killPrize + positionPrize;
+                player.amount = totalPrize;
+                total += totalPrize;
+
+                previewRows += `
+                    <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid #333;">
+                        <span style="color:#ddd;">${player.name} (${player.kills} Kills${player.position && player.position !== 'none' ? `, ${player.position}` : ''})</span>
+                        <span style="color:#00a8ff; font-weight:600;">₹${totalPrize.toFixed(2)}</span>
+                    </div>
+                `;
+            });
+
+            renderPrizeDistributionPlayers();
+
+            previewList.innerHTML = previewRows || '<div style="color:#888;">No prize data</div>';
+            previewTotal.textContent = `₹${total.toFixed(2)}`;
+            previewContainer.style.display = 'block';
+        }
+
+        async function distributePrizes() {
+            if (!selectedPrizeTournament || !prizeDistributionPlayers.length) {
+                showToast("Please select tournament and players first.", 'error');
+                return;
+            }
+
+            const distributeBtn = document.getElementById('distribute-prizes-btn');
+            const resultContainer = document.getElementById('distribution-result-container');
+
+            const winners = prizeDistributionPlayers
+                .filter(player => Number(player.amount || 0) > 0 || Number(player.kills || 0) > 0 || (player.position && player.position !== 'none'))
+                .map(player => ({
+                    userId: player.userId,
+                    amount: Number(player.amount || 0),
+                    position: player.position === '1st' ? 1 : player.position === '2nd' ? 2 : player.position === '3rd' ? 3 : null,
+                    kills: Number(player.kills || 0)
+                }));
+
+            if (!winners.length) {
+                showToast("Add at least kills or winner positions before distributing.", 'error');
+                return;
+            }
+
+            if (winners.some(w => !w.userId)) {
+                showToast("Some players have missing user ID; cannot distribute.", 'error');
+                return;
+            }
+
+            const payload = {
+                tournamentId: selectedPrizeTournament.id,
+                winners
+            };
+
+            const totalAmount = winners.reduce((sum, w) => sum + Number(w.amount || 0), 0);
+            showConfirmationModal(
+                "Confirm Prize Distribution",
+                `Are you sure? This will add money to <strong>${winners.length}</strong> players' wallets.`,
+                async () => {
+                    distributeBtn.disabled = true;
+                    distributeBtn.innerHTML = '<span class="loading-spinner"></span> Distributing...';
+
+                    try {
+                        const response = await fetch(`${BACKEND_BASE_URL}/api/tournament/distribute-prizes`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                        const data = await response.json();
+
+                        if (!response.ok) {
+                            throw new Error(data.message || 'Prize distribution failed.');
+                        }
+
+                        await db.collection("tournaments").doc(selectedPrizeTournament.id).update({
+                            status: 'completed',
+                            updatedAt: FieldValue.serverTimestamp()
+                        });
+
+                        resultContainer.innerHTML = `
+                            <h4 style="margin:0 0 8px 0; color:#26a269;"><i class="fas fa-check-circle"></i> Prizes Distributed Successfully</h4>
+                            <div style="color:#ddd; font-size:0.92em;">
+                                Tournament: <strong>${selectedPrizeTournament.title}</strong><br>
+                                Winners Updated: <strong>${winners.length}</strong><br>
+                                Total Distributed: <strong>₹${totalAmount.toFixed(2)}</strong>
+                            </div>
+                        `;
+                        resultContainer.style.display = 'block';
+                        showToast("Prizes distributed successfully!", 'success');
+                        await sendPushNotification("🏆 Tournament Results!", "🏆 Tournament Results! Check your wallet for prize money!");
+                        logRecentActivity(`Distributed ₹${totalAmount.toFixed(2)} prizes for ${selectedPrizeTournament.title}`);
+                    } catch (error) {
+                        console.error("Error distributing prizes:", error);
+                        showToast(error.message || "Failed to distribute prizes.", 'error');
+                    } finally {
+                        distributeBtn.disabled = false;
+                        distributeBtn.innerHTML = '<i class="fas fa-coins"></i> Distribute Now';
+                    }
+                }
+            );
+        }
+
+        async function loadMatchResultsPlayers() {
+            const matchSelect = document.getElementById('match-results-tournament-selection');
+            const prizeSelect = document.getElementById('prize-tournament-selection');
+            if (!matchSelect || !prizeSelect) return;
+            prizeSelect.value = matchSelect.value;
+            await loadPrizeDistributionPlayers();
+            const container = document.getElementById('match-results-players-container');
+            const source = document.getElementById('prize-distribution-players-container');
+            if (container && source) {
+                container.innerHTML = source.innerHTML;
+            }
         }
         
         async function loadRegisteredUsersForTournament() {
