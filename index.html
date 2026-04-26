@@ -2151,6 +2151,555 @@
                 height: 140px;
             }
         }
+        /* ===== UI Redesign Overrides (HTML/CSS only) ===== */
+        .app-header {
+            background: #111111 !important;
+            border-bottom: 2px solid #ff4655;
+            height: 60px;
+            box-shadow: none;
+        }
+
+        .menu-icon {
+            color: #fff;
+            font-size: 1.05em;
+        }
+
+        .app-name {
+            color: #ff4655;
+            text-shadow: none;
+        }
+
+        .header-wallet-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 70, 85, 0.1);
+            border: 1px solid rgba(255, 70, 85, 0.3);
+            border-radius: 20px;
+            padding: 4px 10px;
+            color: #ff4655;
+            font-size: 0.8em;
+            font-weight: 700;
+        }
+
+        .header-wallet-chip i {
+            font-size: 0.95em;
+        }
+
+        .refresh-button {
+            background: transparent;
+            border: 1px solid #333;
+            color: #ff4655;
+            border-radius: 20px;
+            padding: 8px 10px;
+        }
+
+        .refresh-button:hover {
+            background: rgba(255, 70, 85, 0.08);
+            transform: none;
+        }
+
+        #sidebar-menu {
+            background: #1a1a1a;
+            border-right: 1px solid #2a2a2a;
+        }
+
+        .sidebar-header-banner {
+            background: #111111;
+            border-bottom: 1px solid #2a2a2a;
+            margin-bottom: 10px;
+        }
+
+        .sidebar-menu-item {
+            border-bottom: 1px solid #242424;
+            color: #ddd;
+            gap: 12px;
+            padding: 14px 18px;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-menu-item:hover {
+            background: rgba(255, 70, 85, 0.05);
+            color: #fff;
+            border-left-color: #ff4655;
+            padding-left: 18px;
+        }
+
+        .sidebar-menu-item .menu-icon-symbol {
+            margin-right: 0;
+            width: 20px;
+            color: #ff4655;
+            font-size: 1.05em;
+        }
+
+        #content-area section h2,
+        #content-area section h3 {
+            color: #fff !important;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-left: 3px solid #ff4655;
+            padding-left: 10px;
+        }
+
+        .tournament-tabs {
+            background: #111;
+            border-radius: 0;
+            box-shadow: none;
+            border: 1px solid #222;
+        }
+
+        .tournament-tab {
+            color: #555;
+            border-bottom: 2px solid transparent;
+        }
+
+        .tournament-tab.active {
+            color: #ff4655;
+            background: transparent;
+            border-bottom-color: #ff4655;
+        }
+
+        .tournament-card {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 10px;
+            margin: 10px 15px;
+            box-shadow: none;
+            display: block;
+            min-height: unset;
+        }
+
+        .tournament-card:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .tournament-banner-wrap {
+            position: relative;
+            border-radius: 10px 10px 0 0;
+            overflow: hidden;
+        }
+
+        .tournament-banner {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .tournament-banner-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, transparent 40%, #1a1a1a 100%);
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 10px 12px;
+        }
+
+        .tournament-title {
+            color: #fff;
+            font-weight: 700;
+            font-size: 16px;
+            margin: 0;
+            line-height: 1.25;
+        }
+
+        .tournament-status {
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 10px;
+            letter-spacing: 0.5px;
+        }
+
+        .tournament-content {
+            background: #1a1a1a;
+            padding: 12px;
+        }
+
+        .tournament-info-row {
+            margin-bottom: 10px;
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        .tournament-date {
+            color: #aaa;
+            font-weight: 500;
+        }
+
+        .tournament-price {
+            color: #ffd700;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .tournament-stats {
+            background: transparent;
+            padding: 0;
+            gap: 8px;
+            margin: 0 0 10px;
+            min-height: 0;
+        }
+
+        .stat-item {
+            background: #111;
+            border-radius: 8px;
+            padding: 8px 6px;
+            min-height: 0;
+        }
+
+        .stat-value {
+            color: #ff4655;
+            font-weight: 700;
+            font-size: 14px;
+            max-height: none;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 10px;
+            letter-spacing: 0.6px;
+        }
+
+        .registration-timer,
+        .tournament-timer {
+            background: transparent;
+            border: 0;
+            border-radius: 0;
+            padding: 0;
+            margin: 8px 0;
+            text-align: left;
+        }
+
+        .registration-timer::before,
+        .tournament-timer::before {
+            content: '';
+            display: block;
+            height: 5px;
+            width: 100%;
+            border-radius: 999px;
+            margin-bottom: 6px;
+        }
+
+        .registration-timer::before {
+            background: linear-gradient(90deg, #ff4655, #d91a2a);
+        }
+
+        .tournament-timer::before {
+            background: linear-gradient(90deg, #ffc700, #e6aa00);
+        }
+
+        .timer-label,
+        .tournament-timer-label {
+            font-size: 10px;
+            color: #888;
+            margin-bottom: 2px;
+        }
+
+        .timer-display,
+        .tournament-timer-display {
+            font-size: 12px;
+            letter-spacing: 0.5px;
+            text-shadow: none;
+            color: #ddd;
+        }
+
+        .tournament-actions {
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .action-btn {
+            border-radius: 6px;
+            min-height: 36px;
+            font-size: 0.78em;
+        }
+
+        .details-btn {
+            background: #222;
+            color: #fff;
+        }
+
+        .details-btn:hover {
+            background: #2a2a2a;
+        }
+
+        .players-btn {
+            background: #1a3a6b;
+            color: #fff;
+        }
+
+        .players-btn:hover {
+            background: #21457c;
+        }
+
+        .join-btn {
+            background: linear-gradient(135deg, #ff4655, #d91a2a);
+            color: #fff;
+            box-shadow: none;
+            font-weight: 700;
+        }
+
+        .join-btn:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .view-credentials-btn {
+            background: #0d3d26;
+            color: #2ec27e;
+            border: 1px solid #26a269;
+            border-radius: 6px;
+            box-shadow: none;
+            text-transform: none;
+        }
+
+        .view-credentials-btn:hover {
+            background: #104931;
+            box-shadow: none;
+            transform: none;
+        }
+
+        .nav-bar {
+            background: #111111;
+            border-top: 1px solid #222;
+            box-shadow: none;
+            height: 60px;
+            padding: 0;
+            align-items: stretch;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #555555;
+            border-radius: 0;
+            margin: 0;
+            padding: 4px 2px 2px;
+            position: relative;
+            gap: 2px;
+        }
+
+        .nav-item:hover {
+            background: transparent;
+            color: #777;
+        }
+
+        .nav-item.active {
+            color: #ff4655;
+            background: transparent;
+        }
+
+        .nav-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: 3px;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #ff4655;
+        }
+
+        .nav-icon {
+            font-size: 14px;
+            margin-bottom: 0;
+        }
+
+        .nav-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            line-height: 1.1;
+        }
+
+        .nav-balance-value {
+            font-size: 11px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .nav-balance-item .nav-label {
+            color: #888;
+        }
+
+        .auth-body input[type="text"],
+        .auth-body input[type="email"],
+        .auth-body input[type="password"],
+        .auth-body input[type="number"],
+        .auth-body input[type="tel"] {
+            padding: 15px 18px !important;
+        }
+
+        .auth-body input:focus {
+            border-left: 3px solid #ff4655;
+            padding-left: 16px !important;
+        }
+
+        .referral-input-wrapper {
+            position: relative;
+        }
+
+        .referral-input-wrapper i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #ff4655;
+            font-size: 0.9em;
+            pointer-events: none;
+        }
+
+        .referral-input-wrapper input {
+            padding-left: 38px !important;
+        }
+
+        .wallet-balance-card {
+            background: linear-gradient(135deg, #1a0000 0%, #2d0000 100%);
+            border: 1px solid rgba(255, 70, 85, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 14px;
+            text-align: center;
+        }
+
+        .wallet-panel {
+            background: #121212;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 14px;
+        }
+
+        .wallet-quick-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .wallet-quick-grid button {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            color: #fff;
+            box-shadow: none;
+        }
+
+        .wallet-quick-grid button:hover {
+            border-color: #ff4655;
+            background: #1a1a1a;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .wallet-tx-item {
+            background: #121212;
+            border: 1px solid #2a2a2a;
+            border-left: 3px solid #333;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 8px;
+        }
+
+        .wallet-tx-item.credit {
+            border-left-color: #26a269;
+        }
+
+        .wallet-tx-item.debit {
+            border-left-color: #d72638;
+        }
+
+        .referral-card {
+            background: #121212;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 14px;
+        }
+
+        .referral-code-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        #referral-code-display {
+            flex: 1;
+            padding: 14px;
+            border: 2px dashed #ff4655 !important;
+            border-radius: 10px;
+            background: #111 !important;
+            color: #fff;
+            min-height: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            letter-spacing: 1px;
+        }
+
+        .referral-copy-btn {
+            width: 42px;
+            height: 42px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #333;
+            border-radius: 8px;
+            background: #1a1a1a;
+            color: #ff4655;
+            box-shadow: none;
+            padding: 0;
+        }
+
+        .referral-copy-btn:hover {
+            border-color: #ff4655;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .referral-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .referral-stat-card {
+            background: #121212;
+            border: 1px solid #2a2a2a;
+            padding: 12px;
+            border-radius: 10px;
+        }
+
+        .share-referral-btn {
+            width: 100%;
+            background: transparent;
+            border: 1px solid #ff4655;
+            color: #ff4655;
+            box-shadow: none;
+        }
+
+        .share-referral-btn:hover {
+            background: rgba(255, 70, 85, 0.06);
+            transform: none;
+            box-shadow: none;
+        }
+
+        .loading-spinner-large {
+            border-top-color: #ff4655;
+        }
+
+        .loading-text {
+            animation: textPulse 1.8s infinite ease-in-out;
+        }
+
+        @keyframes textPulse {
+            0%, 100% { opacity: 1; text-shadow: 0 0 0 rgba(255, 70, 85, 0); }
+            50% { opacity: 0.8; text-shadow: 0 0 10px rgba(255, 70, 85, 0.35); }
+        }
     </style>
 </head>
 
@@ -2229,7 +2778,8 @@
                             <input type="password" id="signup-confirm-password" placeholder="Confirm Password" required>
                             <span class="toggle-password" onclick="togglePasswordVisibility('signup-confirm-password')"><i class="fas fa-eye"></i></span>
                         </div>
-                        <div class="form-group">
+                        <div class="form-group referral-input-wrapper">
+                            <i class="fas fa-gift"></i>
                             <input type="text" id="signup-referral-code" placeholder="Referral Code (Optional)">
                         </div>
                         <button class="auth-button" onclick="handleProfessionalSignup()" id="signup-button">Create Account</button>
@@ -2327,10 +2877,10 @@
         <div id="main-app" style="display: none;">
 
             <header class="app-header">
-                <div class="menu-icon" onclick="toggleSidebar()">☰</div>
+                <div class="menu-icon" onclick="toggleSidebar()"><i class="fas fa-bars"></i></div>
                 <div class="app-name">TECHNO E-SPORTS</div>
                 <div style="display:flex; align-items:center; gap:10px;">
-                    <div id="header-wallet-balance" style="font-size: 0.8em; color: #ff4655; font-weight: 700;">₹0.00</div>
+                    <div id="header-wallet-balance" class="header-wallet-chip"><i class="fas fa-wallet"></i>0.00</div>
                     <div class="refresh-button" onclick="refreshPage()" title="Refresh">
                         <i class="fas fa-redo-alt"></i>
                     </div>
@@ -2344,16 +2894,16 @@
                 </div>
 
                 <div class="sidebar-menu-item" onclick="showContent('terms')">
-                    <span class="menu-icon-symbol">📜</span> Terms & Conditions
+                    <span class="menu-icon-symbol"><i class="fas fa-file-alt"></i></span> Terms & Conditions
                 </div>
                 <div class="sidebar-menu-item" onclick="showContent('contact')">
-                    <span class="menu-icon-symbol">📞</span> Contact Us
+                    <span class="menu-icon-symbol"><i class="fas fa-headset"></i></span> Contact Us
                 </div>
                 <div class="sidebar-menu-item" onclick="showContent('privacy')">
-                    <span class="menu-icon-symbol">🛡️</span> Privacy Policy
+                    <span class="menu-icon-symbol"><i class="fas fa-shield-alt"></i></span> Privacy Policy
                 </div>
                 <div class="sidebar-menu-item" onclick="showLogoutConfirmation()">
-                    <span class="menu-icon-symbol">➡️</span> Logout
+                    <span class="menu-icon-symbol"><i class="fas fa-sign-out-alt"></i></span> Logout
                 </div>
             </div>
             <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
@@ -2449,28 +2999,28 @@
 
                 <!-- Wallet Section -->
                 <section id="wallet-section" class="section">
-                    <div style="background: rgba(255,70,85,0.1); border: 1px solid rgba(255,70,85,0.35); border-radius: 12px; padding: 16px; margin-bottom: 14px; text-align: center;">
+                    <div class="wallet-balance-card">
                         <div style="color: #aaa; font-size: 0.9em;">Current Wallet Balance</div>
-                        <div id="wallet-balance-display" style="font-size: 2em; font-weight: 700; color: #ff4655; margin-top: 8px;">₹0.00</div>
+                        <div id="wallet-balance-display" style="font-size: 2em; font-weight: 700; color: #ff4655; margin-top: 8px;">0.00</div>
                     </div>
 
-                    <div style="background: rgba(255,255,255,0.03); border-radius: 12px; padding: 14px; margin-bottom: 14px;">
-                        <h3 style="margin-top: 0; color: #ff4655;">Add Money</h3>
-                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 10px;">
-                            <button onclick="addMoneyToWallet(50)">₹50</button>
-                            <button onclick="addMoneyToWallet(100)">₹100</button>
-                            <button onclick="addMoneyToWallet(200)">₹200</button>
-                            <button onclick="addMoneyToWallet(500)">₹500</button>
+                    <div class="wallet-panel">
+                        <h3 style="margin-top: 0;">Add Money</h3>
+                        <div class="wallet-quick-grid">
+                            <button onclick="addMoneyToWallet(50)">50</button>
+                            <button onclick="addMoneyToWallet(100)">100</button>
+                            <button onclick="addMoneyToWallet(200)">200</button>
+                            <button onclick="addMoneyToWallet(500)">500</button>
                         </div>
                         <div class="form-group">
-                            <label>Custom Amount (₹10 - ₹10000)</label>
+                            <label>Custom Amount (10 - 10000)</label>
                             <input type="number" id="wallet-custom-amount" placeholder="Enter amount" min="10" max="10000">
                         </div>
                         <button style="width: 100%;" onclick="addCustomMoneyToWallet()">Add Money</button>
                     </div>
 
-                    <div style="background: rgba(255,255,255,0.03); border-radius: 12px; padding: 14px;">
-                        <h3 style="margin-top: 0; color: #ff4655;">Transaction History</h3>
+                    <div class="wallet-panel">
+                        <h3 style="margin-top: 0;">Transaction History</h3>
                         <div id="wallet-transactions-list" style="max-height: 320px; overflow-y: auto;">
                             <p style="color: #888; text-align: center;">Loading transactions...</p>
                         </div>
@@ -2479,28 +3029,28 @@
 
                 <!-- Referral Section -->
                 <section id="referral-section" class="section">
-                    <div style="background: rgba(255,70,85,0.1); border: 1px solid rgba(255,70,85,0.35); border-radius: 12px; padding: 14px; margin-bottom: 14px;">
-                        <h3 style="margin-top: 0; color: #ff4655;">Your Referral Code</h3>
-                        <div style="display: flex; gap: 8px; align-items: center;">
-                            <div id="referral-code-display" style="flex:1; padding: 12px; border: 2px solid rgba(255, 70, 85, 0.2); border-radius: 10px; background: rgba(255,255,255,0.05); color:#fff; min-height: 20px;">Generating...</div>
-                            <button onclick="copyReferralCode()">Copy</button>
+                    <div class="referral-card">
+                        <h3 style="margin-top: 0;">Your Referral Code</h3>
+                        <div class="referral-code-row">
+                            <div id="referral-code-display">Generating...</div>
+                            <button class="referral-copy-btn" onclick="copyReferralCode()" title="Copy Referral Code"><i class="fas fa-copy"></i></button>
                         </div>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px;">
-                        <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 10px;">
+                    <div class="referral-stats-grid">
+                        <div class="referral-stat-card">
                             <div style="color: #aaa; font-size: 0.85em;">Total Referrals</div>
                             <div id="referral-count-display" style="font-size: 1.4em; font-weight: 700; color: #ff4655;">0</div>
                         </div>
-                        <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 10px;">
+                        <div class="referral-stat-card">
                             <div style="color: #aaa; font-size: 0.85em;">Referral Earnings</div>
-                            <div id="referral-earnings-display" style="font-size: 1.4em; font-weight: 700; color: #ff4655;">₹0</div>
+                            <div id="referral-earnings-display" style="font-size: 1.4em; font-weight: 700; color: #ff4655;">0</div>
                         </div>
                     </div>
 
-                    <div style="background: rgba(255,255,255,0.03); border-radius: 12px; padding: 14px;">
-                        <h3 style="margin-top: 0; color: #ff4655;">Share Referral Link</h3>
-                        <button style="width: 100%;" onclick="shareReferralLink()">Copy Referral Link</button>
+                    <div class="referral-card">
+                        <h3 style="margin-top: 0;">Share Referral Link</h3>
+                        <button class="share-referral-btn" onclick="shareReferralLink()">Copy Referral Link</button>
                     </div>
                 </section>
 
@@ -2512,7 +3062,7 @@
                             <div><span style="color:#aaa;">Username:</span> <span id="profile-username">-</span></div>
                             <div><span style="color:#aaa;">Email:</span> <span id="profile-email">-</span></div>
                             <div><span style="color:#aaa;">Phone:</span> <span id="profile-phone">-</span></div>
-                            <div><span style="color:#aaa;">Wallet Balance:</span> <span id="profile-wallet-balance">₹0.00</span></div>
+                            <div><span style="color:#aaa;">Wallet Balance:</span> <span id="profile-wallet-balance">0.00</span></div>
                             <div><span style="color:#aaa;">Referral Code:</span> <span id="profile-referral-code">-</span></div>
                             <div><span style="color:#aaa;">Tournaments Participated:</span> <span id="profile-tournaments-count">0</span></div>
                         </div>
@@ -2523,24 +3073,25 @@
 
             <footer class="nav-bar">
                 <div class="nav-item active" data-section="home-section" onclick="showSection('home-section', this)">
-                    <span class="nav-icon">🎮</span>
+                    <span class="nav-icon"><i class="fas fa-gamepad"></i></span>
                     <div class="nav-label">Tournaments</div>
                 </div>
                 <div class="nav-item" data-section="wallet-section" onclick="showSection('wallet-section', this)">
-                    <span class="nav-icon">💰</span>
+                    <span class="nav-icon"><i class="fas fa-wallet"></i></span>
                     <div class="nav-label">Wallet</div>
                 </div>
                 <div class="nav-item" data-section="referral-section" onclick="showSection('referral-section', this)">
-                    <span class="nav-icon">🎁</span>
+                    <span class="nav-icon"><i class="fas fa-gift"></i></span>
                     <div class="nav-label">Referral</div>
                 </div>
                 <div class="nav-item" data-section="profile-section" onclick="showSection('profile-section', this)">
-                    <span class="nav-icon">👤</span>
+                    <span class="nav-icon"><i class="fas fa-user"></i></span>
                     <div class="nav-label">Profile</div>
                 </div>
-                <div class="nav-item" style="pointer-events: none;">
-                    <span class="nav-icon">₹</span>
-                    <div class="nav-label">Bal: <span id="wallet-balance-nav">0.00</span></div>
+                <div class="nav-item nav-balance-item" style="pointer-events: none;">
+                    <span class="nav-icon"><i class="fas fa-coins"></i></span>
+                    <div class="nav-label">BAL</div>
+                    <div class="nav-balance-value"><span id="wallet-balance-nav">0.00</span></div>
                 </div>
             </footer>
         </div>
@@ -3233,7 +3784,7 @@
         }
 
         function formatCurrency(amount) {
-            return `₹${Number(amount || 0).toFixed(2)}`;
+            return `${Number(amount || 0).toFixed(2)}`;
         }
 
         function updateWalletUI() {
@@ -3246,7 +3797,7 @@
             if (navEl) navEl.textContent = balance.toFixed(2);
             if (displayEl) displayEl.textContent = balanceText;
             if (profileEl) profileEl.textContent = balanceText;
-            if (headerEl) headerEl.textContent = balanceText;
+            if (headerEl) headerEl.innerHTML = `<i class="fas fa-wallet"></i>${balance.toFixed(2)}`;
         }
 
         async function fetchWalletBalance() {
@@ -3309,10 +3860,10 @@
                 const dateText = dateValue ? new Date(dateValue).toLocaleString() : 'N/A';
 
                 return `
-                    <div style="background: rgba(0,0,0,0.25); border: 1px solid #333; border-radius: 8px; padding: 10px; margin-bottom: 8px;">
+                    <div class="wallet-tx-item ${isCredit ? 'credit' : 'debit'}">
                         <div style="display:flex; justify-content: space-between; gap:8px; align-items:center;">
                             <div style="color:#fff; font-weight:600;">${tx.description || 'Wallet transaction'}</div>
-                            <div style="color:${color}; font-weight:700;">${sign}₹${amount}</div>
+                            <div style="color:${color}; font-weight:700;">${sign}${amount}</div>
                         </div>
                         <div style="display:flex; justify-content: space-between; color:#aaa; font-size:0.82em; margin-top:6px;">
                             <span>${isCredit ? 'Credit' : 'Debit'}</span>
@@ -3363,7 +3914,7 @@
                 if (countEl) countEl.textContent = String(count);
                 
                 const earningsEl = document.getElementById('referral-earnings-display');
-                if (earningsEl) earningsEl.textContent = `₹${earnings}`;
+                if (earningsEl) earningsEl.textContent = `${earnings}`;
                 
                 const profileCode = document.getElementById('profile-referral-code');
                 if (profileCode) profileCode.textContent = code || '-';
@@ -3447,7 +3998,7 @@
                 return;
             }
             if (!Number.isFinite(amount) || amount < 10 || amount > 10000) {
-                showToast('Amount must be between ₹10 and ₹10000.', 'error');
+                showToast('Amount must be between 10 and 10000.', 'error');
                 return;
             }
             if (typeof Razorpay === 'undefined') {
@@ -4241,17 +4792,18 @@
             ` : '';
             
             card.innerHTML = `
-                <img src="${tournament.imageUrl || 'https://via.placeholder.com/120x270?text=Tournament'}" 
-                     alt="${tournament.title}" class="tournament-banner">
-                <div class="tournament-content">
-                    <div class="tournament-header">
+                <div class="tournament-banner-wrap">
+                    <img src="${tournament.imageUrl || 'https://via.placeholder.com/120x270?text=Tournament'}" 
+                         alt="${tournament.title}" class="tournament-banner">
+                    <div class="tournament-banner-overlay">
                         <div class="tournament-title">${tournament.title}</div>
                         <div class="tournament-status ${statusClass}">${tournamentStatus}</div>
                     </div>
-                    
+                </div>
+                <div class="tournament-content">
                     <div class="tournament-info-row">
                         <span class="tournament-date">${tournamentDate} • ${tournamentTime}</span>
-                        <span class="tournament-price">₹${entryFee}</span>
+                        <span class="tournament-price">${entryFee}</span>
                     </div>
                     
                     ${registrationTimerHTML}
@@ -4277,7 +4829,7 @@
                             <i class="fas fa-info-circle"></i> Details
                         </button>
                         <button class="action-btn players-btn" onclick="showTournamentPlayers('${tournament.id}')">
-                            <i class="fas fa-users"></i> View
+                            <i class="fas fa-users"></i> Players
                         </button>
                         ${showJoinButton && !registrationEnded ? `
                             <button class="action-btn join-btn" onclick="registerForTournament('${tournament.id}')" ${isFull ? 'disabled' : ''}>
@@ -4438,7 +4990,7 @@
                         </div>
                         <div>
                             <div style="color: #aaa; font-size: 0.85em;">Entry Fee</div>
-                            <div style="color: #ffd700; font-weight: bold; font-size: 0.95em;">₹${tournament.entryFee || 0}</div>
+                            <div style="color: #ffd700; font-weight: bold; font-size: 0.95em;">${tournament.entryFee || 0}</div>
                         </div>
                         <div>
                             <div style="color: #aaa; font-size: 0.85em;">Max ${tournament.category === 'solo' ? 'Players' : tournament.category === 'duo' ? 'Teams' : 'Squads'}</div>
@@ -4615,7 +5167,7 @@
                 <div style="background: rgba(255,70,85,0.1); padding: 12px; border-radius: 8px; margin-bottom: 15px;">
                     <div style="font-weight: bold; color: #ff4655; margin-bottom: 5px; font-size: 1em;">${tournament.title}</div>
                     <div style="color: #aaa; font-size: 0.85em;">
-                        ${tournament.category.toUpperCase()} • ₹${tournament.entryFee || 0} Entry Fee
+                        ${tournament.category.toUpperCase()} • ${tournament.entryFee || 0} Entry Fee
                     </div>
                 </div>
                 ${timerHTML}
@@ -4713,7 +5265,7 @@
             formHTML += `
                 <div style="text-align: center; margin: 15px 0;">
                     <button class="auth-button" onclick="proceedToPayment()" style="width: 100%;" id="submit-registration-btn">
-                        <i class="fas fa-arrow-right"></i> Join Tournament (₹${tournament.entryFee || 0})
+                        <i class="fas fa-arrow-right"></i> Join Tournament (${tournament.entryFee || 0})
                     </button>
                 </div>
             `;
