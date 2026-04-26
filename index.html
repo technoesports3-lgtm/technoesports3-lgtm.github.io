@@ -7,6 +7,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- OneSignal SDK Integration Start -->
@@ -2228,6 +2229,9 @@
                             <input type="password" id="signup-confirm-password" placeholder="Confirm Password" required>
                             <span class="toggle-password" onclick="togglePasswordVisibility('signup-confirm-password')"><i class="fas fa-eye"></i></span>
                         </div>
+                        <div class="form-group">
+                            <input type="text" id="signup-referral-code" placeholder="Referral Code (Optional)">
+                        </div>
                         <button class="auth-button" onclick="handleProfessionalSignup()" id="signup-button">Create Account</button>
                         
                         <!-- Google Sign-In Button -->
@@ -2305,16 +2309,6 @@
             </div>
         </div>
 
-        <!-- Pending Verification Popup -->
-        <div id="pending-verification-popup" class="pending-verification-popup">
-            <i class="fas fa-clock"></i>
-            <h3>Admin Verification Required</h3>
-            <p>Your registration has been submitted successfully!</p>
-            <p>The admin is verifying your payment screenshot. Please wait for approval.</p>
-            <p style="color: #aaa; font-size: 0.85em; margin-top: 10px;">Your tournament status will show as "Pending"</p>
-            <button onclick="closePendingVerificationPopup()" style="margin-top: 15px;">OK</button>
-        </div>
-
         <!-- Loading Screen -->
         <div id="loading-screen">
             <div class="loading-animation">
@@ -2335,8 +2329,11 @@
             <header class="app-header">
                 <div class="menu-icon" onclick="toggleSidebar()">☰</div>
                 <div class="app-name">TECHNO E-SPORTS</div>
-                <div class="refresh-button" onclick="refreshPage()" title="Refresh">
-                    <i class="fas fa-redo-alt"></i>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <div id="header-wallet-balance" style="font-size: 0.8em; color: #ff4655; font-weight: 700;">₹0.00</div>
+                    <div class="refresh-button" onclick="refreshPage()" title="Refresh">
+                        <i class="fas fa-redo-alt"></i>
+                    </div>
                 </div>
             </header>
 
@@ -2450,12 +2447,100 @@
                     </div>
                 </section>
 
+                <!-- Wallet Section -->
+                <section id="wallet-section" class="section">
+                    <div style="background: rgba(255,70,85,0.1); border: 1px solid rgba(255,70,85,0.35); border-radius: 12px; padding: 16px; margin-bottom: 14px; text-align: center;">
+                        <div style="color: #aaa; font-size: 0.9em;">Current Wallet Balance</div>
+                        <div id="wallet-balance-display" style="font-size: 2em; font-weight: 700; color: #ff4655; margin-top: 8px;">₹0.00</div>
+                    </div>
+
+                    <div style="background: rgba(255,255,255,0.03); border-radius: 12px; padding: 14px; margin-bottom: 14px;">
+                        <h3 style="margin-top: 0; color: #ff4655;">Add Money</h3>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 10px;">
+                            <button onclick="addMoneyToWallet(50)">₹50</button>
+                            <button onclick="addMoneyToWallet(100)">₹100</button>
+                            <button onclick="addMoneyToWallet(200)">₹200</button>
+                            <button onclick="addMoneyToWallet(500)">₹500</button>
+                        </div>
+                        <div class="form-group">
+                            <label>Custom Amount (₹10 - ₹10000)</label>
+                            <input type="number" id="wallet-custom-amount" placeholder="Enter amount" min="10" max="10000">
+                        </div>
+                        <button style="width: 100%;" onclick="addCustomMoneyToWallet()">Add Money</button>
+                    </div>
+
+                    <div style="background: rgba(255,255,255,0.03); border-radius: 12px; padding: 14px;">
+                        <h3 style="margin-top: 0; color: #ff4655;">Transaction History</h3>
+                        <div id="wallet-transactions-list" style="max-height: 320px; overflow-y: auto;">
+                            <p style="color: #888; text-align: center;">Loading transactions...</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Referral Section -->
+                <section id="referral-section" class="section">
+                    <div style="background: rgba(255,70,85,0.1); border: 1px solid rgba(255,70,85,0.35); border-radius: 12px; padding: 14px; margin-bottom: 14px;">
+                        <h3 style="margin-top: 0; color: #ff4655;">Your Referral Code</h3>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <div id="referral-code-display" style="flex:1; padding: 12px; border: 2px solid rgba(255, 70, 85, 0.2); border-radius: 10px; background: rgba(255,255,255,0.05); color:#fff; min-height: 20px;">Generating...</div>
+                            <button onclick="copyReferralCode()">Copy</button>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px;">
+                        <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 10px;">
+                            <div style="color: #aaa; font-size: 0.85em;">Total Referrals</div>
+                            <div id="referral-count-display" style="font-size: 1.4em; font-weight: 700; color: #ff4655;">0</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 10px;">
+                            <div style="color: #aaa; font-size: 0.85em;">Referral Earnings</div>
+                            <div id="referral-earnings-display" style="font-size: 1.4em; font-weight: 700; color: #ff4655;">₹0</div>
+                        </div>
+                    </div>
+
+                    <div style="background: rgba(255,255,255,0.03); border-radius: 12px; padding: 14px;">
+                        <h3 style="margin-top: 0; color: #ff4655;">Share Referral Link</h3>
+                        <button style="width: 100%;" onclick="shareReferralLink()">Copy Referral Link</button>
+                    </div>
+                </section>
+
+                <!-- Profile Section -->
+                <section id="profile-section" class="section">
+                    <div style="background: rgba(255,255,255,0.03); border-radius: 12px; padding: 14px;">
+                        <h3 style="margin-top: 0; color: #ff4655;">User Profile</h3>
+                        <div style="display: grid; gap: 8px;">
+                            <div><span style="color:#aaa;">Username:</span> <span id="profile-username">-</span></div>
+                            <div><span style="color:#aaa;">Email:</span> <span id="profile-email">-</span></div>
+                            <div><span style="color:#aaa;">Phone:</span> <span id="profile-phone">-</span></div>
+                            <div><span style="color:#aaa;">Wallet Balance:</span> <span id="profile-wallet-balance">₹0.00</span></div>
+                            <div><span style="color:#aaa;">Referral Code:</span> <span id="profile-referral-code">-</span></div>
+                            <div><span style="color:#aaa;">Tournaments Participated:</span> <span id="profile-tournaments-count">0</span></div>
+                        </div>
+                    </div>
+                </section>
+
             </div>
 
             <footer class="nav-bar">
                 <div class="nav-item active" data-section="home-section" onclick="showSection('home-section', this)">
                     <span class="nav-icon">🎮</span>
                     <div class="nav-label">Tournaments</div>
+                </div>
+                <div class="nav-item" data-section="wallet-section" onclick="showSection('wallet-section', this)">
+                    <span class="nav-icon">💰</span>
+                    <div class="nav-label">Wallet</div>
+                </div>
+                <div class="nav-item" data-section="referral-section" onclick="showSection('referral-section', this)">
+                    <span class="nav-icon">🎁</span>
+                    <div class="nav-label">Referral</div>
+                </div>
+                <div class="nav-item" data-section="profile-section" onclick="showSection('profile-section', this)">
+                    <span class="nav-icon">👤</span>
+                    <div class="nav-label">Profile</div>
+                </div>
+                <div class="nav-item" style="pointer-events: none;">
+                    <span class="nav-icon">₹</span>
+                    <div class="nav-label">Bal: <span id="wallet-balance-nav">0.00</span></div>
                 </div>
             </footer>
         </div>
@@ -2497,17 +2582,6 @@
             </div>
         </div>
 
-        <!-- Payment Modal -->
-        <div id="payment-modal" class="modal">
-            <div class="modal-content">
-                <span class="close-button" onclick="closeModal('payment-modal')">&times;</span>
-                <h3 style="font-size: 1.2em;">Complete Payment</h3>
-                <div id="payment-details">
-                    <!-- Dynamic content will be inserted here -->
-                </div>
-            </div>
-        </div>
-
         <!-- Credentials Modal -->
         <div id="credentials-modal" class="modal">
             <div class="modal-content">
@@ -2525,9 +2599,8 @@
                 <span class="close-button" onclick="closeModal('success-modal')">&times;</span>
                 <div style="text-align: center; padding: 20px;">
                     <i class="fas fa-check-circle" style="font-size: 50px; color: #26a269;"></i>
-                    <h3>Registration Submitted!</h3>
-                    <p>Your registration has been submitted for verification.</p>
-                    <p style="color: #ffc700; font-size: 0.9em;">Admin will verify your payment screenshot</p>
+                    <h3>You have joined the tournament!</h3>
+                    <p>Your registration is approved.</p>
                     <button onclick="closeModal('success-modal')">OK</button>
                 </div>
             </div>
@@ -2545,32 +2618,6 @@
                         <!-- Rejection details will be loaded here -->
                     </div>
                     <button onclick="closeModal('rejection-modal')">OK</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Fullscreen QR Modal -->
-        <div id="fullscreen-qr-modal" class="modal fullscreen-qr-modal">
-            <div class="modal-content">
-                <span class="close-button" onclick="closeModal('fullscreen-qr-modal')">&times;</span>
-                <h3 style="text-align: center; font-size: 1.2em;">Scan to Pay</h3>
-                <div class="qr-code-container">
-                    <img id="fullscreen-qr-image" class="fullscreen-qr-image" src="" alt="QR Code">
-                    <div class="upi-id-container">
-                        <div class="upi-id-label">Or send payment to UPI ID:</div>
-                        <div class="upi-id-value">
-                            <div class="upi-id-text" id="upi-id-text"></div>
-                            <button class="copy-upi-btn" onclick="copyUPIId()" id="copy-upi-btn">
-                                <i class="fas fa-copy"></i> Copy
-                            </button>
-                        </div>
-                    </div>
-                    <div class="payment-instructions">
-                        <p><strong>Instructions:</strong></p>
-                        <p>1. Scan the QR code or use UPI ID to make payment</p>
-                        <p>2. Take a screenshot of successful payment</p>
-                        <p>3. Upload screenshot below</p>
-                    </div>
                 </div>
             </div>
         </div>
@@ -2628,7 +2675,11 @@
         let authStateChecked = false;
         let currentTab = 'solo';
         let playerCount = 1;
-        let paymentScreenshotUrl = null;
+        let walletBalance = 0;
+        let walletTransactions = [];
+        let currentUserData = {};
+        const BACKEND_BASE_URL = "https://techno-esports-backend.onrender.com";
+        const RAZORPAY_KEY_ID = "rzp_test_Shhq282Z5gAh0M";
         
         // Timer variables
         let activeTimers = new Map();
@@ -2642,6 +2693,7 @@
 
         // Auto logout timer
         let autoLogoutTimer = null;
+        let walletBalanceInterval = null;
         const AUTO_LOGOUT_TIME = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
         // Forgot password language
@@ -3168,81 +3220,327 @@
             }
         }
 
-        // --- EXACT FILE UPLOAD HANDLER FROM ADMIN PANEL ---
-        async function handleFileSelection(event, targetId) {
-            const file = event.target.files[0];
-            if (file) {
-                const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-                const maxSize = 5 * 1024 * 1024; // 5MB
-
-                if (!validTypes.includes(file.type)) {
-                    showToast('Please upload a JPG or PNG file.', 'error');
-                    return;
-                }
-
-                if (file.size > maxSize) {
-                    showToast('File size must be less than 5MB.', 'error');
-                    return;
-                }
-
-                showToast(`Uploading ${file.name}...`, 'info');
-                const url = await uploadImageToImgBB(file);
-                if (url) {
-                    document.getElementById(targetId).value = url;
-                    showToast("Upload successful!", 'success');
-                    
-                    // Show preview
-                    const preview = document.getElementById('payment-screenshot-preview');
-                    if (preview) {
-                        preview.src = url;
-                        preview.style.display = 'block';
-                    }
-                    
-                    // Store the URL for submission
-                    paymentScreenshotUrl = url;
-                }
-                event.target.value = null;
-            }
-        }
-
-        function triggerFileUpload(inputName) {
-            document.getElementById(`${inputName}-file`).click();
-        }
-
-        function showPendingVerificationPopup() {
-            document.getElementById('pending-verification-popup').style.display = 'block';
-        }
-
-        function closePendingVerificationPopup() {
-            document.getElementById('pending-verification-popup').style.display = 'none';
-        }
-
-        // --- UPI ID Copy Function ---
-        function copyUPIId() {
-            const upiIdText = document.getElementById('upi-id-text').textContent;
-            const copyBtn = document.getElementById('copy-upi-btn');
-            
-            navigator.clipboard.writeText(upiIdText).then(() => {
-                copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied';
-                copyBtn.classList.add('copied');
-                showToast('UPI ID copied to clipboard!', 'success');
-                
-                setTimeout(() => {
-                    copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy';
-                    copyBtn.classList.remove('copied');
-                }, 2000);
-            }).catch(err => {
-                showToast('Failed to copy UPI ID', 'error');
-                console.error('Copy failed:', err);
-            });
-        }
-
         // --- Refresh Page Function ---
         function refreshPage() {
             showToast('Refreshing tournaments...', 'info', 'Refreshing');
             loadTournaments().then(() => {
                 showToast('Tournaments refreshed successfully!', 'success');
             });
+        }
+
+        function getCurrentUserId() {
+            return firebase.auth().currentUser ? firebase.auth().currentUser.uid : null;
+        }
+
+        function formatCurrency(amount) {
+            return `₹${Number(amount || 0).toFixed(2)}`;
+        }
+
+        function updateWalletUI() {
+            const balance = Number(walletBalance || 0);
+            const balanceText = formatCurrency(balance);
+            const navEl = document.getElementById('wallet-balance-nav');
+            const displayEl = document.getElementById('wallet-balance-display');
+            const profileEl = document.getElementById('profile-wallet-balance');
+            const headerEl = document.getElementById('header-wallet-balance');
+            if (navEl) navEl.textContent = balance.toFixed(2);
+            if (displayEl) displayEl.textContent = balanceText;
+            if (profileEl) profileEl.textContent = balanceText;
+            if (headerEl) headerEl.textContent = balanceText;
+        }
+
+        async function fetchWalletBalance() {
+            const userId = getCurrentUserId();
+            if (!userId) return;
+
+            try {
+                const response = await fetch(`${BACKEND_BASE_URL}/api/wallet/balance/${userId}`);
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message || 'Failed to load wallet balance');
+
+                walletBalance = Number(data.balance || 0);
+                updateWalletUI();
+            } catch (error) {
+                console.error('Wallet balance error:', error);
+                showToast('Unable to fetch wallet balance.', 'error');
+            }
+        }
+
+        async function fetchWalletTransactions() {
+            const userId = getCurrentUserId();
+            if (!userId) return;
+
+            const container = document.getElementById('wallet-transactions-list');
+            if (container) {
+                container.innerHTML = '<p style="color: #888; text-align: center;">Loading transactions...</p>';
+            }
+
+            try {
+                const response = await fetch(`${BACKEND_BASE_URL}/api/wallet/transactions/${userId}`);
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message || 'Failed to load transactions');
+
+                walletTransactions = Array.isArray(data.transactions) ? data.transactions : [];
+                renderWalletTransactions();
+            } catch (error) {
+                console.error('Wallet transactions error:', error);
+                if (container) {
+                    container.innerHTML = '<p style="color: #d72638; text-align: center;">Failed to load transactions.</p>';
+                }
+            }
+        }
+
+        function renderWalletTransactions() {
+            const container = document.getElementById('wallet-transactions-list');
+            if (!container) return;
+
+            if (!walletTransactions.length) {
+                container.innerHTML = '<p style="color: #888; text-align: center;">No transactions found.</p>';
+                return;
+            }
+
+            container.innerHTML = walletTransactions.map(tx => {
+                const type = (tx.type || '').toLowerCase();
+                const isCredit = type === 'credit';
+                const color = isCredit ? '#26a269' : '#d72638';
+                const sign = isCredit ? '+' : '-';
+                const amount = Number(tx.amount || 0).toFixed(2);
+                const dateValue = tx.createdAt || tx.date || tx.timestamp;
+                const dateText = dateValue ? new Date(dateValue).toLocaleString() : 'N/A';
+
+                return `
+                    <div style="background: rgba(0,0,0,0.25); border: 1px solid #333; border-radius: 8px; padding: 10px; margin-bottom: 8px;">
+                        <div style="display:flex; justify-content: space-between; gap:8px; align-items:center;">
+                            <div style="color:#fff; font-weight:600;">${tx.description || 'Wallet transaction'}</div>
+                            <div style="color:${color}; font-weight:700;">${sign}₹${amount}</div>
+                        </div>
+                        <div style="display:flex; justify-content: space-between; color:#aaa; font-size:0.82em; margin-top:6px;">
+                            <span>${isCredit ? 'Credit' : 'Debit'}</span>
+                            <span>${dateText}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function fetchReferralData() {
+            const userId = getCurrentUserId();
+            if (!userId) return;
+
+            try {
+                const userRef = db.collection("users").doc(userId);
+                const userDoc = await userRef.get();
+                
+                if (!userDoc.exists) return;
+                
+                let userData = userDoc.data() || {};
+                let code = userData.referralCode || '';
+                
+                const referralDisplay = document.getElementById('referral-code-display');
+
+                // If referral code doesn't exist, generate and save it immediately
+                if (!code) {
+                    if (referralDisplay) referralDisplay.textContent = 'Generating...';
+                    
+                    const prefix = (userData.username || 'TEC').substring(0, 3).toUpperCase().replace(/[^A-Z]/g, 'TEC');
+                    const randomNum = Math.floor(10000 + Math.random() * 90000); 
+                    code = `${prefix}${randomNum}`;
+
+                    await userRef.update({
+                        referralCode: code
+                    });
+                    
+                    userData.referralCode = code;
+                }
+
+                currentUserData = userData;
+
+                const count = Number(userData.referralCount || 0);
+                const earnings = Number(userData.referralEarnings || (count * 10) || 0);
+
+                if (referralDisplay) referralDisplay.textContent = code;
+                
+                const countEl = document.getElementById('referral-count-display');
+                if (countEl) countEl.textContent = String(count);
+                
+                const earningsEl = document.getElementById('referral-earnings-display');
+                if (earningsEl) earningsEl.textContent = `₹${earnings}`;
+                
+                const profileCode = document.getElementById('profile-referral-code');
+                if (profileCode) profileCode.textContent = code || '-';
+                
+            } catch (error) {
+                console.error('Referral data error:', error);
+                showToast('Unable to load referral data.', 'error');
+                
+                const referralDisplay = document.getElementById('referral-code-display');
+                if (referralDisplay && referralDisplay.textContent === 'Generating...') {
+                    referralDisplay.textContent = 'Error';
+                }
+            }
+        }
+
+        function copyReferralCode() {
+            const code = document.getElementById('referral-code-display')?.textContent?.trim() || '';
+            if (!code) {
+                showToast('Referral code not available.', 'error');
+                return;
+            }
+            navigator.clipboard.writeText(code).then(() => {
+                showToast('Referral code copied!', 'success');
+            }).catch(() => {
+                showToast('Failed to copy referral code.', 'error');
+            });
+        }
+
+        function shareReferralLink() {
+            const code = document.getElementById('referral-code-display')?.textContent?.trim() || '';
+            if (!code) {
+                showToast('Referral code not available.', 'error');
+                return;
+            }
+
+            const referralLink = `${window.location.origin}${window.location.pathname}?ref=${encodeURIComponent(code)}`;
+            navigator.clipboard.writeText(referralLink).then(() => {
+                showToast('Referral link copied!', 'success');
+            }).catch(() => {
+                showToast('Failed to copy referral link.', 'error');
+            });
+        }
+
+        async function generateReferralCodeForUser(userId, username) {
+            const response = await fetch(`${BACKEND_BASE_URL}/api/wallet/generate-referral`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId, username })
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.message || 'Failed to generate referral code.');
+            }
+            return data;
+        }
+
+        async function applyReferralForNewUser(newUserId, referralCode) {
+            const response = await fetch(`${BACKEND_BASE_URL}/api/wallet/apply-referral`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ newUserId, referralCode })
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.message || 'Failed to apply referral code.');
+            }
+            return data;
+        }
+
+        function addCustomMoneyToWallet() {
+            const amount = Number(document.getElementById('wallet-custom-amount')?.value || 0);
+            addMoneyToWallet(amount);
+        }
+
+        async function addMoneyToWallet(amount) {
+            const userId = getCurrentUserId();
+            amount = Number(amount);
+
+            if (!userId) {
+                showToast('Please login first.', 'error');
+                return;
+            }
+            if (!Number.isFinite(amount) || amount < 10 || amount > 10000) {
+                showToast('Amount must be between ₹10 and ₹10000.', 'error');
+                return;
+            }
+            if (typeof Razorpay === 'undefined') {
+                showToast('Razorpay SDK failed to load.', 'error');
+                return;
+            }
+
+            const options = {
+                key: RAZORPAY_KEY_ID,
+                amount: Math.round(amount * 100),
+                currency: 'INR',
+                name: 'Techno E-Sports',
+                description: 'Wallet Top-up',
+                handler: async function (response) {
+                    try {
+                        const verifyResponse = await fetch(`${BACKEND_BASE_URL}/api/payment/verify-payment`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                userId,
+                                amount,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_order_id: response.razorpay_order_id || null,
+                                razorpay_signature: response.razorpay_signature || null
+                            })
+                        });
+                        const verifyData = await verifyResponse.json();
+                        if (!verifyResponse.ok) throw new Error(verifyData.message || 'Payment verification failed');
+
+                        showToast('Wallet recharged successfully!', 'success');
+                        await Promise.all([fetchWalletBalance(), fetchWalletTransactions()]);
+                    } catch (error) {
+                        console.error('Verify payment error:', error);
+                        showToast(error.message || 'Payment verification failed.', 'error');
+                    }
+                },
+                prefill: {
+                    email: currentUser?.email || '',
+                    contact: currentUserData?.phone || ''
+                },
+                theme: {
+                    color: '#ff4655'
+                }
+            };
+
+            const rzp = new Razorpay(options);
+            rzp.on('payment.failed', function (response) {
+                const reason = response?.error?.description || 'Payment failed.';
+                showToast(reason, 'error');
+            });
+            rzp.open();
+        }
+
+        async function fetchProfileData() {
+            const userId = getCurrentUserId();
+            if (!userId) return;
+
+            try {
+                const userDoc = await db.collection("users").doc(userId).get();
+                const userData = userDoc.data() || {};
+                currentUserData = userData;
+
+                const username = userData.username || currentUser.displayName || '-';
+                const email = currentUser.email || userData.email || '-';
+                const phone = userData.phone || '-';
+                const tournamentsParticipated = Number(userData.tournamentsParticipated || 0);
+                const referralCode = userData.referralCode || '-';
+
+                const usernameEl = document.getElementById('profile-username');
+                const emailEl = document.getElementById('profile-email');
+                const phoneEl = document.getElementById('profile-phone');
+                const tournamentCountEl = document.getElementById('profile-tournaments-count');
+                const referralCodeEl = document.getElementById('profile-referral-code');
+
+                if (usernameEl) usernameEl.textContent = username;
+                if (emailEl) emailEl.textContent = email;
+                if (phoneEl) phoneEl.textContent = phone;
+                if (tournamentCountEl) tournamentCountEl.textContent = String(tournamentsParticipated);
+                if (referralCodeEl) referralCodeEl.textContent = referralCode;
+            } catch (error) {
+                console.error('Profile data error:', error);
+                showToast('Unable to load profile data.', 'error');
+            }
+        }
+
+        async function loadWalletAndReferralData() {
+            await Promise.all([
+                fetchWalletBalance(),
+                fetchWalletTransactions(),
+                fetchReferralData(),
+                fetchProfileData()
+            ]);
         }
 
         // --- Professional Authentication ---
@@ -3252,6 +3550,7 @@
             const email = document.getElementById('signup-email').value.trim();
             const password = document.getElementById('signup-password').value;
             const confirmPassword = document.getElementById('signup-confirm-password').value;
+            const enteredReferralCode = document.getElementById('signup-referral-code').value.trim();
 
             if (password !== confirmPassword) {
                 showToast("Passwords do not match.", 'error');
@@ -3267,6 +3566,19 @@
             try {
                 const userCredential = await auth.createUserWithEmailAndPassword(email, password);
                 const user = userCredential.user;
+                let generatedReferralCode = '';
+
+                try {
+                    const referralResponse = await fetch('https://techno-esports-backend.onrender.com/api/wallet/generate-referral', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({userId: user.uid, username: username})
+                    });
+                    const referralData = await referralResponse.json().catch(() => ({}));
+                    generatedReferralCode = referralData.referralCode || referralData.code || referralData.data?.referralCode || '';
+                } catch(e) {
+                    console.log('Referral generate error:', e);
+                }
 
                 await db.collection("users").doc(user.uid).set({
                     username: username,
@@ -3275,8 +3587,20 @@
                     role: 'user',
                     isBlocked: false,
                     tournamentsParticipated: 0,
+                    referralCode: generatedReferralCode,
                     registeredAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
+
+                if (enteredReferralCode) {
+                    try {
+                        const applyRes = await applyReferralForNewUser(user.uid, enteredReferralCode);
+                        showToast(applyRes.message || 'Referral applied successfully!', 'success');
+                        await Promise.all([fetchWalletBalance(), fetchWalletTransactions(), fetchReferralData()]);
+                    } catch (applyError) {
+                        console.error('Apply referral on signup error:', applyError);
+                        showToast(applyError.message || 'Failed to apply referral code.', 'error');
+                    }
+                }
 
                 showToast("Registration successful! You can now log in.", 'success');
                 document.getElementById('signup-username').value = '';
@@ -3284,6 +3608,7 @@
                 document.getElementById('signup-email').value = '';
                 document.getElementById('signup-password').value = '';
                 document.getElementById('signup-confirm-password').value = '';
+                document.getElementById('signup-referral-code').value = '';
 
                 // MODIFICATION 1: Auto switch to login tab after successful registration
                 switchAuthTab('login');
@@ -3402,6 +3727,19 @@
                     if (!userDoc.exists) {
                         // New user - create user document
                         const displayName = user.displayName || user.email.split('@')[0];
+                        let generatedReferralCode = '';
+
+                        try {
+                            const referralResponse = await fetch('https://techno-esports-backend.onrender.com/api/wallet/generate-referral', {
+                                method: 'POST',
+                                headers: {'Content-Type': 'application/json'},
+                                body: JSON.stringify({userId: user.uid, username: user.displayName})
+                            });
+                            const referralData = await referralResponse.json().catch(() => ({}));
+                            generatedReferralCode = referralData.referralCode || referralData.code || referralData.data?.referralCode || '';
+                        } catch(e) {
+                            console.log('Referral generate error:', e);
+                        }
                         
                         await db.collection("users").doc(user.uid).set({
                             username: displayName,
@@ -3410,6 +3748,7 @@
                             role: 'user',
                             isBlocked: false,
                             tournamentsParticipated: 0,
+                            referralCode: generatedReferralCode,
                             registeredAt: firebase.firestore.FieldValue.serverTimestamp(),
                             googleAuth: true
                         });
@@ -3453,6 +3792,10 @@
                 clearTimeout(autoLogoutTimer);
                 autoLogoutTimer = null;
             }
+            if (walletBalanceInterval) {
+                clearInterval(walletBalanceInterval);
+                walletBalanceInterval = null;
+            }
             
             // Remove real-time listeners
             if (tournamentListener) tournamentListener();
@@ -3490,6 +3833,9 @@
             
             // Load tournaments and user registrations
             await loadTournaments();
+            await loadWalletAndReferralData();
+            if (walletBalanceInterval) clearInterval(walletBalanceInterval);
+            walletBalanceInterval = setInterval(fetchWalletBalance, 15000);
             
             // Set up real-time listeners
             setupRealTimeListeners();
@@ -4225,7 +4571,6 @@
             
             selectedTournament = tournament;
             playerCount = 1;
-            paymentScreenshotUrl = null; // Reset payment screenshot
             
             const modal = document.getElementById('registration-modal');
             const detailsContainer = document.getElementById('registration-details');
@@ -4350,8 +4695,8 @@
             
             formHTML += `
                 <div style="text-align: center; margin: 15px 0;">
-                    <button class="auth-button" onclick="proceedToPayment()" style="width: 100%;">
-                        <i class="fas fa-arrow-right"></i> Proceed to Payment (₹${tournament.entryFee || 0})
+                    <button class="auth-button" onclick="proceedToPayment()" style="width: 100%;" id="submit-registration-btn">
+                        <i class="fas fa-arrow-right"></i> Join Tournament (₹${tournament.entryFee || 0})
                     </button>
                 </div>
             `;
@@ -4397,125 +4742,47 @@
                 }
             }
 
-            // 4. ACTION: If everything is okay, switch the modals
-            console.log("Validation passed, opening payment...");
-            
-            // Hide registration modal
-            document.getElementById('registration-modal').style.display = 'none';
-            
-            // Show payment modal
-            showPaymentModal();
-        }
-        function showPaymentModal() {
-            const modal = document.getElementById('payment-modal');
-            const detailsContainer = document.getElementById('payment-details');
-            
-            // Use global QR code and UPI ID from app config
-            const qrCodeUrl = appConfig.qrCodeImage || 'https://via.placeholder.com/250?text=QR+Code+Not+Set';
-            const upiId = appConfig.upiId || 'upi-id-not-set@example';
-            
-            detailsContainer.innerHTML = `
-                <div class="qr-code-container">
-                    <img id="payment-qr-image" src="${qrCodeUrl}" 
-                         class="qr-code-image" alt="Payment QR Code"
-                         onclick="showFullscreenQR('${qrCodeUrl}', '${upiId}')">
-                    <div style="margin-top: 10px; color: #aaa; font-size: 0.9em;">
-                        <i class="fas fa-expand-alt"></i> Click QR code to enlarge
-                    </div>
-                    
-                    <div class="upi-id-container">
-                        <div class="upi-id-label">Or send payment to UPI ID:</div>
-                        <div class="upi-id-value">
-                            <div class="upi-id-text">${upiId}</div>
-                            <button class="copy-upi-btn" onclick="copyUPIId()">
-                                <i class="fas fa-copy"></i> Copy
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="payment-instructions">
-                        <p><strong>Payment Instructions:</strong></p>
-                        <p>1. Scan the QR code or use UPI ID to make payment of ₹${selectedTournament.entryFee || 0}</p>
-                        <p>2. Take a screenshot of successful payment</p>
-                        <p>3. Upload screenshot below</p>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label>Payment Screenshot (JPG/PNG, max 5MB)</label>
-                    
-                    <div class="file-upload-container" id="payment-upload-container" 
-                         onclick="document.getElementById('payment-screenshot-file').click()"
-                         ondragover="event.preventDefault(); this.classList.add('dragover');"
-                         ondragleave="this.classList.remove('dragover');"
-                         ondrop="event.preventDefault(); this.classList.remove('dragover'); handleDroppedFile(event);">
-                        <div class="file-upload-icon">
-                            <i class="fas fa-cloud-upload-alt"></i>
-                        </div>
-                        <div class="file-upload-text">
-                            Click or drag & drop to upload payment screenshot<br>
-                            <small>JPG, PNG (Max 5MB)</small>
-                        </div>
-                        <img id="payment-screenshot-preview" class="uploaded-image-preview" style="display: none;">
-                    </div>
-                    
-                    <input type="file" id="payment-screenshot-file" accept="image/*" style="display: none;" 
-                           onchange="handleFileSelection(event, 'payment-screenshot-url')">
-                    
-                    <input type="hidden" id="payment-screenshot-url" value="">
-                    
-                    <small style="color: #666; font-size: 0.85em;">Upload screenshot of successful payment</small>
-                </div>
-                
-                <div style="text-align: center; margin-top: 15px;">
-                    <button class="auth-button" onclick="submitRegistration()" id="submit-registration-btn">
-                        <i class="fas fa-check-circle"></i> Submit Registration
-                    </button>
-                </div>
-            `;
-            
-            modal.style.display = 'block';
+            // Wallet payment flow for tournament registration
+            processTournamentRegistrationWithWallet();
         }
 
-        // Show fullscreen QR code
-        function showFullscreenQR(qrCodeUrl, upiId) {
-            const modal = document.getElementById('fullscreen-qr-modal');
-            const qrImage = document.getElementById('fullscreen-qr-image');
-            const upiIdText = document.getElementById('upi-id-text');
-            
-            qrImage.src = qrCodeUrl;
-            upiIdText.textContent = upiId;
-            
-            // Reset copy button
-            const copyBtn = document.getElementById('copy-upi-btn');
-            copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy';
-            copyBtn.classList.remove('copied');
-            
-            modal.style.display = 'block';
-        }
-
-        // Handle dropped files
-        async function handleDroppedFile(event) {
-            event.preventDefault();
-            const file = event.dataTransfer.files[0];
-            if (file) {
-                const input = document.getElementById('payment-screenshot-file');
-                const dataTransfer = new DataTransfer();
-                dataTransfer.items.add(file);
-                input.files = dataTransfer.files;
-                
-                // Trigger the file selection handler
-                await handleFileSelection({ target: input }, 'payment-screenshot-url');
+        async function payTournamentEntry(tournamentId, amount) {
+            const userId = getCurrentUserId();
+            const response = await fetch(`${BACKEND_BASE_URL}/api/payment/pay-tournament`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId, tournamentId, amount })
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.message || 'Tournament payment failed.');
             }
+            return data;
         }
 
-        async function submitRegistration() {
-            // Check if payment screenshot is uploaded
-            if (!paymentScreenshotUrl) {
-                showToast('Please upload payment screenshot.', 'error');
+        async function processTournamentRegistrationWithWallet() {
+            const entryFee = Number(selectedTournament?.entryFee || 0);
+            await fetchWalletBalance();
+
+            if (walletBalance < entryFee) {
+                showToast('Insufficient Balance', 'error');
+                const walletNav = document.querySelector('.nav-item[data-section="wallet-section"]');
+                showSection('wallet-section', walletNav);
+                addMoneyToWallet(Math.max(10, Math.min(10000, entryFee - walletBalance)));
                 return;
             }
-            
+
+            try {
+                await payTournamentEntry(selectedTournament.id, entryFee);
+                await submitRegistration(true);
+                showToast('Successfully joined tournament!', 'success');
+            } catch (error) {
+                console.error('Tournament wallet payment error:', error);
+                showToast(error.message || 'Wallet payment failed for tournament.', 'error');
+            }
+        }
+
+        async function submitRegistration(isWalletPayment = false) {
             // Collect registration data
             const email = document.getElementById('register-email').value;
             const mobile = document.getElementById('register-mobile').value.trim();
@@ -4561,12 +4828,13 @@
                         mobile: mobile,
                         teamName: teamName,
                         playerDetails: playerDetails,
-                        paymentScreenshotUrl: paymentScreenshotUrl,
-                        status: 'pending',
+                        paymentScreenshotUrl: null,
+                        status: 'approved',
                         rejectionMessage: null, // Clear any previous rejection message
+                        paymentMethod: 'wallet',
                         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
-                    showToast('Registration updated successfully!', 'success');
+                    showToast('Tournament joined successfully!', 'success');
                 } else {
                     // Create new registration
                     const registrationData = {
@@ -4579,27 +4847,32 @@
                         mobile: mobile,
                         teamName: teamName,
                         playerDetails: playerDetails,
-                        paymentScreenshotUrl: paymentScreenshotUrl,
-                        status: 'pending',
+                        paymentScreenshotUrl: null,
+                        status: 'approved',
+                        paymentMethod: 'wallet',
                         registeredAt: firebase.firestore.FieldValue.serverTimestamp()
                     };
                     
                     const docRef = await db.collection("tournament_registrations").add(registrationData);
                     registrationDocId = docRef.id;
-                    showToast('Registration submitted successfully!', 'success');
+                    showToast('Tournament joined successfully!', 'success');
+                }
+
+                // Keep participant count in sync immediately for approved wallet registrations
+                if (!previousRegistration || previousRegistration.status !== 'approved') {
+                    await db.collection("tournaments").doc(selectedTournament.id).update({
+                        participants: firebase.firestore.FieldValue.increment(1)
+                    });
                 }
                 
-                // Close payment modal
-                closeModal('payment-modal');
+                // Close registration modal
+                closeModal('registration-modal');
                 
                 // Show success modal
                 document.getElementById('success-modal').style.display = 'block';
-                
-                // Show pending verification popup
-                setTimeout(() => {
-                    document.getElementById('success-modal').style.display = 'none';
-                    showPendingVerificationPopup();
-                }, 2000);
+                document.querySelector('#success-modal p').textContent = 'You have joined the tournament!';
+
+                await Promise.all([fetchWalletBalance(), fetchWalletTransactions(), loadTournaments(), fetchProfileData()]);
                 
             } catch (error) {
                 console.error("Error submitting registration:", error);
@@ -4608,7 +4881,7 @@
                 const submitBtn = document.getElementById('submit-registration-btn');
                 if (submitBtn) {
                     submitBtn.disabled = false;
-                    submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> Submit Registration';
+                    submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> Join Tournament';
                 }
             }
         }
@@ -4693,6 +4966,15 @@
                 document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
                 navElement.classList.add('active');
             }
+
+            if (sectionId === 'wallet-section') {
+                fetchWalletBalance();
+                fetchWalletTransactions();
+            } else if (sectionId === 'referral-section') {
+                fetchReferralData();
+            } else if (sectionId === 'profile-section') {
+                fetchProfileData();
+            }
             
             toggleSidebar(false);
         }
@@ -4775,6 +5057,10 @@
                 if (autoLogoutTimer) {
                     clearTimeout(autoLogoutTimer);
                     autoLogoutTimer = null;
+                }
+                if (walletBalanceInterval) {
+                    clearInterval(walletBalanceInterval);
+                    walletBalanceInterval = null;
                 }
                 
                 // Remove real-time listeners
