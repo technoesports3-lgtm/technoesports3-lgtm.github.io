@@ -3338,7 +3338,6 @@
                 
                 const referralDisplay = document.getElementById('referral-code-display');
 
-                // If referral code doesn't exist, generate and save it immediately
                 if (!code) {
                     if (referralDisplay) referralDisplay.textContent = 'Generating...';
                     
@@ -3678,68 +3677,24 @@
         }
 
         // --- Google Authentication Functions ---
-        async function handleGoogleLogin() {
-            try {
-                setButtonLoading('google-login-btn', true);
-
-                // Initialize Google Sign-In provider
-                const provider = new firebase.auth.GoogleAuthProvider();
-                
-                // Sign in with redirect or popup (using popup for mobile compatibility)
-                const result = await auth.signInWithPopup(provider);
-                
-                if (result.user) {
-                    document.getElementById('professional-auth-section').style.display = 'none';
-                    document.getElementById('loading-screen').style.display = 'flex';
-                    showToast("Google login successful!", 'success');
-                }
-            } catch (error) {
-                console.error("Google login error:", error);
-                let errorMessage = error.message;
-                
-                if (error.code === 'auth/popup-closed-by-user') {
-                    showToast("Login cancelled", 'info');
-                } else if (error.code === 'auth/popup-blocked') {
-                    showToast("Please enable popups for this website", 'error');
-                } else {
-                    showToast("Google Login Error: " + errorMessage, 'error');
-                }
-            } finally {
-                setButtonLoading('google-login-btn', false);
-            }
-        }
-
         async function handleGoogleSignUp() {
             try {
+                const enteredReferralCode = document.getElementById('signup-referral-code').value.trim();
                 setButtonLoading('google-signup-btn', true);
 
-                // Initialize Google Sign-In provider
                 const provider = new firebase.auth.GoogleAuthProvider();
-                
-                // Sign in with popup
                 const result = await auth.signInWithPopup(provider);
                 const user = result.user;
                 
                 if (user) {
-                    // Check if user already exists in Firestore
                     const userDoc = await db.collection("users").doc(user.uid).get();
                     
                     if (!userDoc.exists) {
-                        // New user - create user document
                         const displayName = user.displayName || user.email.split('@')[0];
-                        let generatedReferralCode = '';
-
-                        try {
-                            const referralResponse = await fetch('https://techno-esports-backend.onrender.com/api/wallet/generate-referral', {
-                                method: 'POST',
-                                headers: {'Content-Type': 'application/json'},
-                                body: JSON.stringify({userId: user.uid, username: user.displayName})
-                            });
-                            const referralData = await referralResponse.json().catch(() => ({}));
-                            generatedReferralCode = referralData.referralCode || referralData.code || referralData.data?.referralCode || '';
-                        } catch(e) {
-                            console.log('Referral generate error:', e);
-                        }
+                        
+                        const prefix = (displayName || 'TEC').substring(0, 3).toUpperCase().replace(/[^A-Z]/g, 'TEC');
+                        const randomNum = Math.floor(10000 + Math.random() * 90000); 
+                        const generatedReferralCode = `${prefix}${randomNum}`;
                         
                         await db.collection("users").doc(user.uid).set({
                             username: displayName,
@@ -3752,6 +3707,16 @@
                             registeredAt: firebase.firestore.FieldValue.serverTimestamp(),
                             googleAuth: true
                         });
+
+                        if (enteredReferralCode) {
+                            try {
+                                await applyReferralForNewUser(user.uid, enteredReferralCode);
+                                showToast("Referral code applied successfully!", 'success');
+                            } catch (applyError) {
+                                console.error("Google signup referral error:", applyError);
+                                showToast(applyError.message || "Failed to apply referral code.", 'error');
+                            }
+                        }
                         
                         showToast("Account created successfully with Google!", 'success');
                     } else {
@@ -3774,6 +3739,59 @@
                 }
             } finally {
                 setButtonLoading('google-signup-btn', false);
+            }
+        }
+
+        async function handleGoogleLogin() {
+            try {
+                setButtonLoading('google-login-btn', true);
+
+                const provider = new firebase.auth.GoogleAuthProvider();
+                const result = await auth.signInWithPopup(provider);
+                const user = result.user;
+                
+                if (user) {
+                    const userDoc = await db.collection("users").doc(user.uid).get();
+                    
+                    if (!userDoc.exists) {
+                        const displayName = user.displayName || user.email.split('@')[0];
+                        
+                        const prefix = (displayName || 'TEC').substring(0, 3).toUpperCase().replace(/[^A-Z]/g, 'TEC');
+                        const randomNum = Math.floor(10000 + Math.random() * 90000); 
+                        const generatedReferralCode = `${prefix}${randomNum}`;
+                        
+                        await db.collection("users").doc(user.uid).set({
+                            username: displayName,
+                            phone: '',
+                            email: user.email,
+                            role: 'user',
+                            isBlocked: false,
+                            tournamentsParticipated: 0,
+                            referralCode: generatedReferralCode,
+                            registeredAt: firebase.firestore.FieldValue.serverTimestamp(),
+                            googleAuth: true
+                        });
+                        showToast("Account created successfully with Google!", 'success');
+                    } else {
+                        showToast("Google login successful!", 'success');
+                    }
+                    
+                    document.getElementById('professional-auth-section').style.display = 'none';
+                    document.getElementById('loading-screen').style.display = 'flex';
+                }
+            } catch (error) {
+                console.error("Google login error:", error);
+                let errorMessage = error.message;
+                
+                if (error.code === 'auth/popup-closed-by-user') {
+                    showToast("Login cancelled", 'info');
+                } else if (error.code === 'auth/popup-blocked') {
+                    showToast("Please enable popups for this website", 'error');
+                } else {
+                    showToast("Google Login Error: " + errorMessage, 'error');
+                }
+            } finally {
+                setButtonLoading('google-login-btn', false);
             }
         }
 
