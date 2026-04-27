@@ -3025,6 +3025,20 @@
                             <p style="color: #888; text-align: center;">Loading transactions...</p>
                         </div>
                     </div>
+
+                    <div style="background: rgba(255,255,255,0.03); border-radius: 12px; padding: 14px; margin-top: 14px;">
+                        <h3 style="margin: 0 0 12px; border-left: 4px solid #ff4655; padding-left: 10px;">WITHDRAW FUNDS</h3>
+                        <div class="form-group">
+                            <label>Amount</label>
+                            <input type="number" id="withdraw-amount" min="50" placeholder="Minimum 50">
+                        </div>
+                        <div class="form-group">
+                            <label>UPI ID</label>
+                            <input type="text" id="withdraw-upi" placeholder="Enter your UPI ID example: name@upi">
+                        </div>
+                        <button id="withdraw-btn" style="width: 100%;" onclick="requestWithdrawal()">Request Withdrawal</button>
+                        <div style="color: #aaa; font-size: 0.85em; margin-top: 10px;">Withdrawals are processed within 24 hours to your UPI ID</div>
+                    </div>
                 </section>
 
                 <!-- Referral Section -->
@@ -4050,6 +4064,53 @@
                 showToast(reason, 'error');
             });
             rzp.open();
+        }
+
+        async function requestWithdrawal() {
+            const userId = getCurrentUserId();
+            const amount = Number(document.getElementById('withdraw-amount').value);
+            const upiId = document.getElementById('withdraw-upi').value.trim();
+
+            if (!amount || amount < 50) {
+                showToast('Minimum withdrawal is 50', 'error');
+                return;
+            }
+            if (!upiId) {
+                showToast('Please enter UPI ID', 'error');
+                return;
+            }
+
+            try {
+                const btn = document.getElementById('withdraw-btn');
+                btn.disabled = true;
+                btn.textContent = 'Submitting...';
+
+                const response = await fetch('https://techno-esports-backend.onrender.com/api/wallet/withdraw', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        userId, amount, upiId
+                    })
+                });
+                const data = await response.json();
+
+                if (!response.ok) throw new Error(data.message);
+
+                showToast('Withdrawal request submitted! We will process within 24 hours.', 'success');
+                document.getElementById('withdraw-amount').value = '';
+                document.getElementById('withdraw-upi').value = '';
+                await fetchWalletBalance();
+                await fetchWalletTransactions();
+
+            } catch (error) {
+                showToast(error.message || 'Withdrawal failed', 'error');
+            } finally {
+                const btn = document.getElementById('withdraw-btn');
+                btn.disabled = false;
+                btn.textContent = 'Request Withdrawal';
+            }
         }
 
         async function fetchProfileData() {
