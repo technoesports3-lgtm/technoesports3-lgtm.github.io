@@ -2705,10 +2705,9 @@
 
 <body>
 
-<!-- ONBOARDING SCREEN (VIDEO + GET STARTED) -->
 <div id="onboarding-screen" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:black; z-index:999999; flex-direction:column; align-items:center; justify-content:center;">
     <video id="intro-video" style="width:100%; max-width:450px; height:100vh; object-fit:cover; display:none;" playsinline webkit-playsinline>
-        <source src="https://technoesports3-lgtm.github.io/Techno-E-sports-/Iv_0_20260404091656.mp4" type="video/mp4">
+        <source src="https://technoesports3-lgtm.github.io/lv_0_20260404091656.mp4" type="video/mp4">
     </video>
     <button id="get-started-btn" style="background:linear-gradient(135deg, #ff4655 0%, #d91a2a 100%); color:white; border:none; padding:16px 50px; border-radius:30px; font-size:1.1em; font-weight:700; text-transform:uppercase; letter-spacing:2px; box-shadow:0 8px 25px rgba(255,70,85,0.5); cursor:pointer;">
         GET STARTED
@@ -5765,125 +5764,78 @@
             }
         }
 
-        function checkFirstTimeUser() {
+        // ========== FORCE VIDEO INTRO - FINAL WORKING CODE ==========
+        (function() {
             const hasSeenIntro = localStorage.getItem('techno_intro_seen');
             if (!hasSeenIntro) {
-                // Force hide any loading or auth elements
                 document.getElementById('loading-screen').style.display = 'none';
                 document.getElementById('professional-auth-section').style.display = 'none';
                 document.getElementById('main-app').style.display = 'none';
 
-                // Show onboarding
                 const onboarding = document.getElementById('onboarding-screen');
-                onboarding.style.display = 'flex';
-
-                const btn = document.getElementById('get-started-btn');
-                const video = document.getElementById('intro-video');
-
-                // When user clicks GET STARTED
-                btn.onclick = () => {
-                    btn.style.display = 'none';
-                    video.style.display = 'block';
-                    video.muted = false; // sound enabled
-                    video.play().catch(e => console.log("Play error:", e));
-                };
-
-                // When video ends, go to login
-                video.addEventListener('ended', () => {
-                    localStorage.setItem('techno_intro_seen', 'true');
-                    onboarding.style.display = 'none';
-                    document.getElementById('professional-auth-section').style.display = 'flex';
-                });
+                if (onboarding) {
+                    onboarding.style.display = 'flex';
+                    const btn = document.getElementById('get-started-btn');
+                    const video = document.getElementById('intro-video');
+                    btn.onclick = () => {
+                        btn.style.display = 'none';
+                        video.style.display = 'block';
+                        video.muted = false;
+                        video.play().catch(e => {
+                            // If autoplay blocked, show unmute hint
+                            const hint = document.createElement('div');
+                            hint.textContent = '🔊 Tap for Sound';
+                            hint.style.cssText = 'position:absolute; bottom:20px; right:20px; background:rgba(0,0,0,0.7); padding:8px 12px; border-radius:20px; cursor:pointer; z-index:1000000;';
+                            hint.onclick = () => { video.muted = false; video.play(); hint.remove(); };
+                            onboarding.appendChild(hint);
+                        });
+                    };
+                    video.addEventListener('ended', () => {
+                        localStorage.setItem('techno_intro_seen', 'true');
+                        onboarding.style.display = 'none';
+                        document.getElementById('professional-auth-section').style.display = 'flex';
+                    });
+                }
             }
-        }
+        })();
 
-        function skipIntro() {
-            localStorage.setItem('techno_intro_seen', 'true');
-            document.getElementById('onboarding-screen').style.display = 'none';
-            document.getElementById('loading-screen').style.display = 'none';
-            document.getElementById('professional-auth-section').style.display = 'flex';
-            const video = document.getElementById('intro-video');
-            if (video) video.pause();
-        }
-
-        // --- Firebase Auth State Listener ---
         auth.onAuthStateChanged(async user => {
             authStateChecked = true;
-
             if (user) {
                 try {
                     const doc = await db.collection("users").doc(user.uid).get();
                     const userData = doc.data() || {};
-
-                    if (userData.isBlocked) {
-                        auth.signOut();
-                        showToast("Your account has been blocked by the administrator.", 'error');
-                        return;
-                    }
-
+                    if (userData.isBlocked) { auth.signOut(); showToast("Your account has been blocked.", 'error'); return; }
                     currentUser = user;
-                    
-                    // Check app update status before initializing
                     await loadAppConfig();
-                    
-                    if (checkAppUpdate()) {
-                        // App is blocked, show update modal
-                        document.getElementById('loading-screen').style.display = 'none';
-                        return;
-                    }
-                    
+                    if (checkAppUpdate()) { document.getElementById('loading-screen').style.display = 'none'; return; }
                     initializeApp(user, userData);
-
-                } catch (error) {
-                    console.error("Error fetching user data:", error);
-                    auth.signOut();
-                    return;
-                }
+                } catch (error) { console.error(error); auth.signOut(); return; }
             } else {
-                if (!localStorage.getItem('techno_intro_seen')) return; // wait for intro
-
-                currentUser = null;
-                // Stop all timers
-                stopAllTimers();
-                
-                // Clear auto logout timer
-                if (autoLogoutTimer) {
-                    clearTimeout(autoLogoutTimer);
-                    autoLogoutTimer = null;
+                if (localStorage.getItem('techno_intro_seen')) {
+                    currentUser = null;
+                    stopAllTimers();
+                    if (autoLogoutTimer) clearTimeout(autoLogoutTimer);
+                    if (walletBalanceInterval) clearInterval(walletBalanceInterval);
+                    if (tournamentListener) tournamentListener();
+                    if (registrationListener) registrationListener();
+                    if (appConfigListener) appConfigListener();
+                    if (appUpdateListener) appUpdateListener();
+                    document.getElementById('loading-screen').style.display = 'none';
+                    document.getElementById('main-app').style.display = 'none';
+                    document.getElementById('professional-auth-section').style.display = 'flex';
                 }
-                if (walletBalanceInterval) {
-                    clearInterval(walletBalanceInterval);
-                    walletBalanceInterval = null;
-                }
-                
-                // Remove real-time listeners
-                if (tournamentListener) tournamentListener();
-                if (registrationListener) registrationListener();
-                if (appConfigListener) appConfigListener();
-                if (appUpdateListener) appUpdateListener();
-                
-                document.getElementById('loading-screen').style.display = 'none';
-                document.getElementById('main-app').style.display = 'none';
-
-                document.getElementById(
-                    'professional-auth-section'
-                ).style.display = 'flex';
             }
         });
 
-        checkFirstTimeUser();
-
-        // Fallback: If auth state check takes too long, show auth section after 3 seconds
         setTimeout(() => {
             if (!authStateChecked) {
                 document.getElementById('loading-screen').style.display = 'none';
-                checkFirstTimeUser();
-                const hasSeenIntro = localStorage
-                    .getItem('techno_intro_seen');
-                if (hasSeenIntro) {
-                    document.getElementById(
-                        'professional-auth-section'
-                    ).style.display = 'flex';
+                if (localStorage.getItem('techno_intro_seen')) {
+                    document.getElementById('professional-auth-section').style.display = 'flex';
+                } else {
+                    const onboarding = document.getElementById('onboarding-screen');
+                    if (onboarding && onboarding.style.display !== 'flex') onboarding.style.display = 'flex';
                 }
             }
         }, 3000);
