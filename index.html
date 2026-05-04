@@ -2735,6 +2735,45 @@
             </div>
         </div>
 
+        <div id="onboarding-screen" style="display:none;">
+    <div style="position:fixed; top:0; left:0; 
+    width:100%; height:100%; background:#000; 
+    z-index:99999; display:flex; 
+    flex-direction:column; align-items:center; 
+    justify-content:center;">
+    
+        <!-- Video Player -->
+        <video id="intro-video" 
+        style="width:100%; max-width:450px; 
+        height:100vh; object-fit:cover;"
+        playsinline webkit-playsinline>
+            <source src="https://raw.githubusercontent.com/technoesports3-lgtm/Techno-E-sports-/main/lv_0_20260404091656__1_.mp4" 
+            type="video/mp4">
+        </video>
+        
+        <!-- Get Started Button - 
+        shows after 3 seconds -->
+        <div id="get-started-btn-container" 
+        style="position:absolute; bottom:60px; 
+        width:100%; text-align:center; 
+        display:none;">
+            <button onclick="skipIntro()" 
+            style="background:linear-gradient(
+            135deg, #ff4655 0%, #d91a2a 100%);
+            color:white; border:none; 
+            padding:16px 50px; border-radius:30px;
+            font-size:1.1em; font-weight:700;
+            text-transform:uppercase; 
+            letter-spacing:2px;
+            box-shadow: 0 8px 25px 
+            rgba(255,70,85,0.5);
+            cursor:pointer;">
+                GET STARTED
+            </button>
+        </div>
+    </div>
+</div>
+
         <!-- Professional Login/Registration Screen -->
         <div id="professional-auth-section" class="professional-auth-container">
             <!-- Animated background elements -->
@@ -5755,6 +5794,64 @@
             }
         }
 
+        function checkFirstTimeUser() {
+            const hasSeenIntro = localStorage.getItem(
+                'techno_intro_seen'
+            );
+
+            if (!hasSeenIntro) {
+                // First time user - show intro
+                document.getElementById(
+                    'loading-screen'
+                ).style.display = 'none';
+                document.getElementById(
+                    'onboarding-screen'
+                ).style.display = 'block';
+
+                const video = document.getElementById(
+                    'intro-video'
+                );
+
+                // Try to autoplay with sound
+                video.muted = false;
+                video.play().catch(() => {
+                    // If autoplay blocked, play muted
+                    video.muted = true;
+                    video.play();
+                });
+
+                // Show GET STARTED button after 3 sec
+                setTimeout(() => {
+                    document.getElementById(
+                        'get-started-btn-container'
+                    ).style.display = 'block';
+                }, 3000);
+
+                // Auto skip when video ends
+                video.addEventListener('ended', () => {
+                    skipIntro();
+                });
+
+            }
+        }
+
+        function skipIntro() {
+            // Mark as seen
+            localStorage.setItem(
+                'techno_intro_seen', 'true'
+            );
+
+            // Hide onboarding
+            document.getElementById(
+                'onboarding-screen'
+            ).style.display = 'none';
+
+            // Show auth screen
+            document.getElementById(
+                'professional-auth-section'
+            ).style.display = 'flex';
+        }
+
         // --- Firebase Auth State Listener ---
         auth.onAuthStateChanged(async user => {
             authStateChecked = true;
@@ -5810,8 +5907,18 @@
                 if (appUpdateListener) appUpdateListener();
                 
                 document.getElementById('loading-screen').style.display = 'none';
-                document.getElementById('professional-auth-section').style.display = 'flex';
                 document.getElementById('main-app').style.display = 'none';
+
+                const hasSeenIntro = localStorage.getItem(
+                    'techno_intro_seen'
+                );
+                if (!hasSeenIntro) {
+                    checkFirstTimeUser();
+                } else {
+                    document.getElementById(
+                        'professional-auth-section'
+                    ).style.display = 'flex';
+                }
             }
         });
 
@@ -5819,8 +5926,14 @@
         setTimeout(() => {
             if (!authStateChecked) {
                 document.getElementById('loading-screen').style.display = 'none';
-                document.getElementById('professional-auth-section').style.display = 'flex';
-                document.getElementById('main-app').style.display = 'none';
+                checkFirstTimeUser();
+                const hasSeenIntro = localStorage
+                    .getItem('techno_intro_seen');
+                if (hasSeenIntro) {
+                    document.getElementById(
+                        'professional-auth-section'
+                    ).style.display = 'flex';
+                }
             }
         }, 3000);
     </script>
