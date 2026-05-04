@@ -25,6 +25,14 @@
   });
 </script>
 <!-- OneSignal SDK Integration End -->
+<div id="onboarding-screen" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#000; z-index:99999; flex-direction:column; align-items:center; justify-content:center;">
+    <video id="intro-video" style="width:100%; max-width:450px; height:100vh; object-fit:cover; display:none;" playsinline webkit-playsinline>
+        <source src="https://technoesports3-lgtm.github.io/Techno-E-sports-/Iv_0_20260404091656.mp4" type="video/mp4">
+    </video>
+    <button id="get-started-btn" style="background:linear-gradient(135deg, #ff4655 0%, #d91a2a 100%); color:white; border:none; padding:16px 50px; border-radius:30px; font-size:1.1em; font-weight:700; text-transform:uppercase; letter-spacing:2px; box-shadow:0 8px 25px rgba(255,70,85,0.5); cursor:pointer;">
+        GET STARTED
+    </button>
+</div>
        <style>
         /* Base Styling */
         body {
@@ -2733,15 +2741,6 @@
                     Please update the app to continue using our services.
                 </div>
             </div>
-        </div>
-
-        <div id="onboarding-screen" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#000; z-index:99999; flex-direction:column; align-items:center; justify-content:center;">
-            <video id="intro-video" style="width:100%; max-width:450px; height:100vh; object-fit:cover; display:none;" playsinline webkit-playsinline>
-                <source src="https://technoesports3-lgtm.github.io/Techno-E-sports-/Iv_0_20260404091656.mp4" type="video/mp4">
-            </video>
-            <button id="get-started-btn" style="background:linear-gradient(135deg, #ff4655 0%, #d91a2a 100%); color:white; border:none; padding:16px 50px; border-radius:30px; font-size:1.1em; font-weight:700; text-transform:uppercase; letter-spacing:2px; box-shadow:0 8px 25px rgba(255,70,85,0.5); cursor:pointer;">
-                GET STARTED
-            </button>
         </div>
 
         <!-- Professional Login/Registration Screen -->
@@ -5768,18 +5767,16 @@
             const hasSeenIntro = localStorage.getItem('techno_intro_seen');
             if (!hasSeenIntro) {
                 document.getElementById('loading-screen').style.display = 'none';
-                document.getElementById('onboarding-screen').style.display = 'flex';
-
+                const onboarding = document.getElementById('onboarding-screen');
+                onboarding.style.display = 'flex';
                 const btn = document.getElementById('get-started-btn');
                 const video = document.getElementById('intro-video');
-
                 btn.onclick = () => {
                     btn.style.display = 'none';
                     video.style.display = 'block';
                     video.muted = false;
                     video.play().catch(e => console.warn(e));
                 };
-
                 video.addEventListener('ended', () => skipIntro());
             }
         }
