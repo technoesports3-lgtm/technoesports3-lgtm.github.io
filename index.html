@@ -3316,6 +3316,23 @@
             }
         };
 
+        // Payment result check
+        const urlParams = new URLSearchParams(window.location.search);
+        const paymentResult = urlParams.get('payment');
+        if (paymentResult === 'success') {
+            setTimeout(() => {
+                showToast('Payment successful! Wallet credited.', 'success');
+                fetchWalletBalance();
+                fetchWalletTransactions();
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }, 2500);
+        } else if (paymentResult === 'failed') {
+            setTimeout(() => {
+                showToast('Payment failed. Please try again.', 'error');
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }, 2500);
+        }
+
         // Token persistence - Set to LOCAL (won't logout on page refresh)
         auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
             .then(() => {
@@ -4111,7 +4128,7 @@
                 return;
             }
             if (!Number.isFinite(amount) || amount < 10 || amount > 10000) {
-                showToast('Amount must be between ₹10 and ₹10000.', 'error');
+                showToast('Amount must be between Rs.10 and Rs.10000.', 'error');
                 return;
             }
 
@@ -4133,19 +4150,16 @@
                     throw new Error(data.message || 'Failed to create UPI order');
                 }
 
-                showToast('Redirecting to UPI payment...', 'success');
+                showToast('Opening payment page...', 'success');
                 window.open(data.paymentUrl, '_blank');
 
-                // Poll wallet balance every 10 seconds for 2 minutes
-                // to reflect payment once webhook credits the wallet
                 let pollCount = 0;
                 const pollInterval = setInterval(async () => {
                     pollCount++;
                     await fetchWalletBalance();
                     await fetchWalletTransactions();
-                    if (pollCount >= 12) {
+                    if (pollCount >= 18) {
                         clearInterval(pollInterval);
-                        showToast('If payment was successful, wallet will update shortly.', 'info');
                     }
                 }, 10000);
 
