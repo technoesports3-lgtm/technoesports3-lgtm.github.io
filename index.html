@@ -4156,11 +4156,17 @@
                 const data = await response.json();
 
                 if (!data.success) {
-                    throw new Error(data.message || 'Failed to create UPI order');
+                    showToast(data.message || 'Failed to create UPI order', 'error');
+                    return;
+                }
+
+                if (!data.paymentUrl) {
+                    showToast('Payment URL not found in response.', 'error');
+                    return;
                 }
 
                 showToast('Opening payment page...', 'success');
-                window.open(data.paymentUrl, '_blank');
+                window.location.href = data.paymentUrl;
 
                 let pollCount = 0;
                 const pollInterval = setInterval(async () => {
