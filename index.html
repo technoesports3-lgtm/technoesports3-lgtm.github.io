@@ -2751,6 +2751,9 @@
             type="video/mp4">
         </video>
         
+        <!-- Unmute Hint -->
+        <div id="unmute-hint" style="position:absolute; top:20px; right:20px; background:rgba(0,0,0,0.6); padding:8px 12px; border-radius:20px; font-size:12px; cursor:pointer; z-index:100000;">🔇 Unmute</div>
+        
         <!-- Get Started Button - 
         shows after video completes or 3 seconds -->
         <div id="get-started-btn-container" 
@@ -5795,61 +5798,58 @@
         }
 
         function checkFirstTimeUser() {
-            const hasSeenIntro = localStorage.getItem(
-                'techno_intro_seen'
-            );
-
+            const hasSeenIntro = localStorage.getItem('techno_intro_seen');
             if (!hasSeenIntro) {
-                // First time user - show intro
-                document.getElementById(
-                    'loading-screen'
-                ).style.display = 'none';
-                document.getElementById(
-                    'onboarding-screen'
-                ).style.display = 'block';
+                document.getElementById('loading-screen').style.display = 'none';
+                document.getElementById('onboarding-screen').style.display = 'block';
 
-                const video = document.getElementById(
-                    'intro-video'
-                );
+                const video = document.getElementById('intro-video');
+                video.muted = false; // we want audio
 
-                // Try to autoplay with sound
-                video.muted = false;
-                video.play().catch(() => {
-                    // If autoplay blocked, play muted
-                    video.muted = true;
-                    video.play();
-                });
+                const playPromise = video.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(() => {
+                        // Autoplay blocked – add an unmute button
+                        const btnContainer = document.getElementById('get-started-btn-container');
+                        const unmuteBtn = document.createElement('button');
+                        unmuteBtn.textContent = '🔊 Tap to Enable Sound';
+                        unmuteBtn.style.cssText = 'background:#ff4655; color:white; border:none; padding:10px 20px; border-radius:30px; margin-bottom:10px; cursor:pointer;';
+                        unmuteBtn.onclick = () => {
+                            video.muted = false;
+                            video.play();
+                            unmuteBtn.remove();
+                        };
+                        btnContainer.parentNode.insertBefore(unmuteBtn, btnContainer);
+                    });
+                }
 
-                // Show GET STARTED button after 3 sec
+                // Show GET STARTED button after 3 seconds
                 setTimeout(() => {
-                    document.getElementById(
-                        'get-started-btn-container'
-                    ).style.display = 'block';
+                    document.getElementById('get-started-btn-container').style.display = 'block';
                 }, 3000);
 
                 // Auto skip when video ends
-                video.addEventListener('ended', () => {
-                    skipIntro();
-                });
-
+                video.addEventListener('ended', () => skipIntro());
+                
+                // Unmute hint click handler
+                const unmuteHint = document.getElementById('unmute-hint');
+                if (unmuteHint) {
+                    unmuteHint.addEventListener('click', () => {
+                        video.muted = false;
+                        video.play();
+                        unmuteHint.style.display = 'none';
+                    });
+                }
             }
         }
 
         function skipIntro() {
-            // Mark as seen
-            localStorage.setItem(
-                'techno_intro_seen', 'true'
-            );
-
-            // Hide onboarding
-            document.getElementById(
-                'onboarding-screen'
-            ).style.display = 'none';
-
-            // Show auth screen
-            document.getElementById(
-                'professional-auth-section'
-            ).style.display = 'flex';
+            localStorage.setItem('techno_intro_seen', 'true');
+            document.getElementById('onboarding-screen').style.display = 'none';
+            document.getElementById('loading-screen').style.display = 'none';
+            document.getElementById('professional-auth-section').style.display = 'flex';
+            const video = document.getElementById('intro-video');
+            if (video) video.pause();
         }
 
         // --- Firebase Auth State Listener ---
