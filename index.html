@@ -25,14 +25,6 @@
   });
 </script>
 <!-- OneSignal SDK Integration End -->
-<div id="onboarding-screen" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#000; z-index:99999; flex-direction:column; align-items:center; justify-content:center;">
-    <video id="intro-video" style="width:100%; max-width:450px; height:100vh; object-fit:cover; display:none;" playsinline webkit-playsinline>
-        <source src="https://technoesports3-lgtm.github.io/Techno-E-sports-/Iv_0_20260404091656.mp4" type="video/mp4">
-    </video>
-    <button id="get-started-btn" style="background:linear-gradient(135deg, #ff4655 0%, #d91a2a 100%); color:white; border:none; padding:16px 50px; border-radius:30px; font-size:1.1em; font-weight:700; text-transform:uppercase; letter-spacing:2px; box-shadow:0 8px 25px rgba(255,70,85,0.5); cursor:pointer;">
-        GET STARTED
-    </button>
-</div>
        <style>
         /* Base Styling */
         body {
@@ -2712,6 +2704,16 @@
 </head>
 
 <body>
+
+<!-- ONBOARDING SCREEN (VIDEO + GET STARTED) -->
+<div id="onboarding-screen" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:black; z-index:999999; flex-direction:column; align-items:center; justify-content:center;">
+    <video id="intro-video" style="width:100%; max-width:450px; height:100vh; object-fit:cover; display:none;" playsinline webkit-playsinline>
+        <source src="https://technoesports3-lgtm.github.io/Techno-E-sports-/Iv_0_20260404091656.mp4" type="video/mp4">
+    </video>
+    <button id="get-started-btn" style="background:linear-gradient(135deg, #ff4655 0%, #d91a2a 100%); color:white; border:none; padding:16px 50px; border-radius:30px; font-size:1.1em; font-weight:700; text-transform:uppercase; letter-spacing:2px; box-shadow:0 8px 25px rgba(255,70,85,0.5); cursor:pointer;">
+        GET STARTED
+    </button>
+</div>
 
     <div class="app-container">
         <!-- Professional Toast Notification -->
@@ -5766,18 +5768,32 @@
         function checkFirstTimeUser() {
             const hasSeenIntro = localStorage.getItem('techno_intro_seen');
             if (!hasSeenIntro) {
+                // Force hide any loading or auth elements
                 document.getElementById('loading-screen').style.display = 'none';
+                document.getElementById('professional-auth-section').style.display = 'none';
+                document.getElementById('main-app').style.display = 'none';
+
+                // Show onboarding
                 const onboarding = document.getElementById('onboarding-screen');
                 onboarding.style.display = 'flex';
+
                 const btn = document.getElementById('get-started-btn');
                 const video = document.getElementById('intro-video');
+
+                // When user clicks GET STARTED
                 btn.onclick = () => {
                     btn.style.display = 'none';
                     video.style.display = 'block';
-                    video.muted = false;
-                    video.play().catch(e => console.warn(e));
+                    video.muted = false; // sound enabled
+                    video.play().catch(e => console.log("Play error:", e));
                 };
-                video.addEventListener('ended', () => skipIntro());
+
+                // When video ends, go to login
+                video.addEventListener('ended', () => {
+                    localStorage.setItem('techno_intro_seen', 'true');
+                    onboarding.style.display = 'none';
+                    document.getElementById('professional-auth-section').style.display = 'flex';
+                });
             }
         }
 
@@ -5824,6 +5840,8 @@
                     return;
                 }
             } else {
+                if (!localStorage.getItem('techno_intro_seen')) return; // wait for intro
+
                 currentUser = null;
                 // Stop all timers
                 stopAllTimers();
@@ -5847,18 +5865,13 @@
                 document.getElementById('loading-screen').style.display = 'none';
                 document.getElementById('main-app').style.display = 'none';
 
-                const hasSeenIntro = localStorage.getItem(
-                    'techno_intro_seen'
-                );
-                if (!hasSeenIntro) {
-                    checkFirstTimeUser();
-                } else {
-                    document.getElementById(
-                        'professional-auth-section'
-                    ).style.display = 'flex';
-                }
+                document.getElementById(
+                    'professional-auth-section'
+                ).style.display = 'flex';
             }
         });
+
+        checkFirstTimeUser();
 
         // Fallback: If auth state check takes too long, show auth section after 3 seconds
         setTimeout(() => {
