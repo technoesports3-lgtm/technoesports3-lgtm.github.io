@@ -2735,7 +2735,7 @@
             </div>
         </div>
 
-        <div id="onboarding-screen" style="display:none;">
+        <div id="onboarding-screen" style="display:flex;">
     <div style="position:fixed; top:0; left:0; 
     width:100%; height:100%; background:#000; 
     z-index:99999; display:flex; 
@@ -2746,13 +2746,13 @@
         <video id="intro-video" 
         style="width:100%; max-width:450px; 
         height:100vh; object-fit:cover;"
-        playsinline webkit-playsinline>
-            <source src="https://technoesports3-lgtm.github.io/lv_0_20260404091656.mp4" 
+        playsinline webkit-playsinline autoplay>
+            <source src="https://technoesports3-lgtm.github.io/Techno-E-sports-/lv_0_20260404091656__1_.mp4" 
             type="video/mp4">
         </video>
         
         <!-- Get Started Button - 
-        shows after 3 seconds -->
+        shows after video completes or 3 seconds -->
         <div id="get-started-btn-container" 
         style="position:absolute; bottom:60px; 
         width:100%; text-align:center; 
@@ -2775,7 +2775,7 @@
 </div>
 
         <!-- Professional Login/Registration Screen -->
-        <div id="professional-auth-section" class="professional-auth-container">
+        <div id="professional-auth-section" class="professional-auth-container" style="display:none;">
             <!-- Animated background elements -->
             <div class="auth-background-blur"></div>
             <div class="auth-background-blur"></div>
