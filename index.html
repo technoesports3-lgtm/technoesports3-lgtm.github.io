@@ -4129,47 +4129,86 @@
         }
 
         async function initiateUpiPayment(amount) {
-            const user = auth.currentUser;
-            if (!user) {
-                showToast('Please login first', 'error');
+          const user = auth.currentUser;
+          if (!user) {
+            showToast('Please login first', 'error');
+            return;
+          }
+          
+          amount = Number(amount);
+          if (!amount || amount < 10 || amount > 10000) {
+            showToast('Enter amount between 10-10000', 'error');
+            return;
+          }
+
+          try {
+            showToast('Creating payment...', 'info');
+            
+            const response = await fetch(
+              'https://techno-esports-backend.onrender.com/api/payment/create-upi-order',
+              {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: user.uid, amount: amount })
+              }
+            );
+            
+            const data = await response.json();
+            console.log('Payment response:', data);
+            
+            if (data.success && data.paymentUrl) {
+              window.open(data.paymentUrl, '_blank');
+              showToast('Complete payment in the new tab. Wallet will be credited automatically!', 'info');
+              startPaymentPolling(data.orderId);
+            } else {
+              showToast(data.message || 'Payment failed', 'error');
+            }
+          } catch (error) {
+            console.error('Payment error:', error);
+            showToast('Gateway failed: ' + error.message, 'error');
+          }
+        }
+
+        function startPaymentPolling(orderId) {
+          if (!orderId) return;
+          
+          let attempts = 0;
+          const maxAttempts = 24; // 24 x 5 seconds = 2 minutes
+          
+          showToast('Checking payment status...', 'info');
+          
+          const pollInterval = setInterval(async () => {
+            attempts++;
+            
+            try {
+              const res = await fetch(
+                `https://techno-esports-backend.onrender.com/api/wallet/check-upi-payment/${encodeURIComponent(orderId)}`
+              );
+              const data = await res.json();
+              
+              if (data.status === 'completed') {
+                clearInterval(pollInterval);
+                showToast('Payment successful! Wallet credited.', 'success');
+                await fetchWalletBalance();
+                await fetchWalletTransactions();
                 return;
+              }
+              
+              if (data.status === 'failed') {
+                clearInterval(pollInterval);
+                showToast('Payment failed. Please try again.', 'error');
+                return;
+              }
+              
+            } catch (e) {
+              console.log('Poll attempt', attempts, 'failed:', e.message);
             }
             
-            amount = Number(amount);
-            if (!amount || amount < 10 || amount > 10000) {
-                showToast('Enter amount between 10-10000', 'error');
-                return;
+            if (attempts >= maxAttempts) {
+              clearInterval(pollInterval);
+              showToast('Payment not confirmed yet. Please refresh in a few minutes.', 'info');
             }
-
-            try {
-                showToast('Creating payment...', 'info');
-                
-                const response = await fetch(
-                    'https://techno-esports-backend.onrender.com/api/payment/create-upi-order',
-                    {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ 
-                            userId: user.uid, 
-                            amount: amount 
-                        })
-                    }
-                );
-                
-                const data = await response.json();
-                console.log('Payment response:', data);
-                
-                if (data.success && data.paymentUrl) {
-                    window.open(data.paymentUrl, '_blank');
-                } else {
-                    showToast(data.message || 'Payment failed', 'error');
-                }
-            } catch (error) {
-                console.error('Payment error:', error);
-                showToast('Gateway failed: ' + error.message, 'error');
-            }
+          }, 5000);
         }
 
         async function requestWithdrawal() {
