@@ -4181,63 +4181,74 @@
             <div style="background: #1a1a1a; border-radius: 16px; padding: 24px; 
                         width: 90%; max-width: 380px; border: 1px solid #333; text-align: center;">
               
-              <h3 style="color: #ff4655; margin: 0 0 8px;">UPI Payment</h3>
-              <p style="color: #aaa; font-size: 0.85em; margin: 0 0 20px;">
-                Complete payment and wallet auto-credits!
+              <h3 style="color: #ff4655; margin: 0 0 4px;">UPI Payment</h3>
+              <p style="color: #aaa; font-size: 0.82em; margin: 0 0 16px;">
+                Pay cheyyi — wallet automatic ga credit avutundi!
               </p>
               
-              <div style="background: #111; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
-                <div style="color: #aaa; font-size: 0.8em; margin-bottom: 4px;">Amount</div>
-                <div style="color: #fff; font-size: 1.8em; font-weight: 700;">₹${data.amount}</div>
+              <div style="background: #111; border-radius: 10px; padding: 14px; margin-bottom: 14px;">
+                <div style="color: #aaa; font-size: 0.78em; margin-bottom: 4px;">Amount</div>
+                <div style="color: #fff; font-size: 2em; font-weight: 700;">₹${data.amount}</div>
               </div>
 
-              <div style="background: rgba(255,70,85,0.1); border: 1px solid #ff4655; 
-                          border-radius: 10px; padding: 14px; margin-bottom: 16px;">
-                <div style="color: #aaa; font-size: 0.75em; margin-bottom: 6px; text-transform: uppercase;">
-                  ⚠️ Important — Add this in UPI Remarks
+              <div style="background: rgba(255,70,85,0.08); border: 1px dashed #ff4655; 
+                          border-radius: 10px; padding: 12px; margin-bottom: 14px;">
+                <div style="color: #aaa; font-size: 0.72em; margin-bottom: 4px; text-transform: uppercase;">
+                  ⚠️ Payment Remarks lo type cheyyi
                 </div>
-                <div style="color: #ff4655; font-size: 1.4em; font-weight: 700; 
-                            font-family: monospace; letter-spacing: 2px;">
+                <div style="color: #ff4655; font-size: 1.5em; font-weight: 700; 
+                            font-family: monospace; letter-spacing: 3px;">
                   ${data.refNumber}
                 </div>
-                <div style="color: #888; font-size: 0.75em; margin-top: 6px;">
-                  Type this reference in payment remarks/note
+                <div style="color: #666; font-size: 0.72em; margin-top: 4px;">
+                  Remarks/Note field lo ee number mandatory
                 </div>
               </div>
 
-              <div style="background: #111; border-radius: 8px; padding: 12px; margin-bottom: 16px;">
-                <div style="color: #aaa; font-size: 0.75em; margin-bottom: 4px;">UPI ID</div>
-                <div style="color: #fff; font-size: 0.9em; font-family: monospace;">
-                  ${data.upiId}
-                </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
+                
+                <a href="${data.gpayLink}" 
+                   style="display:flex; flex-direction:column; align-items:center; justify-content:center;
+                          background: #1a73e8; color:white; padding:12px 8px; border-radius:10px; 
+                          text-decoration:none; font-weight:700; font-size:0.85em; gap:4px;">
+                  <span style="font-size:1.4em;">G</span>
+                  <span>GPay</span>
+                </a>
+
+                <a href="${data.phonepeLink}"
+                   style="display:flex; flex-direction:column; align-items:center; justify-content:center;
+                          background: #5f259f; color:white; padding:12px 8px; border-radius:10px; 
+                          text-decoration:none; font-weight:700; font-size:0.85em; gap:4px;">
+                  <span style="font-size:1.4em;">P</span>
+                  <span>PhonePe</span>
+                </a>
+
               </div>
 
-              <a href="${data.upiLink}" style="display: block; background: linear-gradient(135deg, #ff4655, #d91a2a);
-                 color: white; padding: 14px; border-radius: 10px; text-decoration: none;
-                 font-weight: 700; font-size: 1em; margin-bottom: 10px; text-transform: uppercase;">
-                🚀 Open GPay / PhonePe
+              <a href="${data.upiLink}"
+                 style="display:block; background:#333; color:#fff; padding:10px; border-radius:10px;
+                        text-decoration:none; font-weight:600; font-size:0.85em; margin-bottom:10px;">
+                📱 Other UPI Apps (BHIM, Paytm...)
               </a>
               
-              <button onclick="startPaymentPolling('${data.refNumber}', ${data.amount}); 
-                               document.getElementById('upi-payment-modal').remove();"
-                      style="width: 100%; background: #222; border: 1px solid #444; color: #fff;
-                             padding: 12px; border-radius: 10px; font-weight: 600; cursor: pointer;
-                             margin-bottom: 10px;">
-                ✅ I have paid — Check Status
+              <button onclick="startPaymentPolling('${data.refNumber}'); 
+                               this.innerHTML='⏳ Checking...'; this.disabled=true;"
+                      style="width:100%; background:#222; border:1px solid #444; color:#fff;
+                             padding:11px; border-radius:10px; font-weight:600; cursor:pointer;
+                             margin-bottom:8px; font-size:0.88em;">
+                ✅ Paid chesa — Check Status
               </button>
 
               <button onclick="document.getElementById('upi-payment-modal').remove();"
-                      style="width: 100%; background: transparent; border: none; 
-                             color: #666; padding: 8px; cursor: pointer; font-size: 0.85em;">
+                      style="width:100%; background:transparent; border:none; 
+                             color:#555; padding:8px; cursor:pointer; font-size:0.82em;">
                 Cancel
               </button>
             </div>
           `;
           
           document.body.appendChild(modal);
-          
-          // Auto start polling
-          startPaymentPolling(data.refNumber, data.amount);
+          startPaymentPolling(data.refNumber);
         }
 
         function startPaymentPolling(refNumber, amount) {
