@@ -4131,16 +4131,13 @@
         async function initiateUpiPayment(amount) {
           const user = auth.currentUser;
           if (!user) { showToast('Please login first', 'error'); return; }
-          
           amount = Number(amount);
           if (!amount || amount < 10 || amount > 10000) {
             showToast('Enter amount between 10-10000', 'error');
             return;
           }
-
           try {
             showToast('Creating payment...', 'info');
-            
             const response = await fetch(
               'https://techno-esports-backend.onrender.com/api/payment/create-upi-order',
               {
@@ -4149,16 +4146,9 @@
                 body: JSON.stringify({ userId: user.uid, amount })
               }
             );
-            
             const data = await response.json();
-            if (!data.success) {
-              showToast(data.message || 'Failed', 'error');
-              return;
-            }
-
-            // Show payment instructions modal
+            if (!data.success) { showToast(data.message || 'Failed', 'error'); return; }
             showUpiPaymentModal(data);
-
           } catch (error) {
             showToast('Error: ' + error.message, 'error');
           }
@@ -4171,91 +4161,116 @@
           const modal = document.createElement('div');
           modal.id = 'upi-payment-modal';
           modal.style.cssText = `
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); z-index: 9999;
-            display: flex; align-items: center; justify-content: center;
-            backdrop-filter: blur(5px);
+            position:fixed; top:0; left:0; width:100%; height:100%;
+            background:rgba(0,0,0,0.92); z-index:9999;
+            display:flex; align-items:center; justify-content:center;
+            backdrop-filter:blur(6px); padding:16px; box-sizing:border-box;
           `;
-          
+
           modal.innerHTML = `
-            <div style="background: #1a1a1a; border-radius: 16px; padding: 24px; 
-                        width: 90%; max-width: 380px; border: 1px solid #333; text-align: center;">
-              
-              <h3 style="color: #ff4655; margin: 0 0 4px;">UPI Payment</h3>
-              <p style="color: #aaa; font-size: 0.82em; margin: 0 0 16px;">
-                Pay cheyyi — wallet automatic ga credit avutundi!
-              </p>
-              
-              <div style="background: #111; border-radius: 10px; padding: 14px; margin-bottom: 14px;">
-                <div style="color: #aaa; font-size: 0.78em; margin-bottom: 4px;">Amount</div>
-                <div style="color: #fff; font-size: 2em; font-weight: 700;">₹${data.amount}</div>
+            <div style="background:#1a1a1a; border-radius:18px; padding:22px;
+                        width:100%; max-width:360px; border:1px solid #2a2a2a; 
+                        text-align:center; max-height:90vh; overflow-y:auto;">
+
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                <h3 style="color:#ff4655; margin:0; font-size:1.1em;">UPI Payment</h3>
+                <button onclick="document.getElementById('upi-payment-modal').remove();"
+                        style="background:transparent; border:none; color:#666; 
+                               font-size:1.4em; cursor:pointer; padding:0;">×</button>
               </div>
 
-              <div style="background: rgba(255,70,85,0.08); border: 1px dashed #ff4655; 
-                          border-radius: 10px; padding: 12px; margin-bottom: 14px;">
-                <div style="color: #aaa; font-size: 0.72em; margin-bottom: 4px; text-transform: uppercase;">
-                  ⚠️ Payment Remarks lo type cheyyi
+              <div style="background:#111; border-radius:10px; padding:12px; margin-bottom:14px;">
+                <div style="color:#aaa; font-size:0.78em;">Amount to Pay</div>
+                <div style="color:#fff; font-size:2.2em; font-weight:700;">₹${data.amount}</div>
+              </div>
+
+              <!-- QR Code -->
+              <div style="background:#fff; border-radius:12px; padding:12px; 
+                          margin-bottom:14px; display:inline-block; width:100%; box-sizing:border-box;">
+                <div style="color:#333; font-size:0.78em; margin-bottom:8px; font-weight:600;">
+                  📷 Scan QR to Pay
                 </div>
-                <div style="color: #ff4655; font-size: 1.5em; font-weight: 700; 
-                            font-family: monospace; letter-spacing: 3px;">
-                  ${data.refNumber}
-                </div>
-                <div style="color: #666; font-size: 0.72em; margin-top: 4px;">
-                  Remarks/Note field lo ee number mandatory
+                <img src="${data.qrCodeUrl}" 
+                     alt="UPI QR Code"
+                     style="width:180px; height:180px; display:block; margin:0 auto; border-radius:8px;"
+                     onerror="this.style.display='none'">
+                <div style="color:#888; font-size:0.7em; margin-top:6px;">
+                  GPay / PhonePe / Paytm / Any UPI app
                 </div>
               </div>
 
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
-                
-                <a href="${data.gpayLink}" 
-                   style="display:flex; flex-direction:column; align-items:center; justify-content:center;
-                          background: #1a73e8; color:white; padding:12px 8px; border-radius:10px; 
-                          text-decoration:none; font-weight:700; font-size:0.85em; gap:4px;">
-                  <span style="font-size:1.4em;">G</span>
-                  <span>GPay</span>
-                </a>
-
-                <a href="${data.phonepeLink}"
-                   style="display:flex; flex-direction:column; align-items:center; justify-content:center;
-                          background: #5f259f; color:white; padding:12px 8px; border-radius:10px; 
-                          text-decoration:none; font-weight:700; font-size:0.85em; gap:4px;">
-                  <span style="font-size:1.4em;">P</span>
-                  <span>PhonePe</span>
-                </a>
-
+              <!-- Reference Number -->
+              <div style="background:rgba(255,70,85,0.08); border:1px dashed #ff4655;
+                          border-radius:10px; padding:10px; margin-bottom:14px;">
+                <div style="color:#aaa; font-size:0.72em; text-transform:uppercase; margin-bottom:4px;">
+                  ⚠️ Remarks/Note lo type cheyyi
+                </div>
+                <div style="color:#ff4655; font-size:1.5em; font-weight:700;
+                            font-family:monospace; letter-spacing:3px;">${data.refNumber}</div>
+                <div style="color:#666; font-size:0.7em; margin-top:4px;">
+                  UPI payment remarks lo ee number mandatory
+                </div>
               </div>
 
-              <a href="${data.upiLink}"
-                 style="display:block; background:#333; color:#fff; padding:10px; border-radius:10px;
-                        text-decoration:none; font-weight:600; font-size:0.85em; margin-bottom:10px;">
-                📱 Other UPI Apps (BHIM, Paytm...)
-              </a>
-              
-              <button onclick="startPaymentPolling('${data.refNumber}'); 
-                               this.innerHTML='⏳ Checking...'; this.disabled=true;"
+              <!-- UPI App Buttons -->
+              <div style="margin-bottom:10px;">
+                <div style="color:#aaa; font-size:0.75em; margin-bottom:8px;">OR Open UPI App Directly</div>
+                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
+                  
+                  <a href="${data.gpayLink}"
+                     style="display:flex; flex-direction:column; align-items:center;
+                            background:#1a73e8; color:white; padding:10px 6px;
+                            border-radius:10px; text-decoration:none; gap:4px;">
+                    <span style="font-size:1.3em; font-weight:900; font-family:serif;">G</span>
+                    <span style="font-size:0.72em; font-weight:700;">GPay</span>
+                  </a>
+
+                  <a href="${data.phonepeLink}"
+                     style="display:flex; flex-direction:column; align-items:center;
+                            background:#5f259f; color:white; padding:10px 6px;
+                            border-radius:10px; text-decoration:none; gap:4px;">
+                    <span style="font-size:1.3em;">📱</span>
+                    <span style="font-size:0.72em; font-weight:700;">PhonePe</span>
+                  </a>
+
+                  <a href="${data.paytmLink}"
+                     style="display:flex; flex-direction:column; align-items:center;
+                            background:#002970; color:white; padding:10px 6px;
+                            border-radius:10px; text-decoration:none; gap:4px;">
+                    <span style="font-size:1.3em;">💙</span>
+                    <span style="font-size:0.72em; font-weight:700;">Paytm</span>
+                  </a>
+
+                </div>
+              </div>
+
+              <!-- Check Status Button -->
+              <button id="check-status-btn"
+                      onclick="startPaymentPolling('${data.refNumber}'); 
+                               this.innerHTML='⏳ Checking payment...';
+                               this.disabled=true; this.style.opacity='0.7';"
                       style="width:100%; background:#222; border:1px solid #444; color:#fff;
-                             padding:11px; border-radius:10px; font-weight:600; cursor:pointer;
-                             margin-bottom:8px; font-size:0.88em;">
-                ✅ Paid chesa — Check Status
+                             padding:12px; border-radius:10px; font-weight:600; cursor:pointer;
+                             font-size:0.88em; margin-bottom:8px;">
+                ✅ Paid chesa — Verify Cheyyi
               </button>
 
-              <button onclick="document.getElementById('upi-payment-modal').remove();"
-                      style="width:100%; background:transparent; border:none; 
-                             color:#555; padding:8px; cursor:pointer; font-size:0.82em;">
-                Cancel
-              </button>
+              <div style="color:#555; font-size:0.72em;">
+                Payment automatic ga verify avutundi. Leda manually check cheyyi.
+              </div>
             </div>
           `;
-          
+
           document.body.appendChild(modal);
+          // Auto polling start
           startPaymentPolling(data.refNumber);
         }
 
-        function startPaymentPolling(refNumber, amount) {
+        function startPaymentPolling(refNumber) {
           if (!refNumber) return;
           let attempts = 0;
-          const maxAttempts = 60; // 5 minutes (60 x 5s)
-          
+          const maxAttempts = 60;
+
           const pollInterval = setInterval(async () => {
             attempts++;
             try {
@@ -4263,19 +4278,21 @@
                 `https://techno-esports-backend.onrender.com/api/payment/check-upi-payment/${encodeURIComponent(refNumber)}`
               );
               const data = await res.json();
-              
+
               if (data.status === 'completed') {
                 clearInterval(pollInterval);
                 const modal = document.getElementById('upi-payment-modal');
                 if (modal) modal.remove();
-                showToast('Payment successful! Wallet credited.', 'success');
+                showToast('🎉 Payment successful! Wallet credited.', 'success');
                 await fetchWalletBalance();
                 await fetchWalletTransactions();
                 return;
               }
               if (data.status === 'expired') {
                 clearInterval(pollInterval);
-                showToast('Payment session expired. Please try again.', 'error');
+                const modal = document.getElementById('upi-payment-modal');
+                if (modal) modal.remove();
+                showToast('Session expired. Please try again.', 'error');
                 return;
               }
             } catch (e) {
@@ -4283,7 +4300,7 @@
             }
             if (attempts >= maxAttempts) {
               clearInterval(pollInterval);
-              showToast('Payment not confirmed. Contact support with ref: ' + refNumber, 'info');
+              showToast('Not confirmed. Contact support: ' + refNumber, 'info');
             }
           }, 5000);
         }
