@@ -4195,7 +4195,7 @@
                      style="width:180px; height:180px; display:block; margin:0 auto; border-radius:8px;"
                      onerror="this.style.display='none'">
                 <div style="color:#888; font-size:0.7em; margin-top:6px;">
-                  GPay / PhonePe / Paytm / Any UPI app
+                  Scan with GPay / PhonePe / Paytm / Any UPI App
                 </div>
               </div>
 
@@ -4203,12 +4203,12 @@
               <div style="background:rgba(255,70,85,0.08); border:1px dashed #ff4655;
                           border-radius:10px; padding:10px; margin-bottom:14px;">
                 <div style="color:#aaa; font-size:0.72em; text-transform:uppercase; margin-bottom:4px;">
-                  ⚠️ Remarks/Note lo type cheyyi
+                  ⚠️ Enter This in Payment Remarks
                 </div>
                 <div style="color:#ff4655; font-size:1.5em; font-weight:700;
                             font-family:monospace; letter-spacing:3px;">${data.refNumber}</div>
                 <div style="color:#666; font-size:0.7em; margin-top:4px;">
-                  UPI payment remarks lo ee number mandatory
+                  This reference number is mandatory in UPI remarks/note
                 </div>
               </div>
 
@@ -4252,11 +4252,11 @@
                       style="width:100%; background:#222; border:1px solid #444; color:#fff;
                              padding:12px; border-radius:10px; font-weight:600; cursor:pointer;
                              font-size:0.88em; margin-bottom:8px;">
-                ✅ Paid chesa — Verify Cheyyi
+                ✅ I've Paid — Verify Payment
               </button>
 
               <div style="color:#555; font-size:0.72em;">
-                Payment automatic ga verify avutundi. Leda manually check cheyyi.
+                Payment will be verified automatically. Or click to check manually.
               </div>
             </div>
           `;
@@ -4300,7 +4300,7 @@
             }
             if (attempts >= maxAttempts) {
               clearInterval(pollInterval);
-              showToast('Not confirmed. Contact support: ' + refNumber, 'info');
+              showToast('Payment not confirmed. Contact support with ref: ' + refNumber, 'info');
             }
           }, 5000);
         }
