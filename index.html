@@ -4164,105 +4164,138 @@
             position:fixed; top:0; left:0; width:100%; height:100%;
             background:rgba(0,0,0,0.92); z-index:9999;
             display:flex; align-items:center; justify-content:center;
-            backdrop-filter:blur(6px); padding:16px; box-sizing:border-box;
+            backdrop-filter:blur(8px); padding:16px; box-sizing:border-box;
           `;
 
           modal.innerHTML = `
-            <div style="background:#1a1a1a; border-radius:18px; padding:22px;
-                        width:100%; max-width:360px; border:1px solid #2a2a2a; 
-                        text-align:center; max-height:90vh; overflow-y:auto;">
+            <div style="background:#111; border-radius:20px; padding:0;
+                        width:100%; max-width:360px; border:1px solid #222;
+                        overflow:hidden; max-height:92vh; overflow-y:auto;">
 
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-                <h3 style="color:#ff4655; margin:0; font-size:1.1em;">UPI Payment</h3>
+              <!-- Header -->
+              <div style="background:#161616; padding:18px 20px; 
+                          display:flex; justify-content:space-between; align-items:center;
+                          border-bottom:1px solid #222;">
+                <div>
+                  <div style="color:#fff; font-weight:700; font-size:1em;">Complete Payment</div>
+                  <div style="color:#888; font-size:0.75em; margin-top:2px;">Secure UPI Payment</div>
+                </div>
                 <button onclick="document.getElementById('upi-payment-modal').remove();"
-                        style="background:transparent; border:none; color:#666; 
-                               font-size:1.4em; cursor:pointer; padding:0;">×</button>
+                        style="background:#222; border:none; color:#888; width:32px; height:32px;
+                               border-radius:50%; cursor:pointer; font-size:1.1em; display:flex;
+                               align-items:center; justify-content:center;">✕</button>
               </div>
 
-              <div style="background:#111; border-radius:10px; padding:12px; margin-bottom:14px;">
-                <div style="color:#aaa; font-size:0.78em;">Amount to Pay</div>
-                <div style="color:#fff; font-size:2.2em; font-weight:700;">₹${data.amount}</div>
+              <!-- Amount -->
+              <div style="padding:20px; text-align:center; border-bottom:1px solid #1a1a1a;">
+                <div style="color:#888; font-size:0.78em; letter-spacing:0.5px; 
+                            text-transform:uppercase; margin-bottom:6px;">Amount Due</div>
+                <div style="color:#fff; font-size:2.4em; font-weight:800; letter-spacing:-1px;">
+                  ₹${data.amount}
+                </div>
+                <div style="display:inline-flex; align-items:center; gap:6px; margin-top:8px;
+                            background:#1a2a1a; border:1px solid #2a4a2a; 
+                            border-radius:20px; padding:4px 12px;">
+                  <div style="width:6px; height:6px; background:#4CAF50; border-radius:50%;"></div>
+                  <span style="color:#4CAF50; font-size:0.72em; font-weight:600;">Secured by UPI</span>
+                </div>
               </div>
 
               <!-- QR Code -->
-              <div style="background:#fff; border-radius:12px; padding:12px; 
-                          margin-bottom:14px; display:inline-block; width:100%; box-sizing:border-box;">
-                <div style="color:#333; font-size:0.78em; margin-bottom:8px; font-weight:600;">
-                  📷 Scan QR to Pay
+              <div style="padding:20px; text-align:center; border-bottom:1px solid #1a1a1a;">
+                <div style="color:#aaa; font-size:0.78em; margin-bottom:12px; letter-spacing:0.3px;">
+                  Scan QR with any UPI app
                 </div>
-                <img src="${data.qrCodeUrl}" 
-                     alt="UPI QR Code"
-                     style="width:180px; height:180px; display:block; margin:0 auto; border-radius:8px;"
-                     onerror="this.style.display='none'">
-                <div style="color:#888; font-size:0.7em; margin-top:6px;">
-                  Scan with GPay / PhonePe / Paytm / Any UPI App
+                <div style="background:#fff; border-radius:12px; padding:14px; 
+                            display:inline-block; box-shadow:0 0 0 1px #333;">
+                  <img src="${data.qrCodeUrl}" alt="UPI QR" 
+                       style="width:170px; height:170px; display:block; border-radius:6px;">
+                </div>
+                <div style="color:#555; font-size:0.7em; margin-top:10px;">
+                  Valid for 10 minutes only
                 </div>
               </div>
 
               <!-- Reference Number -->
-              <div style="background:rgba(255,70,85,0.08); border:1px dashed #ff4655;
-                          border-radius:10px; padding:10px; margin-bottom:14px;">
-                <div style="color:#aaa; font-size:0.72em; text-transform:uppercase; margin-bottom:4px;">
-                  ⚠️ Enter This in Payment Remarks
+              <div style="margin:0 16px; margin-top:16px; 
+                          background:#1a1400; border:1px solid #3a3000;
+                          border-radius:12px; padding:14px; text-align:center;">
+                <div style="color:#f0a500; font-size:0.72em; font-weight:600;
+                            text-transform:uppercase; letter-spacing:0.8px; margin-bottom:6px;">
+                  ⚠ Add in Payment Remarks
                 </div>
-                <div style="color:#ff4655; font-size:1.5em; font-weight:700;
-                            font-family:monospace; letter-spacing:3px;">${data.refNumber}</div>
-                <div style="color:#666; font-size:0.7em; margin-top:4px;">
-                  This reference number is mandatory in UPI remarks/note
+                <div style="color:#fff; font-size:1.6em; font-weight:800;
+                            font-family:'Courier New', monospace; letter-spacing:4px;">
+                  ${data.refNumber}
+                </div>
+                <div style="color:#888; font-size:0.7em; margin-top:6px;">
+                  Type this reference in remarks / note field
                 </div>
               </div>
 
-              <!-- UPI App Buttons -->
-              <div style="margin-bottom:10px;">
-                <div style="color:#aaa; font-size:0.75em; margin-bottom:8px;">OR Open UPI App Directly</div>
-                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
+              <!-- UPI Apps -->
+              <div style="padding:16px;">
+                <div style="color:#666; font-size:0.72em; text-align:center; 
+                            margin-bottom:12px; text-transform:uppercase; letter-spacing:0.5px;">
+                  Or pay directly with
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
                   
-                  <a href="${data.gpayLink}"
-                     style="display:flex; flex-direction:column; align-items:center;
-                            background:#1a73e8; color:white; padding:10px 6px;
-                            border-radius:10px; text-decoration:none; gap:4px;">
-                    <span style="font-size:1.3em; font-weight:900; font-family:serif;">G</span>
-                    <span style="font-size:0.72em; font-weight:700;">GPay</span>
+                  <!-- Google Pay -->
+                  <a href="${data.gpayLink}" style="text-decoration:none;">
+                    <div style="background:#161616; border:1px solid #222; border-radius:12px;
+                                padding:12px 8px; text-align:center; transition:all 0.2s;
+                                cursor:pointer;">
+                      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Google_Pay_Logo.svg/512px-Google_Pay_Logo.svg.png" 
+                           alt="GPay" style="width:40px; height:24px; object-fit:contain; margin-bottom:6px;">
+                      <div style="color:#aaa; font-size:0.7em; font-weight:600;">Google Pay</div>
+                    </div>
                   </a>
 
-                  <a href="${data.phonepeLink}"
-                     style="display:flex; flex-direction:column; align-items:center;
-                            background:#5f259f; color:white; padding:10px 6px;
-                            border-radius:10px; text-decoration:none; gap:4px;">
-                    <span style="font-size:1.3em;">📱</span>
-                    <span style="font-size:0.72em; font-weight:700;">PhonePe</span>
+                  <!-- PhonePe -->
+                  <a href="${data.phonepeLink}" style="text-decoration:none;">
+                    <div style="background:#161616; border:1px solid #222; border-radius:12px;
+                                padding:12px 8px; text-align:center; cursor:pointer;">
+                      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/PhonePe_Logo.svg/512px-PhonePe_Logo.svg.png"
+                           alt="PhonePe" style="width:40px; height:24px; object-fit:contain; margin-bottom:6px;">
+                      <div style="color:#aaa; font-size:0.7em; font-weight:600;">PhonePe</div>
+                    </div>
                   </a>
 
-                  <a href="${data.paytmLink}"
-                     style="display:flex; flex-direction:column; align-items:center;
-                            background:#002970; color:white; padding:10px 6px;
-                            border-radius:10px; text-decoration:none; gap:4px;">
-                    <span style="font-size:1.3em;">💙</span>
-                    <span style="font-size:0.72em; font-weight:700;">Paytm</span>
+                  <!-- BHIM UPI -->
+                  <a href="${data.upiLink}" style="text-decoration:none;">
+                    <div style="background:#161616; border:1px solid #222; border-radius:12px;
+                                padding:12px 8px; text-align:center; cursor:pointer;">
+                      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/BHIM_SVG_Logo.svg/512px-BHIM_SVG_Logo.svg.png"
+                           alt="BHIM" style="width:40px; height:24px; object-fit:contain; margin-bottom:6px;">
+                      <div style="color:#aaa; font-size:0.7em; font-weight:600;">BHIM / UPI</div>
+                    </div>
                   </a>
 
                 </div>
               </div>
 
-              <!-- Check Status Button -->
-              <button id="check-status-btn"
-                      onclick="startPaymentPolling('${data.refNumber}'); 
-                               this.innerHTML='⏳ Checking payment...';
-                               this.disabled=true; this.style.opacity='0.7';"
-                      style="width:100%; background:#222; border:1px solid #444; color:#fff;
-                             padding:12px; border-radius:10px; font-weight:600; cursor:pointer;
-                             font-size:0.88em; margin-bottom:8px;">
-                ✅ I've Paid — Verify Payment
-              </button>
-
-              <div style="color:#555; font-size:0.72em;">
-                Payment will be verified automatically. Or click to check manually.
+              <!-- Verify Button -->
+              <div style="padding:0 16px 20px;">
+                <button id="check-status-btn"
+                        onclick="startPaymentPolling('${data.refNumber}');
+                                 this.innerHTML='<span style=\\'font-size:0.9em\\'>Checking payment status...</span>';
+                                 this.disabled=true; this.style.background='#1a1a1a'; this.style.color='#666';"
+                        style="width:100%; background:linear-gradient(135deg,#ff4655,#d91a2a);
+                               border:none; color:#fff; padding:14px; border-radius:12px;
+                               font-weight:700; cursor:pointer; font-size:0.9em; letter-spacing:0.3px;
+                               margin-bottom:10px;">
+                  I've Paid — Verify Payment
+                </button>
+                <div style="text-align:center; color:#444; font-size:0.7em;">
+                  Payment will be verified automatically within seconds
+                </div>
               </div>
+
             </div>
           `;
 
           document.body.appendChild(modal);
-          // Auto polling start
           startPaymentPolling(data.refNumber);
         }
 
