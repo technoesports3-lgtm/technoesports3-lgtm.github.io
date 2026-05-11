@@ -4212,24 +4212,20 @@
                        style="width:170px; height:170px; display:block; border-radius:6px;">
                 </div>
                 <div style="color:#555; font-size:0.7em; margin-top:10px;">
-                  Valid for 10 minutes only
+                  Valid for 30 minutes only
                 </div>
               </div>
 
-              <!-- Reference Number -->
-              <div style="margin:0 16px; margin-top:16px; 
-                          background:#1a1400; border:1px solid #3a3000;
-                          border-radius:12px; padding:14px; text-align:center;">
-                <div style="color:#f0a500; font-size:0.72em; font-weight:600;
-                            text-transform:uppercase; letter-spacing:0.8px; margin-bottom:6px;">
-                  ⚠ Add in Payment Remarks
-                </div>
-                <div style="color:#fff; font-size:1.6em; font-weight:800;
-                            font-family:'Courier New', monospace; letter-spacing:4px;">
-                  ${data.refNumber}
-                </div>
-                <div style="color:#888; font-size:0.7em; margin-top:6px;">
-                  Type this reference in remarks / note field
+              <!-- Payment Page Button -->
+              <div style="padding:16px; border-bottom:1px solid #1a1a1a; text-align:center;">
+                <a href="${data.paymentUrl}" target="_blank"
+                   style="display:inline-block; background:linear-gradient(135deg,#1a3a6b,#1c71d8);
+                          color:#fff; padding:12px 24px; border-radius:10px; text-decoration:none;
+                          font-weight:700; font-size:0.88em; letter-spacing:0.3px;">
+                  🔗 Open Payment Page
+                </a>
+                <div style="color:#555; font-size:0.7em; margin-top:8px;">
+                  Opens UPI Intent secure payment page
                 </div>
               </div>
 
