@@ -4100,26 +4100,53 @@
           `;
 
           modal.innerHTML = `
+            <style>
+              @keyframes upiPulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.15);opacity:0.8} }
+              @keyframes upiScan { 0%{top:0;opacity:0} 20%{opacity:1} 80%{opacity:1} 100%{top:calc(100% - 3px);opacity:0} }
+              @keyframes upiBlink { 0%,100%{opacity:1} 50%{opacity:0.4} }
+              @keyframes upiShimmer { 0%{left:-100%} 100%{left:100%} }
+              @keyframes upiSlideIn { 0%{opacity:0;transform:translateY(30px)} 100%{opacity:1;transform:translateY(0)} }
+              @keyframes upiGlow { 0%,100%{box-shadow:0 0 5px rgba(255,70,85,0.3)} 50%{box-shadow:0 0 20px rgba(255,70,85,0.6)} }
+              @keyframes upiFadeIn { 0%{opacity:0} 100%{opacity:1} }
+              @keyframes upiDotPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.8)} }
+              .upi-app-card:hover { transform:translateY(-3px) !important; border-color:#444 !important; background:#1e1e1e !important; }
+              .upi-app-card { transition: all 0.25s ease !important; }
+              .upi-verify-btn { position:relative; overflow:hidden; }
+              .upi-verify-btn::after { content:''; position:absolute; top:0; left:-100%; width:60%; height:100%; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent); animation:upiShimmer 2.5s infinite; }
+            </style>
             <div style="background:#111; border-radius:20px; padding:0;
                         width:100%; max-width:360px; border:1px solid #222;
-                        overflow:hidden; max-height:92vh; overflow-y:auto;">
+                        overflow:hidden; max-height:92vh; overflow-y:auto;
+                        animation:upiSlideIn 0.4s ease-out;">
 
               <!-- Header -->
               <div style="background:#161616; padding:18px 20px; 
                           display:flex; justify-content:space-between; align-items:center;
                           border-bottom:1px solid #222;">
-                <div>
-                  <div style="color:#fff; font-weight:700; font-size:1em;">Complete Payment</div>
-                  <div style="color:#888; font-size:0.75em; margin-top:2px;">Secure UPI Payment</div>
+                <div style="display:flex; align-items:center; gap:10px;">
+                  <div style="width:36px; height:36px; background:linear-gradient(135deg,#ff4655,#d91a2a);
+                              border-radius:10px; display:flex; align-items:center; justify-content:center;
+                              animation:upiPulse 2s ease-in-out infinite;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <div style="color:#fff; font-weight:700; font-size:1em;">Complete Payment</div>
+                    <div style="color:#888; font-size:0.75em; margin-top:2px;">Secure UPI Payment</div>
+                  </div>
                 </div>
                 <button onclick="document.getElementById('upi-payment-modal').remove();"
                         style="background:#222; border:none; color:#888; width:32px; height:32px;
                                border-radius:50%; cursor:pointer; font-size:1.1em; display:flex;
-                               align-items:center; justify-content:center;">✕</button>
+                               align-items:center; justify-content:center; transition:all 0.2s;"
+                        onmouseover="this.style.background='#333';this.style.color='#fff'"
+                        onmouseout="this.style.background='#222';this.style.color='#888'">✕</button>
               </div>
 
               <!-- Amount -->
-              <div style="padding:20px; text-align:center; border-bottom:1px solid #1a1a1a;">
+              <div style="padding:20px; text-align:center; border-bottom:1px solid #1a1a1a;
+                          animation:upiFadeIn 0.5s ease-out 0.1s both;">
                 <div style="color:#888; font-size:0.78em; letter-spacing:0.5px; 
                             text-transform:uppercase; margin-bottom:6px;">Amount Due</div>
                 <div style="color:#fff; font-size:2.4em; font-weight:800; letter-spacing:-1px;">
@@ -4128,22 +4155,37 @@
                 <div style="display:inline-flex; align-items:center; gap:6px; margin-top:8px;
                             background:#1a2a1a; border:1px solid #2a4a2a; 
                             border-radius:20px; padding:4px 12px;">
-                  <div style="width:6px; height:6px; background:#4CAF50; border-radius:50%;"></div>
+                  <div style="width:6px; height:6px; background:#4CAF50; border-radius:50%;
+                              animation:upiDotPulse 1.5s ease-in-out infinite;"></div>
                   <span style="color:#4CAF50; font-size:0.72em; font-weight:600;">Secured by UPI</span>
                 </div>
               </div>
 
               <!-- QR Code -->
-              <div style="padding:20px; text-align:center; border-bottom:1px solid #1a1a1a;">
-                <div style="color:#aaa; font-size:0.78em; margin-bottom:12px; letter-spacing:0.3px;">
+              <div style="padding:20px; text-align:center; border-bottom:1px solid #1a1a1a;
+                          animation:upiFadeIn 0.5s ease-out 0.2s both;">
+                <div style="color:#aaa; font-size:0.78em; margin-bottom:12px; letter-spacing:0.3px;
+                            display:flex; align-items:center; justify-content:center; gap:6px;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2" stroke-linecap="round">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                    <circle cx="12" cy="13" r="4"/>
+                  </svg>
                   Scan QR with any UPI app
                 </div>
                 <div style="background:#fff; border-radius:12px; padding:14px; 
-                            display:inline-block; box-shadow:0 0 0 1px #333;">
+                            display:inline-block; box-shadow:0 0 0 1px #333;
+                            position:relative; overflow:hidden;">
                   <img src="${data.qrCodeUrl}" alt="UPI QR" 
                        style="width:170px; height:170px; display:block; border-radius:6px;">
+                  <!-- Animated scan line -->
+                  <div style="position:absolute; left:14px; right:14px; height:3px;
+                              background:linear-gradient(90deg, transparent, #ff4655, transparent);
+                              border-radius:2px; animation:upiScan 2.5s ease-in-out infinite;"></div>
                 </div>
-                <div style="color:#555; font-size:0.7em; margin-top:10px;">
+                <div style="color:#555; font-size:0.7em; margin-top:10px; display:flex; align-items:center; justify-content:center; gap:4px;">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2" stroke-linecap="round">
+                    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                  </svg>
                   Valid for 10 minutes only
                 </div>
               </div>
@@ -4151,22 +4193,33 @@
               <!-- Reference Number -->
               <div style="margin:0 16px; margin-top:16px; 
                           background:#1a1400; border:1px solid #3a3000;
-                          border-radius:12px; padding:14px; text-align:center;">
+                          border-radius:12px; padding:14px; text-align:center;
+                          animation:upiFadeIn 0.5s ease-out 0.3s both, upiGlow 3s ease-in-out infinite;">
                 <div style="color:#f0a500; font-size:0.72em; font-weight:600;
-                            text-transform:uppercase; letter-spacing:0.8px; margin-bottom:6px;">
-                  ⚠ Add in Payment Remarks
+                            text-transform:uppercase; letter-spacing:0.8px; margin-bottom:6px;
+                            display:flex; align-items:center; justify-content:center; gap:5px;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f0a500" stroke-width="2.5" stroke-linecap="round"
+                       style="animation:upiBlink 1.5s ease-in-out infinite;">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                  </svg>
+                  Add in Payment Remarks
                 </div>
                 <div style="color:#fff; font-size:1.6em; font-weight:800;
                             font-family:'Courier New', monospace; letter-spacing:4px;">
                   ${data.refNumber}
                 </div>
-                <div style="color:#888; font-size:0.7em; margin-top:6px;">
+                <div style="color:#888; font-size:0.7em; margin-top:6px; display:flex; align-items:center; justify-content:center; gap:4px;">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" stroke-linecap="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
                   Type this reference in remarks / note field
                 </div>
               </div>
 
               <!-- UPI Apps -->
-              <div style="padding:16px;">
+              <div style="padding:16px; animation:upiFadeIn 0.5s ease-out 0.4s both;">
                 <div style="color:#666; font-size:0.72em; text-align:center; 
                             margin-bottom:12px; text-transform:uppercase; letter-spacing:0.5px;">
                   Or pay directly with
@@ -4175,7 +4228,7 @@
           
                   <!-- Google Pay -->
                   <a href="${data.gpayLink}" style="text-decoration:none;">
-                    <div style="background:#161616; border:1px solid #222; border-radius:12px;
+                    <div class="upi-app-card" style="background:#161616; border:1px solid #222; border-radius:12px;
                                 padding:12px 8px; text-align:center; cursor:pointer;">
                       <svg width="40" height="24" viewBox="0 0 80 32" style="margin-bottom:6px; display:block; margin-left:auto; margin-right:auto;">
                         <text x="0" y="24" font-family="Arial" font-weight="800" font-size="26" fill="#4285F4">G</text>
@@ -4187,7 +4240,7 @@
 
                   <!-- PhonePe -->
                   <a href="${data.phonepeLink}" style="text-decoration:none;">
-                    <div style="background:#161616; border:1px solid #222; border-radius:12px;
+                    <div class="upi-app-card" style="background:#161616; border:1px solid #222; border-radius:12px;
                                 padding:12px 8px; text-align:center; cursor:pointer;">
                       <svg width="40" height="24" viewBox="0 0 40 24" style="margin-bottom:6px; display:block; margin-left:auto; margin-right:auto;">
                         <rect width="40" height="24" rx="4" fill="#5f259f"/>
@@ -4199,7 +4252,7 @@
 
                   <!-- BHIM UPI -->
                   <a href="${data.upiLink}" style="text-decoration:none;">
-                    <div style="background:#161616; border:1px solid #222; border-radius:12px;
+                    <div class="upi-app-card" style="background:#161616; border:1px solid #222; border-radius:12px;
                                 padding:12px 8px; text-align:center; cursor:pointer;">
                       <svg width="40" height="24" viewBox="0 0 40 24" style="margin-bottom:6px; display:block; margin-left:auto; margin-right:auto;">
                         <rect width="40" height="24" rx="4" fill="#00529C"/>
@@ -4213,18 +4266,24 @@
               </div>
 
               <!-- Verify Button -->
-              <div style="padding:0 16px 20px;">
-                <button id="check-status-btn"
+              <div style="padding:0 16px 20px; animation:upiFadeIn 0.5s ease-out 0.5s both;">
+                <button id="check-status-btn" class="upi-verify-btn"
                         onclick="startPaymentPolling('${data.refNumber}');
                                  this.innerHTML='<span style=\\'font-size:0.9em\\'>Checking payment status...</span>';
                                  this.disabled=true; this.style.background='#1a1a1a'; this.style.color='#666';"
                         style="width:100%; background:linear-gradient(135deg,#ff4655,#d91a2a);
                                border:none; color:#fff; padding:14px; border-radius:12px;
                                font-weight:700; cursor:pointer; font-size:0.9em; letter-spacing:0.3px;
-                               margin-bottom:10px;">
+                               margin-bottom:10px; display:flex; align-items:center; justify-content:center; gap:8px;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
                   I've Paid — Verify Payment
                 </button>
-                <div style="text-align:center; color:#444; font-size:0.7em;">
+                <div style="text-align:center; color:#444; font-size:0.7em; display:flex; align-items:center; justify-content:center; gap:4px;">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#444" stroke-width="2" stroke-linecap="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                  </svg>
                   Payment will be verified automatically within seconds
                 </div>
               </div>
@@ -4253,7 +4312,7 @@
                 clearInterval(pollInterval);
                 const modal = document.getElementById('upi-payment-modal');
                 if (modal) modal.remove();
-                showToast('🎉 Payment successful! Wallet credited.', 'success');
+                showToast('Payment successful! Wallet credited.', 'success');
                 await fetchWalletBalance();
                 await fetchWalletTransactions();
                 return;
