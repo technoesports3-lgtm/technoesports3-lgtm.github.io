@@ -3044,7 +3044,7 @@
                                 <span style="font-size: 0.75em; opacity: 0.8;">Card / Net Banking</span>
                             </button>
 
-                            <button onclick="addCustomMoneyViaUPI()" 
+                            <button onclick="initiateUpiPayment(document.getElementById('wallet-custom-amount')?.value || selectedAmount)" 
                                     style="background: linear-gradient(135deg, #6a0dad, #9b30ff);
                                            color: white; border: none; padding: 12px 8px;
                                            border-radius: 8px; font-weight: 700; font-size: 0.85em;
@@ -4060,20 +4060,14 @@
             return data;
         }
 
-        async function addCustomMoneyViaUPI() {
+        async function initiateUpiPayment(amount) {
           const user = auth.currentUser;
-          if (!user) { 
-            showToast('Please login first', 'error'); 
-            return; 
-          }
-          const amount = Number(
-            document.getElementById('wallet-custom-amount')?.value || 0
-          );
+          if (!user) { showToast('Please login first', 'error'); return; }
+          amount = Number(amount);
           if (!amount || amount < 10 || amount > 10000) {
             showToast('Enter amount between 10-10000', 'error');
             return;
           }
-
           try {
             showToast('Creating payment...', 'info');
             const response = await fetch(
@@ -4085,119 +4079,160 @@
               }
             );
             const data = await response.json();
-            if (!data.success) {
-              showToast(data.message || 'Failed', 'error');
-              return;
-            }
-            showUpiModal(data);
-          } catch(e) {
-            showToast('Error: ' + e.message, 'error');
+            if (!data.success) { showToast(data.message || 'Failed', 'error'); return; }
+            showUpiPaymentModal(data);
+          } catch (error) {
+            showToast('Error: ' + error.message, 'error');
           }
         }
 
-        function showUpiModal(data) {
-          const existing = document.getElementById('upi-pay-modal');
-          if (existing) existing.remove();
+        function showUpiPaymentModal(data) {
+          const existingModal = document.getElementById('upi-payment-modal');
+          if (existingModal) existingModal.remove();
 
-          document.body.insertAdjacentHTML('beforeend', `
-            <div id="upi-pay-modal" style="
-              position:fixed;top:0;left:0;width:100%;height:100%;
-              background:rgba(0,0,0,0.95);z-index:99999;
-              display:flex;align-items:center;justify-content:center;
-              padding:15px;box-sizing:border-box;">
-              <div style="
-                background:#1a1a1a;border-radius:16px;padding:22px;
-                max-width:360px;width:100%;border:1px solid #333;
-                text-align:center;max-height:90vh;overflow-y:auto;">
-                
-                <h3 style="color:#ff4655;margin:0 0 4px;">
-                  Pay Rs.${data.amount}
-                </h3>
-                <p style="color:#aaa;font-size:0.8em;margin:0 0 15px;">
-                  Scan QR or tap Pay Now button
-                </p>
-                
-                <img src="${data.qrUrl}" 
-                  style="width:200px;height:200px;border-radius:10px;
-                  border:3px solid #ff4655;margin-bottom:12px;"
-                  onerror="this.style.display='none'">
-                
-                <div style="
-                  background:#111;border-radius:8px;padding:8px;
-                  margin-bottom:15px;font-family:monospace;
-                  font-size:0.72em;color:#666;word-break:break-all;">
-                  Ref: ${data.txnRef}
+          const modal = document.createElement('div');
+          modal.id = 'upi-payment-modal';
+          modal.style.cssText = `
+            position:fixed; top:0; left:0; width:100%; height:100%;
+            background:rgba(0,0,0,0.92); z-index:9999;
+            display:flex; align-items:center; justify-content:center;
+            backdrop-filter:blur(6px); padding:16px; box-sizing:border-box;
+          `;
+
+          modal.innerHTML = `
+            <div style="background:#1a1a1a; border-radius:18px; padding:22px;
+                        width:100%; max-width:360px; border:1px solid #2a2a2a; 
+                        text-align:center; max-height:90vh; overflow-y:auto;">
+
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                <h3 style="color:#ff4655; margin:0; font-size:1.1em;">UPI Payment</h3>
+                <button onclick="document.getElementById('upi-payment-modal').remove();"
+                        style="background:transparent; border:none; color:#666; 
+                               font-size:1.4em; cursor:pointer; padding:0;">×</button>
+              </div>
+
+              <div style="background:#111; border-radius:10px; padding:12px; margin-bottom:14px;">
+                <div style="color:#aaa; font-size:0.78em;">Amount to Pay</div>
+                <div style="color:#fff; font-size:2.2em; font-weight:700;">₹${data.amount}</div>
+              </div>
+
+              <!-- QR Code -->
+              <div style="background:#fff; border-radius:12px; padding:12px; 
+                          margin-bottom:14px; display:inline-block; width:100%; box-sizing:border-box;">
+                <div style="color:#333; font-size:0.78em; margin-bottom:8px; font-weight:600;">
+                  📷 Scan QR to Pay
                 </div>
-                
-                <a href="${data.upiLink}" style="
-                  display:block;background:linear-gradient(135deg,#ff4655,#d91a2a);
-                  color:white;padding:14px;border-radius:10px;
-                  text-decoration:none;font-weight:700;font-size:0.95em;
-                  margin-bottom:8px;">
-                  PAY NOW (GPay / PhonePe / Paytm)
-                </a>
-                
-                <div id="upi-pay-status" style="
-                  color:#aaa;font-size:0.78em;margin:10px 0;
-                  padding:8px;background:#111;border-radius:6px;">
-                  Waiting for payment...
+                <img src="${data.qrCodeUrl}" 
+                     alt="UPI QR Code"
+                     style="width:180px; height:180px; display:block; margin:0 auto; border-radius:8px;"
+                     onerror="this.style.display='none'">
+                <div style="color:#888; font-size:0.7em; margin-top:6px;">
+                  GPay / PhonePe / Paytm / Any UPI app
                 </div>
-                
-                <button onclick="closeUpiModal()" style="
-                  background:transparent;border:1px solid #444;
-                  color:#aaa;padding:10px 25px;border-radius:8px;
-                  cursor:pointer;margin-top:5px;width:100%;">
-                  Cancel
-                </button>
+              </div>
+
+              <!-- Reference Number -->
+              <div style="background:rgba(255,70,85,0.08); border:1px dashed #ff4655;
+                          border-radius:10px; padding:10px; margin-bottom:14px;">
+                <div style="color:#aaa; font-size:0.72em; text-transform:uppercase; margin-bottom:4px;">
+                  ⚠️ Remarks/Note lo type cheyyi
+                </div>
+                <div style="color:#ff4655; font-size:1.5em; font-weight:700;
+                            font-family:monospace; letter-spacing:3px;">${data.refNumber}</div>
+                <div style="color:#666; font-size:0.7em; margin-top:4px;">
+                  UPI payment remarks lo ee number mandatory
+                </div>
+              </div>
+
+              <!-- UPI App Buttons -->
+              <div style="margin-bottom:10px;">
+                <div style="color:#aaa; font-size:0.75em; margin-bottom:8px;">OR Open UPI App Directly</div>
+                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
+                  
+                  <a href="${data.gpayLink}"
+                     style="display:flex; flex-direction:column; align-items:center;
+                            background:#1a73e8; color:white; padding:10px 6px;
+                            border-radius:10px; text-decoration:none; gap:4px;">
+                    <span style="font-size:1.3em; font-weight:900; font-family:serif;">G</span>
+                    <span style="font-size:0.72em; font-weight:700;">GPay</span>
+                  </a>
+
+                  <a href="${data.phonepeLink}"
+                     style="display:flex; flex-direction:column; align-items:center;
+                            background:#5f259f; color:white; padding:10px 6px;
+                            border-radius:10px; text-decoration:none; gap:4px;">
+                    <span style="font-size:1.3em;">📱</span>
+                    <span style="font-size:0.72em; font-weight:700;">PhonePe</span>
+                  </a>
+
+                  <a href="${data.paytmLink}"
+                     style="display:flex; flex-direction:column; align-items:center;
+                            background:#002970; color:white; padding:10px 6px;
+                            border-radius:10px; text-decoration:none; gap:4px;">
+                    <span style="font-size:1.3em;">💙</span>
+                    <span style="font-size:0.72em; font-weight:700;">Paytm</span>
+                  </a>
+
+                </div>
+              </div>
+
+              <!-- Check Status Button -->
+              <button id="check-status-btn"
+                      onclick="startPaymentPolling('${data.refNumber}'); 
+                               this.innerHTML='⏳ Checking payment...';
+                               this.disabled=true; this.style.opacity='0.7';"
+                      style="width:100%; background:#222; border:1px solid #444; color:#fff;
+                             padding:12px; border-radius:10px; font-weight:600; cursor:pointer;
+                             font-size:0.88em; margin-bottom:8px;">
+                ✅ Paid chesa — Verify Cheyyi
+              </button>
+
+              <div style="color:#555; font-size:0.72em;">
+                Payment automatic ga verify avutundi. Leda manually check cheyyi.
               </div>
             </div>
-          `);
+          `;
 
-          startPaymentPolling(data.txnRef);
+          document.body.appendChild(modal);
+          // Auto polling start
+          startPaymentPolling(data.refNumber);
         }
 
-        function closeUpiModal() {
-          const modal = document.getElementById('upi-pay-modal');
-          if (modal) modal.remove();
-        }
+        function startPaymentPolling(refNumber) {
+          if (!refNumber) return;
+          let attempts = 0;
+          const maxAttempts = 60;
 
-        function startPaymentPolling(txnRef) {
-          let count = 0;
-          const statusEl = document.getElementById('upi-pay-status');
-          
-          const interval = setInterval(async () => {
-            count++;
+          const pollInterval = setInterval(async () => {
+            attempts++;
             try {
               const res = await fetch(
-                `https://techno-esports-backend.onrender.com/api/payment/check-upi-payment/${txnRef}`
+                `https://techno-esports-backend.onrender.com/api/payment/check-upi-payment/${encodeURIComponent(refNumber)}`
               );
               const data = await res.json();
-              
-              if (data.status === 'success') {
-                clearInterval(interval);
-                closeUpiModal();
-                showToast('Payment successful! Wallet credited!', 'success');
+
+              if (data.status === 'completed') {
+                clearInterval(pollInterval);
+                const modal = document.getElementById('upi-payment-modal');
+                if (modal) modal.remove();
+                showToast('🎉 Payment successful! Wallet credited.', 'success');
                 await fetchWalletBalance();
                 await fetchWalletTransactions();
                 return;
               }
-              
               if (data.status === 'expired') {
-                clearInterval(interval);
-                if (statusEl) statusEl.textContent = 'Payment expired. Please try again.';
+                clearInterval(pollInterval);
+                const modal = document.getElementById('upi-payment-modal');
+                if (modal) modal.remove();
+                showToast('Session expired. Please try again.', 'error');
                 return;
               }
-              
-              if (statusEl) {
-                statusEl.textContent = `Checking payment... (${count * 5}s)`;
-              }
-            } catch(e) {
-              console.error('Poll error:', e);
+            } catch (e) {
+              console.log('Poll attempt', attempts, ':', e.message);
             }
-            
-            if (count >= 36) {
-              clearInterval(interval);
-              if (statusEl) statusEl.textContent = 'Timeout. Check wallet after payment.';
+            if (attempts >= maxAttempts) {
+              clearInterval(pollInterval);
+              showToast('Not confirmed. Contact support: ' + refNumber, 'info');
             }
           }, 5000);
         }
