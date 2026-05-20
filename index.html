@@ -4267,24 +4267,31 @@
 
               <!-- Verify Button -->
               <div style="padding:0 16px 20px; animation:upiFadeIn 0.5s ease-out 0.5s both;">
-                <button id="check-status-btn" class="upi-verify-btn"
-                        onclick="startPaymentPolling('${data.refNumber}');
-                                 this.innerHTML='<span style=\\'font-size:0.9em\\'>Checking payment status...</span>';
-                                 this.disabled=true; this.style.background='#1a1a1a'; this.style.color='#666';"
-                        style="width:100%; background:linear-gradient(135deg,#ff4655,#d91a2a);
-                               border:none; color:#fff; padding:14px; border-radius:12px;
-                               font-weight:700; cursor:pointer; font-size:0.9em; letter-spacing:0.3px;
-                               margin-bottom:10px; display:flex; align-items:center; justify-content:center; gap:8px;">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
-                  I've Paid — Verify Payment
-                </button>
+                <div style="margin-bottom:12px;">
+                  <input type="text" id="utr-number-input"
+                    placeholder="Enter UTR Number after payment"
+                    style="width:100%;padding:12px;border-radius:10px;
+                    border:1px solid #333;background:#1a1a1a;
+                    color:#fff;font-size:0.9em;box-sizing:border-box;
+                    margin-bottom:8px;text-align:center;
+                    letter-spacing:1px;">
+                  <button onclick="verifyUTRPayment('${data.refNumber}', ${data.amount})"
+                    style="width:100%;background:linear-gradient(135deg,#26a269,#2ec27e);
+                    border:none;color:#fff;padding:14px;border-radius:12px;
+                    font-weight:700;cursor:pointer;font-size:0.9em;
+                    margin-bottom:8px;display:flex;align-items:center;
+                    justify-content:center;gap:8px;">
+                    Verify & Add to Wallet
+                  </button>
+                  <div id="utr-verify-status" style="display:none;
+                    font-size:0.78em;padding:8px;background:#111;
+                    border-radius:6px;text-align:center;"></div>
+                </div>
                 <div style="text-align:center; color:#444; font-size:0.7em; display:flex; align-items:center; justify-content:center; gap:4px;">
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#444" stroke-width="2" stroke-linecap="round">
                     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
                   </svg>
-                  Payment will be verified automatically within seconds
+                  Payment verified automatically
                 </div>
               </div>
 
@@ -4414,6 +4421,62 @@
         function closeUpiModal() {
           const modal = document.getElementById('upi-pay-modal');
           if (modal) modal.remove();
+        }
+
+        async function verifyUTRPayment(refNumber, amount) {
+          const user = auth.currentUser;
+          if (!user) { 
+            showToast('Please login first', 'error'); 
+            return; 
+          }
+          
+          const input = document.getElementById('utr-number-input');
+          const status = document.getElementById('utr-verify-status');
+          const utrNumber = input?.value?.trim();
+          
+          if (!utrNumber || utrNumber.length < 10) {
+            showToast('Please enter valid UTR number', 'error');
+            return;
+          }
+          
+          status.style.display = 'block';
+          status.style.color = '#aaa';
+          status.textContent = 'Verifying payment...';
+          
+          try {
+            const response = await fetch(
+              'https://techno-esports-backend.onrender.com/api/payment/verify-utr',
+              {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                  userId: user.uid, 
+                  utrNumber, 
+                  refNumber 
+                })
+              }
+            );
+            const data = await response.json();
+            
+            if (data.success) {
+              status.style.color = '#26a269';
+              status.textContent = 'Payment verified! Wallet credited!';
+              showToast('Rs.' + amount + ' added to wallet!', 'success');
+              setTimeout(async () => {
+                const modal = document.getElementById('upi-payment-modal');
+                if (modal) modal.remove();
+                await fetchWalletBalance();
+                await fetchWalletTransactions();
+              }, 2000);
+            } else {
+              status.style.color = '#d72638';
+              status.textContent = data.message || 'Verification failed';
+              showToast(data.message || 'Verification failed', 'error');
+            }
+          } catch (error) {
+            status.style.color = '#d72638';
+            status.textContent = 'Error: ' + error.message;
+          }
         }
 
         async function requestWithdrawal() {
