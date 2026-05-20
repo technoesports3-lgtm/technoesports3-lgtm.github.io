@@ -4334,6 +4334,88 @@
           }, 5000);
         }
 
+        function showUpiModal(data) {
+          const existing = document.getElementById('upi-pay-modal');
+          if (existing) existing.remove();
+          document.body.insertAdjacentHTML('beforeend', `
+            <div id="upi-pay-modal" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.97);z-index:99999;display:flex;align-items:center;justify-content:center;padding:15px;box-sizing:border-box;">
+              <div style="background:#1a1a1a;border-radius:16px;padding:22px;max-width:340px;width:100%;border:1px solid #333;text-align:center;max-height:90vh;overflow-y:auto;">
+                <h3 style="color:#ff4655;margin:0 0 4px;">Pay Rs.${data.amount}</h3>
+                <p style="color:#aaa;font-size:0.8em;margin:0 0 10px;">Scan QR with GPay / PhonePe / Paytm</p>
+                <div style="background:white;padding:10px;border-radius:10px;display:inline-block;margin-bottom:12px;">
+                  <img src="${data.qrCodeUrl}" style="width:200px;height:200px;display:block;">
+                </div>
+                <div style="background:#111;border-radius:8px;padding:8px;margin-bottom:12px;font-size:0.75em;color:#666;">
+                  Ref: ${data.refNumber}
+                </div>
+                <div style="background:#1a1a2e;border-radius:10px;padding:12px;margin-bottom:12px;border:1px solid #333;text-align:left;">
+                  <p style="color:#ffc700;font-size:0.82em;margin:0 0 8px;text-align:center;">
+                    Pay చేసిన తర్వాత UTR number enter చేయి
+                  </p>
+                  <input type="number" id="utr-input"
+                    placeholder="UTR Number (12 digits)"
+                    style="width:100%;padding:10px;border-radius:8px;border:1px solid #444;background:#111;color:#fff;font-size:0.9em;box-sizing:border-box;margin-bottom:8px;">
+                  <button onclick="verifyUTR('${data.refNumber}', ${data.amount})"
+                    style="width:100%;background:linear-gradient(135deg,#26a269,#2ec27e);color:white;padding:12px;border-radius:8px;border:none;font-weight:700;font-size:0.9em;cursor:pointer;">
+                    Verify & Add to Wallet
+                  </button>
+                </div>
+                <div id="utr-status" style="display:none;font-size:0.78em;padding:8px;background:#111;border-radius:6px;margin-bottom:10px;"></div>
+                <button onclick="closeUpiModal()" style="background:transparent;border:1px solid #444;color:#aaa;padding:10px;border-radius:8px;cursor:pointer;width:100%;">Cancel</button>
+              </div>
+            </div>
+          `);
+          startPaymentPolling(data.refNumber);
+        }
+
+        async function verifyUTR(refNumber, amount) {
+          const user = auth.currentUser;
+          if (!user) { showToast('Please login first', 'error'); return; }
+          const utrInput = document.getElementById('utr-input');
+          const utrStatus = document.getElementById('utr-status');
+          const utrNumber = utrInput?.value?.trim();
+          if (!utrNumber || utrNumber.length < 10) {
+            showToast('Please enter valid UTR number', 'error');
+            return;
+          }
+          utrStatus.style.display = 'block';
+          utrStatus.style.color = '#aaa';
+          utrStatus.textContent = 'Verifying...';
+          try {
+            const response = await fetch(
+              'https://techno-esports-backend.onrender.com/api/payment/verify-utr',
+              {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: user.uid, utrNumber, refNumber })
+              }
+            );
+            const data = await response.json();
+            if (data.success) {
+              utrStatus.style.color = '#26a269';
+              utrStatus.textContent = 'Payment verified! Wallet credited!';
+              showToast('Rs.' + amount + ' added to wallet!', 'success');
+              setTimeout(async () => {
+                closeUpiModal();
+                await fetchWalletBalance();
+                await fetchWalletTransactions();
+              }, 2000);
+            } else {
+              utrStatus.style.color = '#d72638';
+              utrStatus.textContent = data.message || 'Verification failed';
+              showToast(data.message || 'Verification failed', 'error');
+            }
+          } catch (error) {
+            utrStatus.style.color = '#d72638';
+            utrStatus.textContent = 'Error: ' + error.message;
+          }
+        }
+
+        function closeUpiModal() {
+          const modal = document.getElementById('upi-pay-modal');
+          if (modal) modal.remove();
+        }
+
         async function requestWithdrawal() {
             const userId = getCurrentUserId();
             const amount = Number(document.getElementById('withdraw-amount').value);
