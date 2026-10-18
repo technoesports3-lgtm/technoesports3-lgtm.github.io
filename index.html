@@ -16,15 +16,6 @@
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
-    <script>
-        const p1 = "os_v2_app_5m7omil6tvanvaauawbar2azfqohbzhv3o7";
-        const p2 = "ewmntwxuavmvinhbxifs2zjlhs5ukp5433cntzv";
-        const p3 = "5ikhgnghcx7asb3jwuownwsfitb4q";
-        const ONESIGNAL_REST_KEY = p1 + p2 + p3;
-        const ONESIGNAL_APP_ID = "eb3ee621-7e9d-40da-8014-058208e8192c";
-        console.log('🔑 OneSignal REST Key loaded');
-    </script>
-
     <style>
         /* ===== RESET & BASE ===== */
         * {
@@ -4602,7 +4593,6 @@
             measurementId: "G-VSP48X406H"
         };
 
-        const IMGBB_API_KEY = "db671a28c5c7d432622dc7e5bc74eecc";
         const LOGO_URL = "https://i.ibb.co/N63GPg0L/Screenshot-2026-07-01-080013.png";
 
         firebase.initializeApp(firebaseConfig);
@@ -6770,38 +6760,28 @@ function copyAllCredentials(id, pass) {
 
                 console.log(`Sending notifications to ${userIds.length} users for tournament: ${tournamentTitle}`);
 
-                const notificationBody = {
-                    app_id: ONESIGNAL_APP_ID,
-                    contents: {
-                        en: `🔑 Tournament ID & Password are now available for "${tournamentTitle}"! Check the app now.`
-                    },
-                    headings: {
-                        en: `🎮 ${tournamentTitle} Credentials Released`
-                    },
-                    filters: [
-                        { field: "tag", key: `tour_${tournamentId}`, relation: "exists" }
-                    ],
-                    data: {
-                        tournamentId: tournamentId,
-                        type: "credentials_released",
-                        deep_link: `techno://tournament/${tournamentId}`
-                    },
-                    android_channel_id: "b90e598b-ebac-4a6a-8bb7-1ea7e088976e"
-                };
+                const idToken = await auth.currentUser?.getIdToken();
+                if (!idToken) throw new Error('Staff sign-in is required to send notifications');
 
-                const response = await fetch('https://onesignal.com/api/v1/notifications', {
+                const response = await fetch(`${BACKEND_BASE_URL}/api/staff/notifications`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Basic ${ONESIGNAL_REST_KEY}`
+                        'Authorization': `Bearer ${idToken}`
                     },
-                    body: JSON.stringify(notificationBody)
+                    body: JSON.stringify({
+                        title: `🎮 ${tournamentTitle} Credentials Released`,
+                        message: `🔑 Tournament ID & Password are now available for "${tournamentTitle}"! Check the app now.`,
+                        targetTagKey: `tour_${tournamentId}`,
+                        targetTagRelation: 'exists',
+                        tournamentId
+                    })
                 });
 
                 const result = await response.json();
 
-                if (!response.ok) {
-                    throw new Error(result.errors ? result.errors.join(', ') : 'Failed to send notification');
+                if (!response.ok || !result.success) {
+                    throw new Error(result.message || 'Failed to send notification');
                 }
 
                 console.log(`✅ Notification sent to ${result.recipients || userIds.length} recipients.`);
@@ -6815,6 +6795,7 @@ function copyAllCredentials(id, pass) {
 
             } catch (e) {
                 console.error('❌ Error sending credential notification:', e);
+                throw e;
             }
         }
 
