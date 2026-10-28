@@ -5168,6 +5168,7 @@
                 if (userDoc.exists) {
                     const data = userDoc.data() || {};
                     withdrawableBalance = Number(data.withdrawableBalance || 0);
+                    // also capture FF details for display
                     currentUserData.freeFireName = data.freeFireName || '';
                     currentUserData.freeFireUID = data.freeFireUID || '';
                 }
@@ -5250,6 +5251,7 @@
                     await db.collection("users").doc(uid).update({ referralCode: code });
                     data.referralCode = code;
                 }
+                // merge FF details if present
                 currentUserData = {
                     ...currentUserData,
                     ...data,
@@ -5329,6 +5331,7 @@
                 `Hey! Download the Techno E-Sports app and play Free Fire tournaments to win Real Cash daily! 🎮💸\n\nUse my referral code: ${code} to get a ₹10 Welcome Bonus!\n\nDownload App here:`;
             const shareUrl = "https://technoesports.in/";
 
+            // If Native Web Share is supported, use it
             if (navigator.share) {
                 navigator.share({
                         title: shareTitle,
@@ -5336,12 +5339,14 @@
                         url: shareUrl
                     })
                     .catch((err) => {
+                        // User cancelled — do nothing (no error toast)
                         if (err.name !== 'AbortError') {
                             console.error('Share error:', err);
                             showToast('Failed to share. Please try again.', 'error');
                         }
                     });
             } else {
+                // Fallback: copy the full message + link to clipboard
                 const fullMessage = `${shareText} ${shareUrl}`;
                 navigator.clipboard.writeText(fullMessage)
                     .then(() => {
@@ -5673,17 +5678,13 @@
 
         function startTournamentStartTimer(tournament) {
             if (!tournament.conductingDate || !tournament.conductingTime) return;
-            try {
-                const d = new Date(tournament.conductingDate);
-                const timeStr = String(tournament.conductingTime);
-                if (!timeStr.includes(':')) return; // Safe check
-                const [h, m] = timeStr.split(':');
-                d.setHours(parseInt(h), parseInt(m), 0, 0);
-                const id = tournament.id;
-                if (tournamentTimers.has(id)) clearInterval(tournamentTimers.get(id));
-                updateTournamentTimer(id, d);
-                tournamentTimers.set(id, setInterval(() => updateTournamentTimer(id, d), 1000));
-            } catch(e) { console.warn('Timer start error:', e); }
+            const d = new Date(tournament.conductingDate),
+                [h, m] = tournament.conductingTime.split(':');
+            d.setHours(parseInt(h), parseInt(m), 0, 0);
+            const id = tournament.id;
+            if (tournamentTimers.has(id)) clearInterval(tournamentTimers.get(id));
+            updateTournamentTimer(id, d);
+            tournamentTimers.set(id, setInterval(() => updateTournamentTimer(id, d), 1000));
         }
 
         function stopAllTimers() {
@@ -5697,22 +5698,16 @@
         async function loadTournaments() {
             try {
                 const snap = await db.collection("tournaments").get();
-                currentTournaments = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(t => t.isActive !== false && t.status !== 'completed');
-            } catch (e) {
-                console.error('Load tournaments error:', e);
-                showToast('Failed to load tournaments. Check console.', 'error');
-                return; // Exit if tournaments fail to load
-            }
-
-            if (currentUser) {
-                try {
-                    const regSnap = await db.collection("tournament_registrations").where("userId", "==", currentUser.uid).get();
+                currentTournaments = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(t => t.isActive !== false && t
+                    .status !== 'completed');
+                if (currentUser) {
+                    const regSnap = await db.collection("tournament_registrations").where("userId", "==", currentUser.uid)
+                        .get();
                     userRegistrations = regSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-                } catch (e) {
-                    console.warn('Could not load user registrations:', e);
                 }
-            }
-            renderTournaments();
+                renderTournaments();
+            } catch (e) { console.error('Load tournaments error:', e);
+                showToast('Failed to load tournaments.', 'error'); }
         }
 
         function switchTournamentTab(tab) {
@@ -5730,25 +5725,13 @@
             ['solo', 'duo', 'squad'].forEach(cat => {
                 const container = document.getElementById(`${cat}-tournaments`);
                 if (!container) return;
-                
-                // Safe filtering: defaults to 'solo' if category is missing, casts to string
-                const filtered = currentTournaments.filter(t => {
-                    let c = (t.category || 'solo').toString().toLowerCase().trim();
-                    return c === cat;
-                });
-
+                const filtered = currentTournaments.filter(t => (t.category || '').toLowerCase() === cat);
                 container.innerHTML = '';
                 if (!filtered.length) {
                     container.innerHTML =
                         `<div class="empty-state"><i class="fas fa-gamepad"></i><h3>No ${cat.charAt(0).toUpperCase() + cat.slice(1)} Tournaments</h3><p>Check back later.</p></div>`;
                 } else {
-                    filtered.forEach(t => {
-                        try {
-                            container.appendChild(createTournamentCard(t));
-                        } catch(err) {
-                            console.error('Error rendering tournament card:', err, t);
-                        }
-                    });
+                    filtered.forEach(t => container.appendChild(createTournamentCard(t)));
                 }
             });
         }
@@ -5757,85 +5740,91 @@
             const card = document.createElement('div');
             card.className = 'tournament-card';
 
-            const reg = (userRegistrations || []).find(r => r.tournamentId === tournament.id);
+            const reg = userRegistrations.find(r => r.tournamentId === tournament.id);
             const isRegistered = !!reg;
             const isApproved = reg && reg.status === 'approved';
             const isPending = reg && reg.status === 'pending';
             const isRejected = reg && reg.status === 'rejected';
-            
-            const maxP = Number(tournament.maxParticipants) || 0;
-            const currentP = Number(tournament.participants) || 0;
-            const isFull = currentP >= maxP;
+            const isFull = tournament.participants >= tournament.maxParticipants;
 
             let registrationEnded = false;
-            if (tournament.registrationEndTime) {
-                try { registrationEnded = new Date(tournament.registrationEndTime) <= new Date(); } catch(e){}
-            }
+            if (tournament.registrationEndTime) registrationEnded = new Date(tournament.registrationEndTime) <= new Date();
 
-            let tournamentStarted = false, tournamentStatus = 'Active', statusClass = 'status-active';
+            let tournamentStarted = false,
+                tournamentStatus = 'Active',
+                statusClass = 'status-active';
             if (tournament.conductingDate && tournament.conductingTime) {
-                try {
-                    const d = new Date(tournament.conductingDate);
-                    const timeStr = String(tournament.conductingTime);
-                    if (timeStr.includes(':')) {
-                        const [h, m] = timeStr.split(':');
-                        d.setHours(parseInt(h), parseInt(m), 0, 0);
-                        tournamentStarted = d <= new Date();
-                        if (tournamentStarted) { tournamentStatus = 'Ongoing'; statusClass = 'status-ongoing'; }
-                    }
-                } catch(e) {}
+                const d = new Date(tournament.conductingDate),
+                    [h, m] = tournament.conductingTime.split(':');
+                d.setHours(parseInt(h), parseInt(m), 0, 0);
+                tournamentStarted = d <= new Date();
+                if (tournamentStarted) { tournamentStatus = 'Ongoing';
+                    statusClass = 'status-ongoing'; }
             }
 
-            let showJoin = true, showCreds = false;
+            let showJoin = true,
+                showCreds = false;
+
             if (isRegistered && isApproved) {
-                showCreds = true; statusClass = 'status-approved'; tournamentStatus = 'Approved'; showJoin = false;
+                showCreds = true;
+                statusClass = 'status-approved';
+                tournamentStatus = 'Approved';
+                showJoin = false;
             } else if (isFull) {
-                statusClass = 'status-full'; tournamentStatus = 'Full'; showJoin = false;
+                statusClass = 'status-full';
+                tournamentStatus = 'Full';
+                showJoin = false;
             } else if (registrationEnded) {
-                statusClass = 'status-full'; tournamentStatus = 'Registration Ended'; showJoin = false;
+                statusClass = 'status-full';
+                tournamentStatus = 'Registration Ended';
+                showJoin = false;
             } else if (isRegistered) {
-                if (isPending) { statusClass = 'status-pending'; tournamentStatus = 'Pending'; showJoin = false; }
-                else if (isRejected) { statusClass = 'status-rejected'; tournamentStatus = 'Rejected'; showJoin = true; }
+                if (isPending) { statusClass = 'status-pending';
+                    tournamentStatus = 'Pending';
+                    showJoin = false; } else if (isRejected) { statusClass = 'status-rejected';
+                    tournamentStatus = 'Rejected';
+                    showJoin = true; }
             }
 
-            let tTime = tournament.conductingTime ? String(tournament.conductingTime) : 'TBA';
+            let tTime = tournament.conductingTime || 'TBA';
             if (tTime !== 'TBA' && tTime.includes(':')) {
-                try {
-                    const [h, m] = tTime.split(':');
-                    const hour = parseInt(h), ampm = hour >= 12 ? 'PM' : 'AM', h12 = hour % 12 || 12;
-                    tTime = `${h12}:${m} ${ampm}`;
-                } catch(e){}
+                const [h, m] = tTime.split(':');
+                const hour = parseInt(h),
+                    ampm = hour >= 12 ? 'PM' : 'AM',
+                    h12 = hour % 12 || 12;
+                tTime = `${h12}:${m} ${ampm}`;
             }
             const tDate = tournament.conductingDate ? new Date(tournament.conductingDate).toLocaleDateString() : 'TBA';
-            const entryFee = Number(tournament.entryFee) || 0;
-
-            let displayVal = tournament.category === 'solo' ?
-                (tournament.perKill ? String(tournament.perKill) : 'N/A') :
-                (tournament.prizes ? String(tournament.prizes).split('\n')[0] : 'N/A');
-            
+            const entryFee = tournament.entryFee || 0;
+            const maxP = tournament.maxParticipants || 0;
+            const currentP = tournament.participants || 0;
+            let displayVal = tournament.category === 'solo' ? (tournament.perKill || 'N/A') : (tournament.prizes ? tournament
+                .prizes.split('\n')[0] : 'N/A');
             if (tournament.category !== 'solo' && tournament.prizes) {
-                const lines = String(tournament.prizes).split('\n');
+                const lines = tournament.prizes.split('\n');
                 if (lines.length > 1) displayVal = lines[0] + '...';
             }
             const displayLabel = tournament.category === 'solo' ? 'Per Kill' : 'Prizes';
 
             const startTimerHTML = (tournament.conductingDate && tournament.conductingTime && !tournamentStarted) ?
-                `<div class="tournament-timer" id="tournament-timer-${tournament.id}"><div class="tournament-timer-label">Starts in:</div><div class="tournament-timer-display">Loading...</div></div>` : '';
+                `<div class="tournament-timer" id="tournament-timer-${tournament.id}"><div class="tournament-timer-label">Starts in:</div><div class="tournament-timer-display">Loading...</div></div>` :
+                '';
 
             let credBadge = '';
             if (showCreds && tournament.tournamentId && tournament.tournamentPassword) {
-                credBadge = `<span class="cred-notification-badge"><i class="fas fa-key"></i> ID/Pass Ready</span>`;
+                credBadge =
+                    `<span class="cred-notification-badge"><i class="fas fa-key"></i> ID/Pass Ready</span>`;
             }
 
             card.innerHTML = `
                         <div class="tournament-banner-wrap">
-                            <img src="${tournament.imageUrl || 'https://via.placeholder.com/400x140?text=Tournament'}" alt="${tournament.title || 'Tournament'}" class="tournament-banner">
+                            <img src="${tournament.imageUrl || 'https://via.placeholder.com/400x140?text=Tournament'}" alt="${tournament.title}" class="tournament-banner">
                             <div class="tournament-banner-overlay">
                                 <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
                                     <div class="tournament-badge">
                                         <span class="badge-logo"><img src="${LOGO_URL}" alt="TECHNO"></span>
                                     </div>
-                                    <div class="tournament-title">${tournament.title || 'Untitled Tournament'} ${credBadge}</div>
+                                    <div class="tournament-title">${tournament.title} ${credBadge}</div>
                                 </div>
                                 <div class="tournament-status ${statusClass}">${tournamentStatus}</div>
                             </div>
@@ -5861,9 +5850,8 @@
                         </div>
                     `;
 
-            if (tournament.conductingDate && tournament.conductingTime && !tournamentStarted) {
-                setTimeout(() => startTournamentStartTimer(tournament), 100);
-            }
+            if (tournament.conductingDate && tournament.conductingTime && !tournamentStarted) setTimeout(() =>
+                startTournamentStartTimer(tournament), 100);
 
             return card;
         }
@@ -5874,49 +5862,44 @@
             if (!t) return;
             selectedTournament = t;
             const page = document.getElementById('tournament-details-page');
-            document.getElementById('details-page-title').textContent = t.title || 'Tournament Details';
+            document.getElementById('details-page-title').textContent = t.title;
 
-            let tTime = t.conductingTime ? String(t.conductingTime) : 'TBA';
+            let tTime = t.conductingTime || 'TBA';
             if (tTime !== 'TBA' && tTime.includes(':')) {
-                try {
-                    const [h, m] = tTime.split(':');
-                    const hour = parseInt(h), ampm = hour >= 12 ? 'PM' : 'AM', h12 = hour % 12 || 12;
-                    tTime = `${h12}:${m} ${ampm}`;
-                } catch(e){}
+                const [h, m] = tTime.split(':');
+                const hour = parseInt(h),
+                    ampm = hour >= 12 ? 'PM' : 'AM',
+                    h12 = hour % 12 || 12;
+                tTime = `${h12}:${m} ${ampm}`;
             }
             const tDate = t.conductingDate ? new Date(t.conductingDate).toLocaleDateString() : 'TBA';
 
             let startTimerHTML = '';
             if (t.conductingDate && t.conductingTime) {
-                try {
-                    const d = new Date(t.conductingDate);
-                    const timeStr = String(t.conductingTime);
-                    if (timeStr.includes(':')) {
-                        const [h, m] = timeStr.split(':');
-                        d.setHours(parseInt(h), parseInt(m), 0, 0);
-                        if (d > new Date()) {
-                            const diff = d - new Date(),
-                                hrs = Math.floor(diff / (1000 * 60 * 60)),
-                                mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
-                                secs = Math.floor((diff % (1000 * 60)) / 1000);
-                            startTimerHTML = `
-                                        <div style="background:rgba(255,199,0,0.04);padding:12px;border-radius:var(--radius-sm);margin-bottom:14px;border:1px solid rgba(255,199,0,0.08);">
-                                            <div style="color:#b8860b;font-weight:700;margin-bottom:4px;font-size:0.85rem;"><i class="fas fa-hourglass-start"></i> Tournament Starts In</div>
-                                            <div style="font-family:monospace;font-size:1.1rem;text-align:center;color:var(--text-primary);">${String(hrs).padStart(2,'0')}hr ${String(mins).padStart(2,'0')}min ${String(secs).padStart(2,'0')}s</div>
-                                            <div style="color:var(--text-muted);font-size:0.75rem;text-align:center;margin-top:4px;">Tournament starts on: ${d.toLocaleString()}</div>
-                                        </div>
-                                    `;
-                        } else {
-                            startTimerHTML =
-                                `<div style="background:rgba(227,27,46,0.04);padding:12px;border-radius:var(--radius-sm);margin-bottom:14px;border:1px solid rgba(227,27,46,0.08);"><div style="color:var(--primary);font-weight:700;text-align:center;"><i class="fas fa-play-circle"></i> Tournament In Progress</div><div style="color:var(--text-muted);font-size:0.75rem;text-align:center;margin-top:4px;">Started on: ${d.toLocaleString()}</div></div>`;
-                        }
-                    }
-                } catch(e){}
+                const d = new Date(t.conductingDate),
+                    [h, m] = t.conductingTime.split(':');
+                d.setHours(parseInt(h), parseInt(m), 0, 0);
+                if (d > new Date()) {
+                    const diff = d - new Date(),
+                        hrs = Math.floor(diff / (1000 * 60 * 60)),
+                        mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
+                        secs = Math.floor((diff % (1000 * 60)) / 1000);
+                    startTimerHTML = `
+                                <div style="background:rgba(255,199,0,0.04);padding:12px;border-radius:var(--radius-sm);margin-bottom:14px;border:1px solid rgba(255,199,0,0.08);">
+                                    <div style="color:#b8860b;font-weight:700;margin-bottom:4px;font-size:0.85rem;"><i class="fas fa-hourglass-start"></i> Tournament Starts In</div>
+                                    <div style="font-family:monospace;font-size:1.1rem;text-align:center;color:var(--text-primary);">${String(hrs).padStart(2,'0')}hr ${String(mins).padStart(2,'0')}min ${String(secs).padStart(2,'0')}s</div>
+                                    <div style="color:var(--text-muted);font-size:0.75rem;text-align:center;margin-top:4px;">Tournament starts on: ${d.toLocaleString()}</div>
+                                </div>
+                            `;
+                } else if (d <= new Date()) {
+                    startTimerHTML =
+                        `<div style="background:rgba(227,27,46,0.04);padding:12px;border-radius:var(--radius-sm);margin-bottom:14px;border:1px solid rgba(227,27,46,0.08);"><div style="color:var(--primary);font-weight:700;text-align:center;"><i class="fas fa-play-circle"></i> Tournament In Progress</div><div style="color:var(--text-muted);font-size:0.75rem;text-align:center;margin-top:4px;">Started on: ${d.toLocaleString()}</div></div>`;
+                }
             }
 
             document.getElementById('details-page-body').innerHTML = `
                         <div style="text-align:center;margin-bottom:16px;">
-                            <img src="${t.imageUrl || 'https://via.placeholder.com/400x200?text=Tournament+Banner'}" alt="${t.title || 'Tournament'}" style="width:100%;border-radius:var(--radius-sm);max-height:220px;object-fit:cover;">
+                            <img src="${t.imageUrl || 'https://via.placeholder.com/400x200?text=Tournament+Banner'}" alt="${t.title}" style="width:100%;border-radius:var(--radius-sm);max-height:220px;object-fit:cover;">
                         </div>
                         ${startTimerHTML}
                         <div class="content-block">
@@ -5924,15 +5907,15 @@
                             <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:8px;">
                                 <div><div style="color:var(--text-muted);font-size:0.75rem;">Date</div><div style="color:var(--text-primary);font-weight:700;font-size:0.95rem;">${tDate}</div></div>
                                 <div><div style="color:var(--text-muted);font-size:0.75rem;">Time</div><div style="color:var(--text-primary);font-weight:700;font-size:0.95rem;">${tTime}</div></div>
-                                <div><div style="color:var(--text-muted);font-size:0.75rem;">Category</div><div style="color:var(--text-primary);font-weight:700;text-transform:capitalize;font-size:0.95rem;">${t.category || 'Solo'}</div></div>
-                                <div><div style="color:var(--text-muted);font-size:0.75rem;">Entry Fee</div><div style="color:var(--primary);font-weight:700;font-size:0.95rem;"><i class="fas fa-coins"></i> ${Number(t.entryFee) || 0}</div></div>
-                                <div><div style="color:var(--text-muted);font-size:0.75rem;">Max ${t.category === 'solo' ? 'Players' : t.category === 'duo' ? 'Teams' : 'Squads'}</div><div style="color:var(--text-primary);font-weight:700;font-size:0.95rem;">${Number(t.maxParticipants) || 0}</div></div>
-                                <div><div style="color:var(--text-muted);font-size:0.75rem;">Registered</div><div style="color:var(--text-primary);font-weight:700;font-size:0.95rem;">${Number(t.participants) || 0}</div></div>
+                                <div><div style="color:var(--text-muted);font-size:0.75rem;">Category</div><div style="color:var(--text-primary);font-weight:700;text-transform:capitalize;font-size:0.95rem;">${t.category}</div></div>
+                                <div><div style="color:var(--text-muted);font-size:0.75rem;">Entry Fee</div><div style="color:var(--primary);font-weight:700;font-size:0.95rem;"><i class="fas fa-coins"></i> ${t.entryFee || 0}</div></div>
+                                <div><div style="color:var(--text-muted);font-size:0.75rem;">Max ${t.category === 'solo' ? 'Players' : t.category === 'duo' ? 'Teams' : 'Squads'}</div><div style="color:var(--text-primary);font-weight:700;font-size:0.95rem;">${t.maxParticipants || 0}</div></div>
+                                <div><div style="color:var(--text-muted);font-size:0.75rem;">Registered</div><div style="color:var(--text-primary);font-weight:700;font-size:0.95rem;">${t.participants || 0}</div></div>
                             </div>
                         </div>
                         <div class="content-block">
                             <h4><i class="fas fa-trophy" style="color:var(--primary);"></i> ${t.category === 'solo' ? 'Per Kill' : 'Prizes'}</h4>
-                            <div style="color:var(--text-primary);line-height:1.6;white-space:pre-line;font-size:0.95rem;">${t.category === 'solo' ? (String(t.perKill || 'N/A')) : (String(t.prizes || 'N/A'))}</div>
+                            <div style="color:var(--text-primary);line-height:1.6;white-space:pre-line;font-size:0.95rem;">${t.category === 'solo' ? (t.perKill || 'N/A') : (t.prizes || 'N/A')}</div>
                         </div>
                         <div class="content-block">
                             <h4><i class="fas fa-file-alt" style="color:var(--primary);"></i> Details</h4>
@@ -6027,7 +6010,7 @@
 
             if (t.registrationEndTime && new Date(t.registrationEndTime) <= new Date())
                 return showToast("Registration ended.", 'error');
-            if (Number(t.participants) >= Number(t.maxParticipants)) return showToast("Tournament is full.", 'error');
+            if (t.participants >= t.maxParticipants) return showToast("Tournament is full.", 'error');
 
             const existingReg = userRegistrations.find(r => r.tournamentId === t.id);
             if (existingReg) {
@@ -6048,9 +6031,9 @@
 
             details.innerHTML = `
                         <div style="background:rgba(26,111,181,0.04);padding:12px;border-radius:var(--radius-sm);margin-bottom:14px;border:1px solid rgba(26,111,181,0.08);">
-                            <div style="font-weight:700;color:var(--primary);margin-bottom:4px;font-size:0.95rem;">${t.title || 'Tournament'}</div>
-                            <div style="color:var(--text-muted);font-size:0.80rem;">${String(t.category || 'solo').toUpperCase()} • <i class="fas fa-coins"></i> ${Number(t.entryFee) || 0} Entry Fee</div>
-                            <div style="color:var(--text-muted);font-size:0.75rem;margin-top:4px;">Max Participants: ${Number(t.maxParticipants) || 0}</div>
+                            <div style="font-weight:700;color:var(--primary);margin-bottom:4px;font-size:0.95rem;">${t.title}</div>
+                            <div style="color:var(--text-muted);font-size:0.80rem;">${t.category.toUpperCase()} • <i class="fas fa-coins"></i> ${t.entryFee || 0} Entry Fee</div>
+                            <div style="color:var(--text-muted);font-size:0.75rem;margin-top:4px;">Max Participants: ${t.maxParticipants}</div>
                         </div>
                     `;
 
@@ -6075,10 +6058,10 @@
 
                 let takenSlots = {};
                 const slotsPerTeam = t.category === 'duo' ? 2 : t.category === 'squad' ? 4 : 1;
-                const maxParticipants = Number(t.maxParticipants) || 0;
+                const maxParticipants = t.maxParticipants || 0;
                 const numberOfTeams = t.category === 'solo' ? 1 : Math.ceil(maxParticipants / slotsPerTeam);
 
-                if (t.category === 'solo' || !t.category) {
+                if (t.category === 'solo') {
                     takenSlots = {};
                     registrations.forEach(reg => {
                         const slotNum = reg.slotNumber;
@@ -6150,9 +6133,9 @@
 
                 let html = '';
 
-                const totalSlots = maxParticipants;
+                const totalSlots = t.category === 'solo' ? maxParticipants : maxParticipants;
                 let takenCount = 0;
-                if (t.category === 'solo' || !t.category) {
+                if (t.category === 'solo') {
                     takenCount = Object.keys(takenSlots).length;
                 } else {
                     for (let team in takenSlots) {
@@ -6165,14 +6148,14 @@
                             <div class="slot-booking-info">
                                 <span><i class="fas fa-users"></i> <span class="info-highlight">${availableCount}</span> slots available</span>
                                 <span><i class="fas fa-check-circle"></i> <span class="info-highlight taken-count">${takenCount}</span> taken</span>
-                                <span><i class="fas fa-coins"></i> Fee: <span class="info-highlight">${Number(t.entryFee) || 0}</span></span>
+                                <span><i class="fas fa-coins"></i> Fee: <span class="info-highlight">${t.entryFee || 0}</span></span>
                             </div>
                             <div style="color:var(--text-muted);font-size:0.75rem;margin-bottom:8px;text-align:center;">
                                 <i class="fas fa-info-circle"></i> Click an available slot below to register
                             </div>
                         `;
 
-                if (t.category === 'solo' || !t.category) {
+                if (t.category === 'solo') {
                     html += `<div class="slot-grid">`;
                     for (let slot = 1; slot <= maxParticipants; slot++) {
                         const taken = takenSlots[slot];
@@ -6233,7 +6216,7 @@
                     }
                 }
 
-                if (availableCount <= 0) {
+                if (availableCount === 0) {
                     html += `
                                 <div style="text-align:center;padding:16px;background:rgba(215,38,56,0.04);border-radius:var(--radius-sm);border:1px solid rgba(215,38,56,0.08);margin-top:12px;">
                                     <i class="fas fa-exclamation-circle" style="color:#d72638;font-size:1.4rem;"></i>
@@ -6247,7 +6230,7 @@
 
                 let selectionDisplay = '';
                 if (hasSelection) {
-                    if (t.category === 'solo' || !t.category) {
+                    if (t.category === 'solo') {
                         selectionDisplay = `Slot ${slotBookingState.selectedSlot}`;
                     } else {
                         selectionDisplay =
@@ -6255,6 +6238,7 @@
                     }
                 }
 
+                // ─── AUTO-FILL FF DETAILS FROM currentUserData ───
                 const savedName = currentUserData.freeFireName || '';
                 const savedUid = currentUserData.freeFireUID || '';
 
@@ -6277,7 +6261,7 @@
                                 </div>
                                 ${savedName || savedUid ? `<div style="font-size:0.70rem;color:var(--text-muted);margin:-4px 0 8px;text-align:right;"><i class="fas fa-save"></i> Auto-filled from your profile. Edit if needed.</div>` : ''}
                                 <button class="btn-primary" onclick="processSlotBooking()" id="slot-pay-btn" style="width:100%;margin-top:4px;">
-                                    <i class="fas fa-arrow-right"></i> Pay &amp; Join (<i class="fas fa-coins"></i> ${Number(t.entryFee) || 0})
+                                    <i class="fas fa-arrow-right"></i> Pay &amp; Join (<i class="fas fa-coins"></i> ${t.entryFee || 0})
                                 </button>
                                 <button class="btn-secondary" onclick="cancelSlotSelection()" style="width:100%;margin-top:6px;padding:8px;">
                                     <i class="fas fa-times"></i> Cancel
@@ -6315,7 +6299,7 @@
 
             const takenSlots = slotBookingState.takenSlots;
             let isTaken = false;
-            if (t.category === 'solo' || !t.category) {
+            if (t.category === 'solo') {
                 isTaken = !!takenSlots[slotNumber];
             } else {
                 isTaken = !!(takenSlots[teamNumber] && takenSlots[teamNumber][slotNumber]);
@@ -6326,7 +6310,7 @@
             }
 
             await fetchWalletBalance();
-            if (walletBalance < (Number(t.entryFee) || 0)) {
+            if (walletBalance < (t.entryFee || 0)) {
                 showToast('Insufficient wallet balance. Please add coins.', 'error');
                 return;
             }
@@ -6381,7 +6365,7 @@
                 'error');
 
             await fetchWalletBalance();
-            if (walletBalance < (Number(t.entryFee) || 0)) {
+            if (walletBalance < (t.entryFee || 0)) {
                 showToast('Insufficient wallet balance. Please add coins.', 'error');
                 return;
             }
@@ -6393,7 +6377,7 @@
             const regs = snap.docs.map(d => d.data());
 
             let slotTaken = false;
-            if (t.category === 'solo' || !t.category) {
+            if (t.category === 'solo') {
                 slotTaken = regs.some(r => r.slotNumber === slot && r.status !== 'rejected');
             } else {
                 slotTaken = regs.some(r => r.teamNumber === team && r.slotNumber === slot && r.status !== 'rejected');
@@ -6410,7 +6394,7 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
 
             try {
-                const payResult = await payTournamentEntry(t.id, Number(t.entryFee) || 0);
+                const payResult = await payTournamentEntry(t.id, t.entryFee || 0);
                 if (!payResult || !payResult.success) {
                     throw new Error(payResult?.message || 'Payment failed.');
                 }
@@ -6419,12 +6403,12 @@
                 const regData = {
                     userId: currentUser.uid,
                     tournamentId: t.id,
-                    tournamentTitle: t.title || 'Tournament',
-                    tournamentCategory: t.category || 'solo',
+                    tournamentTitle: t.title,
+                    tournamentCategory: t.category,
                     name: currentUser.displayName || currentUser.email.split('@')[0],
                     email: currentUser.email || '',
                     mobile: '',
-                    teamName: (t.category && t.category !== 'solo') ? `Team ${team}` : '',
+                    teamName: t.category !== 'solo' ? `Team ${team}` : '',
                     playerDetails: playerDetails,
                     paymentScreenshotUrl: null,
                     status: 'approved',
@@ -6440,6 +6424,7 @@
                     participants: firebase.firestore.FieldValue.increment(1)
                 });
 
+                // ─── SAVE FF DETAILS TO USER PROFILE ───
                 await saveFreeFireDetailsToUser(playerName, playerUid);
 
                 try {
@@ -6472,7 +6457,7 @@
             } finally {
                 btn.disabled = false;
                 btn.innerHTML =
-                `<i class="fas fa-arrow-right"></i> Pay &amp; Join (<i class="fas fa-coins"></i> ${Number(t.entryFee) || 0})`;
+                `<i class="fas fa-arrow-right"></i> Pay &amp; Join (<i class="fas fa-coins"></i> ${t.entryFee || 0})`;
             }
         }
 
@@ -6714,27 +6699,26 @@ function copyAllCredentials(id, pass) {
                         document.getElementById('main-app').style.display = 'none'; } }
             }, err => console.warn('app_update listener error:', err));
             tournamentListener = db.collection("tournaments").onSnapshot(snap => {
-                try {
-                    currentTournaments = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(t => t.isActive !== false && t.status !== 'completed');
-                    renderTournaments();
-                    snap.docChanges().forEach(change => {
-                        if (change.type === 'modified') {
-                            const data = change.doc.data();
-                            if (data.tournamentId && data.tournamentPassword && data.credentialsNotified !==
-                                true) {
-                                sendCredentialsNotificationToRegistrants(change.doc.id, data.title || 'Tournament')
-                                    .then(() => {
-                                        db.collection("tournaments").doc(change.doc.id).update({
-                                            credentialsNotified: true,
-                                            credentialsNotifiedAt: firebase.firestore
-                                                .FieldValue.serverTimestamp()
-                                        }).catch(e => console.warn(
-                                            'Failed to mark notified:', e));
-                                    }).catch(e => console.warn('Notification send error:', e));
-                            }
+                currentTournaments = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(t => t.isActive !==
+                    false && t.status !== 'completed');
+                renderTournaments();
+                snap.docChanges().forEach(change => {
+                    if (change.type === 'modified') {
+                        const data = change.doc.data();
+                        if (data.tournamentId && data.tournamentPassword && data.credentialsNotified !==
+                            true) {
+                            sendCredentialsNotificationToRegistrants(change.doc.id, data.title || 'Tournament')
+                                .then(() => {
+                                    db.collection("tournaments").doc(change.doc.id).update({
+                                        credentialsNotified: true,
+                                        credentialsNotifiedAt: firebase.firestore
+                                            .FieldValue.serverTimestamp()
+                                    }).catch(e => console.warn(
+                                        'Failed to mark notified:', e));
+                                }).catch(e => console.warn('Notification send error:', e));
                         }
-                    });
-                } catch(e) { console.error("Error in tournament snapshot:", e); }
+                    }
+                });
             }, e => console.error("Tournament listener error:", e));
             registrationListener = db.collection("tournament_registrations").where("userId", "==", currentUser.uid)
                 .onSnapshot(snap => {
