@@ -4312,8 +4312,8 @@
                     conductingDate: document.getElementById('solo-date').value,
                     conductingTime: document.getElementById('solo-time').value,
                     details: document.getElementById('solo-details').value.trim(),
-                    maxParticipants: parseInt(document.getElementById('solo-max-players').value),
-                    entryFee: parseInt(document.getElementById('solo-entry-fee').value),
+                    maxParticipants: parseInt(document.getElementById('solo-max-players').value) || 0,
+                    entryFee: parseInt(document.getElementById('solo-entry-fee').value) || 0,
                     perKill: document.getElementById('solo-per-kill').value.trim(),
                     prizes: document.getElementById('solo-prizes').value.trim(),
                     tournamentId: document.getElementById('solo-tournament-id').value.trim(),
@@ -4337,8 +4337,8 @@
                     conductingDate: document.getElementById('duo-date').value,
                     conductingTime: document.getElementById('duo-time').value,
                     details: document.getElementById('duo-details').value.trim(),
-                    maxParticipants: parseInt(document.getElementById('duo-max-teams').value),
-                    entryFee: parseInt(document.getElementById('duo-entry-fee').value),
+                    maxParticipants: parseInt(document.getElementById('duo-max-teams').value) || 0,
+                    entryFee: parseInt(document.getElementById('duo-entry-fee').value) || 0,
                     prizes: document.getElementById('duo-prizes').value.trim(),
                     tournamentId: document.getElementById('duo-tournament-id').value.trim(),
                     tournamentPassword: document.getElementById('duo-tournament-password').value.trim(),
@@ -4361,8 +4361,8 @@
                     conductingDate: document.getElementById('squad-date').value,
                     conductingTime: document.getElementById('squad-time').value,
                     details: document.getElementById('squad-details').value.trim(),
-                    maxParticipants: parseInt(document.getElementById('squad-max-squads').value),
-                    entryFee: parseInt(document.getElementById('squad-entry-fee').value),
+                    maxParticipants: parseInt(document.getElementById('squad-max-squads').value) || 0,
+                    entryFee: parseInt(document.getElementById('squad-entry-fee').value) || 0,
                     prizes: document.getElementById('squad-prizes').value.trim(),
                     tournamentId: document.getElementById('squad-tournament-id').value.trim(),
                     tournamentPassword: document.getElementById('squad-tournament-password').value.trim(),
@@ -5952,6 +5952,7 @@
         console.log("  - Fixed: forceLogout does NOT reset to false");
         console.log("  - [FIXED] applyTemplateFromList() and loadTemplate() robustly map all fields");
         console.log("  - triggerAutoRepeatManually() with Run Auto-Repeat Now button");
+        console.log("  - [FIXED] parseInt() replaced with `parseInt(...) || 0` in createTournament to prevent Firestore NaN errors");
     </script>
 </body>
 </html>
