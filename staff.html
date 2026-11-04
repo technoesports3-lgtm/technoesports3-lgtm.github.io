@@ -3155,11 +3155,10 @@
                 showToast(`Uploading ${file.name}...`, 'info');
                 const uploadFile = await optimizeTournamentImage(file);
 
-                const formData = new FormData();
-                formData.append("image", uploadFile);
                 const result = await staffApiRequest('/api/staff/image-upload', {
                     method: 'POST',
-                    body: formData
+                    headers: { 'Content-Type': uploadFile.type },
+                    body: uploadFile
                 });
 
                 progressBarFill.style.width = '100%';
@@ -3178,7 +3177,7 @@
                         '.file-upload-text');
                     uploadContainer.innerHTML = `<i class="fas fa-check-circle" style="color: #26a269;"></i><br>Upload successful!`;
 
-                    showToast("Image uploaded successfully! URL generated.", 'success');
+                    showToast(`Image uploaded to ${result.data.provider || 'image storage'}.`, 'success');
 
                     setTimeout(() => {
                         progressBar.style.display = 'none';
