@@ -4855,32 +4855,67 @@
             return `${prefix}${Math.floor(10000 + Math.random() * 90000)}`;
         }
 
+        const googleProfileRequests = new Map();
+
         async function ensureGoogleUserProfile(user, mode, enteredReferralCode = '') {
-            const userRef = db.collection("users").doc(user.uid);
-            const doc = await userRef.get();
-            if (!doc.exists) {
-                const displayName = user.displayName || user.email.split('@')[0];
-                const referralCode = generateClientReferralCode(displayName);
-                await userRef.set({
+            if (googleProfileRequests.has(user.uid)) return googleProfileRequests.get(user.uid);
+
+            const profileRequest = (async () => {
+                const userRef = db.collection("users").doc(user.uid);
+                const doc = await userRef.get();
+                if (doc.exists) {
+                    showToast(mode === 'signup' ? "Welcome back!" : "Google login successful!", 'success');
+                    return doc.data() || {};
+                }
+
+                const displayName = user.displayName || user.email?.split('@')[0] || 'Player';
+                const profile = {
                     username: displayName,
                     phone: '',
-                    email: user.email,
+                    email: user.email || '',
                     role: 'user',
                     isBlocked: false,
                     tournamentsParticipated: 0,
-                    referralCode: referralCode,
+                    referralCode: generateClientReferralCode(displayName),
                     registeredAt: firebase.firestore.FieldValue.serverTimestamp(),
                     googleAuth: true,
                     withdrawableBalance: 0
-                });
-                if (mode === 'signup' && enteredReferralCode) {
-                    try { await applyReferralForNewUser(user.uid, enteredReferralCode);
-                        showToast("Referral code applied!", 'success'); } catch (e) { showToast(e.message ||
-                            "Failed to apply referral.", 'error'); }
-                }
+                };
+                await userRef.set(profile);
                 showToast("Account created with Google!", 'success');
-            } else {
-                showToast(mode === 'signup' ? "Welcome back!" : "Google login successful!", 'success');
+
+                if (mode === 'signup' && enteredReferralCode) {
+                    applyReferralForNewUser(user.uid, enteredReferralCode)
+                        .then(() => showToast("Referral code applied!", 'success'))
+                        .catch(error => {
+                            console.error('Google signup referral error:', error);
+                            showToast(error.message || "Failed to apply referral.", 'error');
+                        });
+                }
+                return profile;
+            })();
+
+            googleProfileRequests.set(user.uid, profileRequest);
+            try {
+                return await profileRequest;
+            } finally {
+                googleProfileRequests.delete(user.uid);
+            }
+        }
+
+        async function withAuthStartupTimeout(promise, timeoutMs = 15000) {
+            let timeoutId;
+            try {
+                return await Promise.race([
+                    promise,
+                    new Promise((_, reject) => {
+                        timeoutId = setTimeout(() => reject(new Error(
+                            'Google sign-in is taking too long to load your profile. Check your connection and try again.'
+                        )), timeoutMs);
+                    })
+                ]);
+            } finally {
+                clearTimeout(timeoutId);
             }
         }
 
@@ -4902,9 +4937,10 @@
             try {
                 const result = await auth.signInWithPopup(provider);
                 if (result?.user) {
-                    await ensureGoogleUserProfile(result.user, mode, referral);
-                    document.getElementById('professional-auth-section').style.display = 'none';
-                    document.getElementById('loading-screen').style.display = 'flex';
+                    const profile = await withAuthStartupTimeout(
+                        ensureGoogleUserProfile(result.user, mode, referral)
+                    );
+                    await initializeApp(result.user, profile);
                 }
             } catch (error) {
                 if (error.code === 'auth/popup-blocked') {
@@ -4930,9 +4966,10 @@
                 if (result?.user) {
                     const mode = sessionStorage.getItem(GOOGLE_AUTH_MODE_KEY) || 'login';
                     const referral = sessionStorage.getItem(GOOGLE_AUTH_REFERRAL_KEY) || '';
-                    await ensureGoogleUserProfile(result.user, mode, referral);
-                    document.getElementById('professional-auth-section').style.display = 'none';
-                    document.getElementById('loading-screen').style.display = 'flex';
+                    const profile = await withAuthStartupTimeout(
+                        ensureGoogleUserProfile(result.user, mode, referral)
+                    );
+                    await initializeApp(result.user, profile);
                 }
             } catch (e) { showToast(e.message || 'Redirect error', 'error'); } finally {
                 sessionStorage.removeItem(GOOGLE_AUTH_MODE_KEY);
@@ -4951,16 +4988,10 @@
                 const credential = firebase.auth.GoogleAuthProvider.credential(idToken);
                 const result = await auth.signInWithCredential(credential);
                 if (result?.user) {
-                    await ensureGoogleUserProfile(result.user, mode, referral);
-                    document.getElementById('professional-auth-section').style.display = 'none';
-                    document.getElementById('loading-screen').style.display = 'flex';
-                    setTimeout(() => {
-                        const mainApp = document.getElementById('main-app');
-                        if (mainApp && mainApp.style.display !== 'block' && auth.currentUser) {
-                            console.warn('Stuck detected, forcing re-init');
-                            location.reload();
-                        }
-                    }, 6000);
+                    const profile = await withAuthStartupTimeout(
+                        ensureGoogleUserProfile(result.user, mode, referral)
+                    );
+                    await initializeApp(result.user, profile);
                 }
             } catch (error) {
                 showToast(error.message || 'Google auth failed.', 'error');
@@ -7010,7 +7041,9 @@ function copyAllCredentials(id, pass) {
         }
 
         // ─── AUTH STATE ───
+        let authStateGeneration = 0;
         auth.onAuthStateChanged(async user => {
+            const generation = ++authStateGeneration;
             authStateChecked = true;
 
             if (user) {
@@ -7018,8 +7051,18 @@ function copyAllCredentials(id, pass) {
                 document.getElementById('loading-screen').style.display = 'flex';
 
                 try {
-                    const doc = await db.collection("users").doc(user.uid).get();
-                    const data = doc.data() || {};
+                    const doc = await withAuthStartupTimeout(db.collection("users").doc(user.uid).get());
+                    if (generation !== authStateGeneration || auth.currentUser?.uid !== user.uid) return;
+
+                    let data = doc.exists ? doc.data() || {} : null;
+                    const isGoogleUser = user.providerData.some(provider => provider.providerId === 'google.com');
+                    if (!data && isGoogleUser) {
+                        const mode = sessionStorage.getItem(GOOGLE_AUTH_MODE_KEY) || 'login';
+                        const referral = sessionStorage.getItem(GOOGLE_AUTH_REFERRAL_KEY) || '';
+                        data = await withAuthStartupTimeout(ensureGoogleUserProfile(user, mode, referral));
+                    }
+                    if (!data) throw new Error('Your account profile could not be found. Please sign in again.');
+                    if (generation !== authStateGeneration || auth.currentUser?.uid !== user.uid) return;
 
                     if (data.isBlocked) {
                         await auth.signOut();
@@ -7033,10 +7076,13 @@ function copyAllCredentials(id, pass) {
 
                 } catch (e) {
                     console.error('Auth state handler error:', e);
-                    try { await auth.signOut(); } catch (_) {}
+                    if (generation !== authStateGeneration) return;
                     document.getElementById('loading-screen').style.display = 'none';
+                    document.getElementById('main-app').style.display = 'none';
                     document.getElementById('professional-auth-section').style.display = 'flex';
-                    showToast('Error loading user data. Please try again.', 'error');
+                    setButtonLoading('google-login-btn', false);
+                    setButtonLoading('google-signup-btn', false);
+                    showToast(e.message || 'Unable to load your account. Check your connection and try again.', 'error');
                 }
             } else {
                 if (appInitialized) {
