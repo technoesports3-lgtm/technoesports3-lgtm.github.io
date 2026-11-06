@@ -1570,6 +1570,181 @@
                 flex: 1 1 100%;
                 margin: 2px 0;
             }
+            .admin-entity-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
+        /* =========================================================
+           STAFF ARCHITECTURE STYLES (ORIGINAL DARK #0a0a0a / #00a8ff THEME):
+           1. Cascading Match Classification Selector Bar
+           2. Games & Modes Classification Builder
+           3. Promotional Banner & Live Notice Manager
+           ========================================================= */
+        :root {
+            --primary-blue: #00a8ff;
+            --primary-blue-light: #1ab2ff;
+            --primary-gradient: linear-gradient(135deg, #00a8ff 0%, #0097e6 100%);
+            --text-primary: #ffffff;
+            --text-muted: #aaaaaa;
+            --accent-green: #10B981;
+            --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        }
+        .cascade-selector-bar {
+            background: rgba(25, 25, 25, 0.95);
+            border: 1px solid rgba(0, 168, 255, 0.35);
+            border-radius: 10px;
+            padding: 18px;
+            margin: 15px 0;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+        }
+        .cascade-selector-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+        .cascade-selector-title h3 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #00a8ff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .cascade-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 12px;
+        }
+        .cascade-step-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00a8ff 0%, #0097e6 100%);
+            color: #fff;
+            font-size: 0.72rem;
+            font-weight: 800;
+            margin-right: 6px;
+        }
+        .builder-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 16px;
+            margin: 15px 0;
+        }
+        .admin-entity-card {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: rgba(30, 30, 30, 0.9);
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-bottom: 10px;
+            transition: all 0.2s ease;
+        }
+        .admin-entity-card:hover {
+            border-color: #00a8ff;
+            box-shadow: 0 5px 15px rgba(0, 168, 255, 0.18);
+        }
+        .admin-entity-thumb {
+            width: 64px;
+            height: 64px;
+            border-radius: 8px;
+            object-fit: cover;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            flex-shrink: 0;
+        }
+        .admin-banner-thumb {
+            width: 110px;
+            height: 62px;
+            border-radius: 8px;
+            object-fit: cover;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            flex-shrink: 0;
+        }
+        .admin-entity-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .admin-entity-title {
+            font-weight: 700;
+            font-size: 0.96rem;
+            color: #fff;
+            margin-bottom: 3px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .admin-entity-sub {
+            font-size: 0.8rem;
+            color: #aaa;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .pill-count-green {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(16, 185, 129, 0.16);
+            color: #34D399;
+            font-weight: 700;
+            font-size: 0.75rem;
+            padding: 3px 9px;
+            border-radius: 999px;
+            border: 1px solid rgba(16, 185, 129, 0.35);
+        }
+        .pill-count-blue {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(0, 168, 255, 0.16);
+            color: #00a8ff;
+            font-weight: 700;
+            font-size: 0.75rem;
+            padding: 3px 9px;
+            border-radius: 999px;
+            border: 1px solid rgba(0, 168, 255, 0.35);
+        }
+        .live-notice-preview {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(0, 168, 255, 0.1);
+            border: 1px solid rgba(0, 168, 255, 0.3);
+            border-radius: 8px;
+            padding: 10px 14px;
+            margin-top: 10px;
+            color: #fff;
+            font-size: 0.86rem;
+            font-weight: 600;
+        }
+        .pulse-dot-green {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10B981;
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            animation: pulseGreenDot 1.8s infinite;
+            display: inline-block;
+        }
+        @keyframes pulseGreenDot {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); }
+            70% { box-shadow: 0 0 0 7px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
         }
     </style>
 </head>
@@ -1671,7 +1846,7 @@
             <div id="sidebar-menu">
                 <div class="sidebar-header-banner">
                     <h3>STAFF PANEL</h3>
-                    <p>Tournament Management</p>
+                    <p>Tournament &amp; Live Ecosystem</p>
                 </div>
 
                 <div class="sidebar-menu-item" onclick="showSection('dashboard-section')">
@@ -1681,7 +1856,10 @@
                     <span class="menu-icon-symbol"><i class="fas fa-user-circle"></i></span> My Profile
                 </div>
                 <div class="sidebar-menu-item" onclick="showSection('announcements-section')" id="announcements-menu-item">
-                    <span class="menu-icon-symbol"><i class="fas fa-bullhorn"></i></span> Announcements
+                    <span class="menu-icon-symbol"><i class="fas fa-images"></i></span> Banners &amp; Notices
+                </div>
+                <div class="sidebar-menu-item" onclick="showSection('games-modes-section')" id="games-modes-menu-item">
+                    <span class="menu-icon-symbol"><i class="fas fa-layer-group"></i></span> Games &amp; Modes
                 </div>
                 <div class="sidebar-menu-item" onclick="showSection('manage-users-section')" id="users-menu-item" style="display: none;">
                     <span class="menu-icon-symbol"><i class="fas fa-users"></i></span> Manage Users
@@ -1768,7 +1946,17 @@
                                 <a class="action-card" onclick="showSection('tournaments-section')" id="quick-tournament">
                                     <div class="action-icon"><i class="fas fa-plus-circle"></i></div>
                                     <div class="action-title">Create Tournament</div>
-                                    <div class="action-subtitle">Create new tournaments</div>
+                                    <div class="action-subtitle">Game &rarr; Mode &rarr; Format</div>
+                                </a>
+                                <a class="action-card" onclick="showSection('games-modes-section')" id="quick-games-modes">
+                                    <div class="action-icon"><i class="fas fa-layer-group"></i></div>
+                                    <div class="action-title">Games &amp; Modes</div>
+                                    <div class="action-subtitle">Manage games &amp; mode buckets</div>
+                                </a>
+                                <a class="action-card" onclick="showSection('announcements-section')" id="quick-banners">
+                                    <div class="action-icon"><i class="fas fa-images"></i></div>
+                                    <div class="action-title">Banners &amp; Notices</div>
+                                    <div class="action-subtitle">Promo sliders &amp; live notice bar</div>
                                 </a>
                                 <a class="action-card" onclick="showSection('manage-users-section')" id="quick-users">
                                     <div class="action-icon"><i class="fas fa-user-cog"></i></div>
@@ -1783,32 +1971,322 @@
                             </div>
                             <div class="content-body">
                                 <div id="recent-activity-log">
-                                    <p style="color:#888;">No recent activity yet.</p>
+                                    <p style="color:#aaa;">No recent activity yet.</p>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                <!-- Announcements Section -->
+                <!-- Banner & Notice Manager + Global Push Announcements Section -->
                 <section id="announcements-section" class="section">
+                    <!-- 1. Live Notice Bar Manager -->
                     <div class="content-card">
                         <div class="content-header">
-                            <h3><i class="fas fa-bullhorn"></i> Send Global Notification</h3>
+                            <h3><i class="fas fa-bullhorn"></i> Live Notice Bar Manager (User Home)</h3>
                         </div>
                         <div class="content-body">
-                            <div style="color: #ffc700; background: rgba(255, 199, 0, 0.1); padding: 10px; border-radius: 6px; margin-bottom: 15px;">
+                            <div class="tournament-form-grid">
+                                <div class="form-group" style="grid-column: 1 / -1;">
+                                    <label>LIVE ANNOUNCEMENT BAR TEXT</label>
+                                    <input type="text" id="live-notice-text" placeholder="e.g., Welcome to TECHNO E-SPORTS! Room ID & Password shared 15 mins before match start.">
+                                </div>
+                                <div class="form-group">
+                                    <label>ACTION LINK / ROUTE (OPTIONAL)</label>
+                                    <input type="text" id="live-notice-link" placeholder="e.g., https://... or leave blank">
+                                </div>
+                                <div class="form-group">
+                                    <label>NOTICE BAR STATUS</label>
+                                    <div class="show-credentials-toggle" style="margin:0;">
+                                        <span style="font-weight:700; font-size:0.88em;">Show Notice Bar on User Home</span>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="live-notice-active" checked>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="live-notice-preview" id="live-notice-preview-box">
+                                <span class="pulse-dot-green"></span>
+                                <i class="fas fa-volume-up" style="color:var(--primary-blue);"></i>
+                                <span id="live-notice-preview-text">Live notice preview will appear here...</span>
+                            </div>
+                            <button type="button" onclick="saveLiveNoticeConfig()" id="save-live-notice-btn" style="margin-top:14px; width:100%;">
+                                <i class="fas fa-save"></i> SAVE LIVE NOTICE BAR
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 2. Promotional Banner Slider Manager -->
+                    <div class="content-card">
+                        <div class="content-header">
+                            <h3><i class="fas fa-images"></i> Promotional Banner Slider Manager</h3>
+                        </div>
+                        <div class="content-body">
+                            <input type="hidden" id="banner-edit-id" value="">
+                            <div class="tournament-form-grid">
+                                <div class="form-group">
+                                    <label>BANNER HEADLINE (OPTIONAL)</label>
+                                    <input type="text" id="banner-title-input" placeholder="e.g., Grand Free Fire Max Series">
+                                </div>
+                                <div class="form-group">
+                                    <label>BANNER SUBTITLE / BADGE (OPTIONAL)</label>
+                                    <input type="text" id="banner-subtitle-input" placeholder="e.g., Win Daily Instant Rewards">
+                                </div>
+                            </div>
+                            <div class="tournament-form-grid">
+                                <div class="form-group">
+                                    <label>UPLOAD OR PASTE BANNER IMAGE</label>
+                                    <div class="file-upload-container" onclick="document.getElementById('banner-image-file').click()">
+                                        <div class="file-upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                                        <div class="file-upload-text">
+                                            Click to upload promo banner (16:9 recommended)<br>
+                                            <small>Supported: JPG, PNG, WebP</small>
+                                        </div>
+                                        <img id="banner-image-preview" class="uploaded-image-preview" alt="Banner Preview">
+                                        <input type="file" id="banner-image-file" class="file-input-hidden" accept="image/*" onchange="handleCustomAssetUpload('banner', this.files[0])">
+                                        <div class="upload-progress" id="banner-upload-progress">
+                                            <div class="upload-progress-bar" id="banner-upload-progress-bar"></div>
+                                        </div>
+                                    </div>
+                                    <input type="text" id="banner-image-url" placeholder="Or paste direct Banner Image URL (https://...)" style="margin-top:8px;">
+                                </div>
+                                <div class="form-group">
+                                    <label>TARGET ACTION / LINK (OPTIONAL)</label>
+                                    <input type="text" id="banner-action-url" placeholder="External URL or leave blank to open Games">
+                                    <label style="margin-top:12px;">SORT ORDER (LOWER SHOWS FIRST)</label>
+                                    <input type="number" id="banner-sort-order" value="1" min="0">
+                                    <div class="show-credentials-toggle" style="margin-top:12px;">
+                                        <span style="font-weight:700; font-size:0.88em;">Active on Home Carousel</span>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="banner-is-active" checked>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                                <button type="button" onclick="savePromoBanner()" id="save-promo-banner-btn" style="flex:1;">
+                                    <i class="fas fa-plus-circle"></i> SAVE PROMOTIONAL BANNER
+                                </button>
+                                <button type="button" class="btn-outline-sm" onclick="resetPromoBannerForm()" style="padding:12px 18px;">
+                                    <i class="fas fa-undo"></i> Clear
+                                </button>
+                            </div>
+
+                            <h4 style="margin:22px 0 12px 0; color:var(--primary-blue);">ACTIVE &amp; SAVED PROMOTIONAL BANNERS</h4>
+                            <div id="promo-banners-admin-list">
+                                <div class="empty-state" style="padding:25px;">
+                                    <i class="fas fa-images"></i>
+                                    <h3>No Promotional Banners Yet</h3>
+                                    <p>Add a promotional banner above to display on the User Panel Home Slider.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Global Push Notification -->
+                    <div class="content-card">
+                        <div class="content-header">
+                            <h3><i class="fas fa-bell"></i> Send Global Push Notification</h3>
+                        </div>
+                        <div class="content-body">
+                            <div style="color: #00a8ff; background: rgba(25, 118, 210, 0.08); border: 1px solid rgba(25, 118, 210, 0.2); padding: 10px 14px; border-radius: 10px; margin-bottom: 15px; font-weight: 500;">
                                 <i class="fas fa-info-circle"></i> This message will be sent as a Push Notification to all users who have allowed notifications.
                             </div>
 
                             <div class="form-group">
                                 <label>Message Content</label>
-                                <textarea id="announcement-message" rows="5" placeholder="Type your update/announcement here..." required></textarea>
+                                <textarea id="announcement-message" rows="4" placeholder="Type your update/announcement here..." required></textarea>
                             </div>
 
                             <button class="auth-button" onclick="sendCustomPushAnnouncement()" id="send-push-announcement-btn">
                                 <i class="fas fa-bell"></i> Send Push Notification (Free)
                             </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Game & Mode Classification Builder Section -->
+                <section id="games-modes-section" class="section">
+                    <div class="builder-grid">
+                        <!-- Column 1: Esports Games Builder -->
+                        <div class="content-card" style="margin:0;">
+                            <div class="content-header">
+                                <h3><i class="fas fa-gamepad"></i> 1. Esports Games Builder</h3>
+                            </div>
+                            <div class="content-body">
+                                <input type="hidden" id="game-edit-id" value="">
+                                <div class="form-group">
+                                    <label>GAME TITLE</label>
+                                    <input type="text" id="game-name-input" placeholder="e.g., Free Fire Max">
+                                </div>
+                                <div class="form-group">
+                                    <label>GAME TAGLINE / SUBTITLE (OPTIONAL)</label>
+                                    <input type="text" id="game-tagline-input" placeholder="e.g., Official Battle Royale & Clash Squad">
+                                </div>
+                                <div class="form-group">
+                                    <label>GAME COVER BANNER / THUMBNAIL</label>
+                                    <div class="file-upload-container" onclick="document.getElementById('game-image-file').click()">
+                                        <div class="file-upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                                        <div class="file-upload-text">
+                                            Click to upload Game Banner Image<br>
+                                            <small>Supported: JPG, PNG, WebP</small>
+                                        </div>
+                                        <img id="game-image-preview" class="uploaded-image-preview" alt="Game Preview">
+                                        <input type="file" id="game-image-file" class="file-input-hidden" accept="image/*" onchange="handleCustomAssetUpload('game', this.files[0])">
+                                        <div class="upload-progress" id="game-upload-progress">
+                                            <div class="upload-progress-bar" id="game-upload-progress-bar"></div>
+                                        </div>
+                                    </div>
+                                    <input type="text" id="game-image-url" placeholder="Or paste Game Cover URL (https://...)" style="margin-top:8px;">
+                                </div>
+                                <div class="tournament-form-grid">
+                                    <div class="form-group">
+                                        <label>SORT ORDER</label>
+                                        <input type="number" id="game-sort-order" value="1" min="0">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>STATUS</label>
+                                        <div class="show-credentials-toggle" style="margin:0;">
+                                            <span style="font-weight:700; font-size:0.85em;">Active</span>
+                                            <label class="toggle-switch">
+                                                <input type="checkbox" id="game-is-active" checked>
+                                                <span class="toggle-slider"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="display:flex; gap:8px; margin-top:10px;">
+                                    <button type="button" onclick="saveEsportsGame()" id="save-game-btn" style="flex:1;">
+                                        <i class="fas fa-save"></i> SAVE GAME
+                                    </button>
+                                    <button type="button" class="btn-outline-sm" onclick="resetEsportsGameForm()" style="padding:10px 14px;">
+                                        <i class="fas fa-undo"></i> Reset
+                                    </button>
+                                </div>
+
+                                <h4 style="margin:20px 0 10px 0; color:var(--primary-blue);">CREATED GAMES</h4>
+                                <div id="esports-games-admin-list">
+                                    <div class="empty-state" style="padding:20px;">
+                                        <i class="fas fa-gamepad"></i>
+                                        <h3>No Games Created</h3>
+                                        <p>Create a game (e.g., Free Fire Max) to display on User Home.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Column 2: Mode Classification Builder -->
+                        <div class="content-card" style="margin:0;">
+                            <div class="content-header">
+                                <h3><i class="fas fa-layer-group"></i> 2. Mode Classification Builder</h3>
+                            </div>
+                            <div class="content-body">
+                                <input type="hidden" id="mode-edit-id" value="">
+                                <div class="form-group">
+                                    <label>LINK TO PARENT GAME</label>
+                                    <select id="mode-game-select">
+                                        <option value="">-- Select Game First --</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>MODE NAME</label>
+                                    <input type="text" id="mode-name-input" placeholder="e.g., FF Survival, Full Map, Lone Wolf, Headshot, CS-New">
+                                </div>
+                                <div class="form-group">
+                                    <label>MODE THUMBNAIL ICON / IMAGE</label>
+                                    <div class="file-upload-container" onclick="document.getElementById('mode-image-file').click()">
+                                        <div class="file-upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                                        <div class="file-upload-text">
+                                            Click to upload Mode Thumbnail<br>
+                                            <small>Square 1:1 or 4:3 image recommended</small>
+                                        </div>
+                                        <img id="mode-image-preview" class="uploaded-image-preview" alt="Mode Preview">
+                                        <input type="file" id="mode-image-file" class="file-input-hidden" accept="image/*" onchange="handleCustomAssetUpload('mode', this.files[0])">
+                                        <div class="upload-progress" id="mode-upload-progress">
+                                            <div class="upload-progress-bar" id="mode-upload-progress-bar"></div>
+                                        </div>
+                                    </div>
+                                    <input type="text" id="mode-image-url" placeholder="Or paste Mode Thumbnail URL (https://...)" style="margin-top:8px;">
+                                </div>
+                                <div class="tournament-form-grid">
+                                    <div class="form-group">
+                                        <label>DEFAULT MAP</label>
+                                        <input type="text" id="mode-map-input" placeholder="e.g., Bermuda / Iron Cage" value="Bermuda">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>DEFAULT PERSPECTIVE</label>
+                                        <select id="mode-perspective-select" style="margin:0;">
+                                            <option value="TPP">TPP</option>
+                                            <option value="FPP">FPP</option>
+                                            <option value="CS">CS (Clash Squad)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="tournament-form-grid">
+                                    <div class="form-group">
+                                        <label>SORT ORDER</label>
+                                        <input type="number" id="mode-sort-order" value="1" min="0">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>STATUS</label>
+                                        <div class="show-credentials-toggle" style="margin:0;">
+                                            <span style="font-weight:700; font-size:0.85em;">Active</span>
+                                            <label class="toggle-switch">
+                                                <input type="checkbox" id="mode-is-active" checked>
+                                                <span class="toggle-slider"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="display:flex; gap:8px; margin-top:10px;">
+                                    <button type="button" onclick="saveEsportsMode()" id="save-mode-btn" style="flex:1;">
+                                        <i class="fas fa-save"></i> SAVE MODE
+                                    </button>
+                                    <button type="button" class="btn-outline-sm" onclick="resetEsportsModeForm()" style="padding:10px 14px;">
+                                        <i class="fas fa-undo"></i> Reset
+                                    </button>
+                                </div>
+
+                                <h4 style="margin:20px 0 10px 0; color:var(--primary-blue);">CREATED MODES &amp; OPEN MATCH COUNTS</h4>
+                                <div id="esports-modes-admin-list">
+                                    <div class="empty-state" style="padding:20px;">
+                                        <i class="fas fa-layer-group"></i>
+                                        <h3>No Modes Created</h3>
+                                        <p>Create modes linked to your game so matches route into them.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bulk Assign Legacy / Unclassified Matches Helper -->
+                    <div class="content-card">
+                        <div class="content-header">
+                            <h3><i class="fas fa-link"></i> Assign Existing / Legacy Matches to a Game &amp; Mode Bucket</h3>
+                        </div>
+                        <div class="content-body">
+                            <p style="color:var(--text-muted); font-size:0.88em; margin-top:0; margin-bottom:12px;">
+                                If you have older tournaments or templates created before Game &amp; Mode buckets were set up, you can link all unassigned tournaments to a target Game &amp; Mode in one click.
+                            </p>
+                            <div class="cascade-grid" style="align-items:end;">
+                                <div class="form-group" style="margin:0;">
+                                    <label>TARGET GAME</label>
+                                    <select id="legacy-assign-game-select" onchange="populateModeDropdownForGame(this.value, 'legacy-assign-mode-select')" style="margin:0;">
+                                        <option value="">-- Select Game --</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" style="margin:0;">
+                                    <label>TARGET MODE</label>
+                                    <select id="legacy-assign-mode-select" style="margin:0;">
+                                        <option value="">-- Select Mode --</option>
+                                    </select>
+                                </div>
+                                <button type="button" onclick="assignLegacyTournamentsToMode()" id="assign-legacy-btn">
+                                    <i class="fas fa-check-double"></i> Link Unassigned Matches &amp; Templates
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -1827,21 +2305,21 @@
                                     </div>
                                     <div class="profile-info">
                                         <h3 id="profile-name">Loading...</h3>
-                                        <div style="color: #ccc; font-size: 0.9em;" id="profile-email">Email: Loading...</div>
-                                        <div style="color: #ccc; font-size: 0.9em;" id="profile-phone">Phone: Loading...</div>
+                                        <div style="color: #aaa; font-size: 0.9em;" id="profile-email">Email: Loading...</div>
+                                        <div style="color: #aaa; font-size: 0.9em;" id="profile-phone">Phone: Loading...</div>
                                         <div style="color: #00a8ff; font-weight: bold;" id="profile-position">Position: Loading...</div>
                                     </div>
                                 </div>
 
                                 <div style="margin: 20px 0;">
-                                    <h4 style="color: #ccc; margin-bottom: 10px; font-size: 1em;">My Permissions</h4>
+                                    <h4 style="color: #fff; margin-bottom: 10px; font-size: 1em;">My Permissions</h4>
                                     <div id="permissions-container">
-                                        <p style="color: #666;">Loading permissions...</p>
+                                        <p style="color: #aaa;">Loading permissions...</p>
                                     </div>
                                 </div>
 
                                 <div style="margin: 20px 0;">
-                                    <h4 style="color: #ccc; margin-bottom: 10px; font-size: 1em;">Activity Stats</h4>
+                                    <h4 style="color: #fff; margin-bottom: 10px; font-size: 1em;">Activity Stats</h4>
                                     <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
                                         <div style="text-align: center;">
                                             <div style="color: #aaa; font-size: 0.8em;">Applications Processed</div>
@@ -1862,12 +2340,12 @@
                                     </div>
                                 </div>
 
-                                <div style="color: #666; font-size: 0.8em; margin-top: 20px;">
-                                    <div>Joined: <span id="join-date" style="color: #aaa;">Loading...</span></div>
-                                    <div>Last Active: <span id="last-active" style="color: #aaa;">Loading...</span></div>
+                                <div style="color: #aaa; font-size: 0.8em; margin-top: 20px;">
+                                    <div>Joined: <span id="join-date" style="color: #fff;">Loading...</span></div>
+                                    <div>Last Active: <span id="last-active" style="color: #fff;">Loading...</span></div>
                                     <div style="margin-top:10px; padding-top:10px; border-top:1px solid #333;">
-                                        <span style="color:#888;">Shift: </span>
-                                        <span id="shift-display" style="color:#00a8ff;">Loading...</span>
+                                        <span style="color:#aaa;">Shift: </span>
+                                        <span id="shift-display" style="color:#00a8ff; font-weight:700;">Loading...</span>
                                     </div>
                                 </div>
                             </div>
@@ -1882,7 +2360,7 @@
                             <h3>Manage Users</h3>
                         </div>
                         <div class="content-body">
-                            <div style="color: #ffc700; background: rgba(255, 199, 0, 0.1); padding: 10px; border-radius: 6px; margin-bottom: 15px;">
+                            <div style="color: #00a8ff; background: rgba(25, 118, 210, 0.08); border: 1px solid rgba(25, 118, 210, 0.2); padding: 10px 14px; border-radius: 10px; margin-bottom: 15px;">
                                 <i class="fas fa-exclamation-triangle"></i> You can block/unblock users based on your permissions.
                             </div>
                             <table>
@@ -1909,9 +2387,57 @@
                 <section id="tournaments-section" class="section">
                     <div class="content-card">
                         <div class="content-header">
-                            <h3>TOURNAMENTS</h3>
+                            <h3><i class="fas fa-gamepad"></i> ENHANCED MATCH CREATION &amp; MANAGEMENT</h3>
                         </div>
                         <div class="content-body">
+                            <!-- Cascading Classification Bar: Select Game -> Select Mode -> Select Format (Solo/Duo/Squad) -->
+                            <div class="cascade-selector-bar">
+                                <div class="cascade-selector-title">
+                                    <h3><i class="fas fa-sitemap"></i> Match Classification Routing (Staff &rarr; User Feed)</h3>
+                                    <button type="button" class="btn-outline-sm" onclick="showSection('games-modes-section')">
+                                        <i class="fas fa-plus"></i> Manage Games &amp; Modes
+                                    </button>
+                                </div>
+                                <div class="cascade-grid">
+                                    <div class="form-group" style="margin:0;">
+                                        <label><span class="cascade-step-badge">1</span>SELECT GAME</label>
+                                        <select id="match-game-select" onchange="onCascadeGameChange(this.value)" style="margin:0;">
+                                            <option value="">-- Select Game --</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group" style="margin:0;">
+                                        <label><span class="cascade-step-badge">2</span>SELECT MODE</label>
+                                        <select id="match-mode-select" onchange="onCascadeModeChange(this.value)" style="margin:0;">
+                                            <option value="">-- Select Mode --</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group" style="margin:0;">
+                                        <label><span class="cascade-step-badge">3</span>SELECT FORMAT</label>
+                                        <select id="match-format-select" onchange="onCascadeFormatChange(this.value)" style="margin:0;">
+                                            <option value="solo">SOLO</option>
+                                            <option value="duo">DUO</option>
+                                            <option value="squad">SQUAD</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group" style="margin:0;">
+                                        <label>MAP NAME</label>
+                                        <input type="text" id="match-map-input" value="Bermuda" placeholder="e.g., Bermuda" style="margin:0;">
+                                    </div>
+                                    <div class="form-group" style="margin:0;">
+                                        <label>PERSPECTIVE / MODE</label>
+                                        <select id="match-perspective-select" style="margin:0;">
+                                            <option value="TPP">TPP</option>
+                                            <option value="FPP">FPP</option>
+                                            <option value="CS">CS</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group" style="margin:0;">
+                                        <label>TOTAL PRIZE POOL (₹)</label>
+                                        <input type="text" id="match-prize-pool-input" placeholder="e.g., 500 (Auto-detected if blank)" style="margin:0;">
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="category-tabs">
                                 <div class="category-tab active" onclick="switchTournamentCategory('solo')">SOLO</div>
                                 <div class="category-tab" onclick="switchTournamentCategory('duo')">DUO</div>
@@ -1935,7 +2461,7 @@
                                             <button class="save-template-btn" onclick="saveTemplate('solo')" style="margin-top:6px;">
                                                 <i class="fas fa-save"></i> Save as Template
                                             </button>
-                                            <button onclick="refreshTemplates('solo')" style="background:#333; margin-top:6px;">
+                                            <button onclick="refreshTemplates('solo')" class="btn-outline-sm" style="margin-top:6px;">
                                                 <i class="fas fa-sync-alt"></i>
                                             </button>
                                         </div>
@@ -1962,7 +2488,7 @@
                                                         <div class="upload-progress-bar" id="solo-upload-progress-bar"></div>
                                                     </div>
                                                 </div>
-                                                <input type="text" id="solo-image-url" placeholder="Image URL will appear here after upload" readonly style="margin-top: 10px; background: #333; color: #aaa;">
+                                                <input type="text" id="solo-image-url" placeholder="Image URL (uploads automatically or paste URL here)" style="margin-top: 10px;">
                                             </div>
                                         </div>
 
@@ -2084,7 +2610,7 @@
                                             <button class="save-template-btn" onclick="saveTemplate('duo')" style="margin-top:6px;">
                                                 <i class="fas fa-save"></i> Save as Template
                                             </button>
-                                            <button onclick="refreshTemplates('duo')" style="background:#333; margin-top:6px;">
+                                            <button onclick="refreshTemplates('duo')" class="btn-outline-sm" style="margin-top:6px;">
                                                 <i class="fas fa-sync-alt"></i>
                                             </button>
                                         </div>
@@ -2111,7 +2637,7 @@
                                                         <div class="upload-progress-bar" id="duo-upload-progress-bar"></div>
                                                     </div>
                                                 </div>
-                                                <input type="text" id="duo-image-url" placeholder="Image URL will appear here after upload" readonly style="margin-top: 10px; background: #333; color: #aaa;">
+                                                <input type="text" id="duo-image-url" placeholder="Image URL (uploads automatically or paste URL here)" style="margin-top: 10px;">
                                             </div>
                                         </div>
 
@@ -2226,7 +2752,7 @@
                                             <button class="save-template-btn" onclick="saveTemplate('squad')" style="margin-top:6px;">
                                                 <i class="fas fa-save"></i> Save as Template
                                             </button>
-                                            <button onclick="refreshTemplates('squad')" style="background:#333; margin-top:6px;">
+                                            <button onclick="refreshTemplates('squad')" class="btn-outline-sm" style="margin-top:6px;">
                                                 <i class="fas fa-sync-alt"></i>
                                             </button>
                                         </div>
@@ -2253,7 +2779,7 @@
                                                         <div class="upload-progress-bar" id="squad-upload-progress-bar"></div>
                                                     </div>
                                                 </div>
-                                                <input type="text" id="squad-image-url" placeholder="Image URL will appear here after upload" readonly style="margin-top: 10px; background: #333; color: #aaa;">
+                                                <input type="text" id="squad-image-url" placeholder="Image URL (uploads automatically or paste URL here)" style="margin-top: 10px;">
                                             </div>
                                         </div>
 
@@ -3155,10 +3681,11 @@
                 showToast(`Uploading ${file.name}...`, 'info');
                 const uploadFile = await optimizeTournamentImage(file);
 
+                const formData = new FormData();
+                formData.append("image", uploadFile);
                 const result = await staffApiRequest('/api/staff/image-upload', {
                     method: 'POST',
-                    headers: { 'Content-Type': uploadFile.type },
-                    body: uploadFile
+                    body: formData
                 });
 
                 progressBarFill.style.width = '100%';
@@ -3177,7 +3704,7 @@
                         '.file-upload-text');
                     uploadContainer.innerHTML = `<i class="fas fa-check-circle" style="color: #26a269;"></i><br>Upload successful!`;
 
-                    showToast(`Image uploaded to ${result.data.provider || 'image storage'}.`, 'success');
+                    showToast("Image uploaded successfully! URL generated.", 'success');
 
                     setTimeout(() => {
                         progressBar.style.display = 'none';
@@ -3395,6 +3922,16 @@
             }
         }
 
+        // --- Dynamic Staff-to-User Ecosystem State ---
+        let esportsGames = [];
+        let esportsModes = [];
+        let promoBanners = [];
+        let liveNoticeConfig = { liveNoticeText: '', liveNoticeLink: '', liveNoticeActive: true };
+        let gamesListener = null;
+        let modesListener = null;
+        let bannersListener = null;
+        let configListener = null;
+
         // --- Real-time Listeners ---
         function setupRealTimeListeners() {
             if (!currentStaff) return;
@@ -3415,6 +3952,10 @@
                         if (document.getElementById('tournaments-section').style.display === 'block') {
                             renderTournaments();
                         }
+                        if (document.getElementById('games-modes-section').style.display === 'block') {
+                            renderEsportsGamesAdmin();
+                            renderEsportsModesAdmin();
+                        }
 
                         populateTournamentSelection();
                         // Refresh automations when tournaments change
@@ -3427,6 +3968,57 @@
                 }, (error) => {
                     console.error('Tournament listener error:', error);
                 });
+
+            if (gamesListener) gamesListener();
+            gamesListener = db.collection("esports_games")
+                .onSnapshot((snapshot) => {
+                    esportsGames = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    esportsGames.sort((a, b) => (Number(a.sortOrder) || 0) - (Number(b.sortOrder) || 0));
+                    populateGameDropdowns();
+                    renderEsportsGamesAdmin();
+                }, (err) => console.warn('esports_games listener error:', err));
+
+            if (modesListener) modesListener();
+            modesListener = db.collection("esports_modes")
+                .onSnapshot((snapshot) => {
+                    esportsModes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    esportsModes.sort((a, b) => (Number(a.sortOrder) || 0) - (Number(b.sortOrder) || 0));
+                    populateModeDropdowns();
+                    renderEsportsGamesAdmin();
+                    renderEsportsModesAdmin();
+                }, (err) => console.warn('esports_modes listener error:', err));
+
+            if (bannersListener) bannersListener();
+            bannersListener = db.collection("promo_banners")
+                .onSnapshot((snapshot) => {
+                    promoBanners = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    promoBanners.sort((a, b) => (Number(a.sortOrder) || 0) - (Number(b.sortOrder) || 0));
+                    renderPromoBannersAdmin();
+                }, (err) => console.warn('promo_banners listener error:', err));
+
+            if (configListener) configListener();
+            configListener = db.collection("app_config").doc("main")
+                .onSnapshot((doc) => {
+                    if (doc.exists) {
+                        liveNoticeConfig = doc.data() || {};
+                        const textInput = document.getElementById('live-notice-text');
+                        const linkInput = document.getElementById('live-notice-link');
+                        const activeInput = document.getElementById('live-notice-active');
+                        const previewText = document.getElementById('live-notice-preview-text');
+                        if (textInput && document.activeElement !== textInput) {
+                            textInput.value = liveNoticeConfig.liveNoticeText || '';
+                        }
+                        if (linkInput && document.activeElement !== linkInput) {
+                            linkInput.value = liveNoticeConfig.liveNoticeLink || '';
+                        }
+                        if (activeInput) {
+                            activeInput.checked = liveNoticeConfig.liveNoticeActive !== false;
+                        }
+                        if (previewText) {
+                            previewText.textContent = liveNoticeConfig.liveNoticeText || 'No live notice text set.';
+                        }
+                    }
+                }, (err) => console.warn('app_config listener error:', err));
 
             if (hasPermissions.manageUsers) {
                 userListener = db.collection("users")
@@ -3563,13 +4155,13 @@
                     }
                     const status = isWithinShift ? '✅ Active' : '⛔ Off-duty';
                     shiftDisplay.textContent = `${shiftStart} - ${shiftEnd} (${status})`;
-                    shiftDisplay.style.color = isWithinShift ? '#26a269' : '#d72638';
+                    shiftDisplay.style.color = isWithinShift ? '#10B981' : '#EF4444';
                 } catch (e) {
                     shiftDisplay.textContent = `${staffData.shiftStart} - ${staffData.shiftEnd}`;
                 }
             } else if (shiftDisplay) {
                 shiftDisplay.textContent = 'No shift set (always on)';
-                shiftDisplay.style.color = '#888';
+                shiftDisplay.style.color = '#aaa';
             }
 
             const permissionsContainer = document.getElementById('permissions-container');
@@ -3587,7 +4179,7 @@
             }
 
             if (permissionsContainer.innerHTML === '') {
-                permissionsContainer.innerHTML = '<p style="color: #666;">No special permissions assigned.</p>';
+                permissionsContainer.innerHTML = '<p style="color: #aaa;">No special permissions assigned.</p>';
             }
         }
 
@@ -3602,13 +4194,13 @@
             const container = document.getElementById('recent-activity-log');
             if (!container) return;
             if (!recentActivity.length) {
-                container.innerHTML = '<p style="color:#888;">No recent activity yet.</p>';
+                container.innerHTML = '<p style="color:#aaa;">No recent activity yet.</p>';
                 return;
             }
             container.innerHTML = recentActivity.map(item => `
                     <div style="padding:8px 0; border-bottom:1px solid #333;">
-                        <div style="color:#fff;">${item.action}</div>
-                        <div style="color:#888; font-size:0.85em;">${item.time}</div>
+                        <div style="color:#fff; font-weight:600;">${item.action}</div>
+                        <div style="color:#aaa; font-size:0.85em;">${item.time}</div>
                     </div>
                 `).join('');
         }
@@ -3616,14 +4208,23 @@
         // --- Navigation ---
         function showSection(sectionId) {
             document.querySelectorAll('.section').forEach(section => section.style.display = 'none');
-            document.getElementById(sectionId).style.display = 'block';
+            const target = document.getElementById(sectionId);
+            if (target) target.style.display = 'block';
 
             toggleSidebar(false);
 
             if (sectionId === 'manage-users-section' && hasPermissions.manageUsers) {
                 renderUsersTable();
             } else if (sectionId === 'tournaments-section' && hasPermissions.manageTournaments) {
+                populateGameDropdowns();
+                populateModeDropdowns();
                 renderTournaments();
+            } else if (sectionId === 'games-modes-section') {
+                populateGameDropdowns();
+                renderEsportsGamesAdmin();
+                renderEsportsModesAdmin();
+            } else if (sectionId === 'announcements-section') {
+                renderPromoBannersAdmin();
             } else if (sectionId === 'registered-users-section' && hasPermissions.viewReports) {
                 populateTournamentSelection();
             } else if (sectionId === 'prize-distribution-section' && hasPermissions.viewReports) {
@@ -3635,6 +4236,699 @@
                 loadWithdrawals();
             } else if (sectionId === 'automations-section' && hasPermissions.manageTournaments) {
                 loadTemplatesAndAutoRepeat();
+            }
+        }
+
+        // ============================================================
+        // NEW STAFF BUILDERS:
+        // 1. Live Notice Bar & Promotional Banners
+        // 2. Esports Games & Mode Classification Builder
+        // 3. Cascading Game -> Mode -> Format Selectors
+        // ============================================================
+
+        async function handleCustomAssetUpload(prefix, file) {
+            if (!file) return;
+            const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+            if (!validTypes.includes(file.type)) {
+                showToast('Please select a valid image file (JPG, PNG, WebP)', 'error');
+                return;
+            }
+            const progressContainer = document.getElementById(`${prefix}-upload-progress`);
+            const progressBar = document.getElementById(`${prefix}-upload-progress-bar`);
+            const preview = document.getElementById(`${prefix}-image-preview`);
+            const urlInput = document.getElementById(`${prefix}-image-url`);
+
+            try {
+                if (progressContainer) progressContainer.style.display = 'block';
+                if (progressBar) progressBar.style.width = '35%';
+
+                const uploadFile = await optimizeTournamentImage(file);
+                if (progressBar) progressBar.style.width = '65%';
+
+                const result = await staffApiRequest('/api/staff/image-upload', {
+                    method: 'POST',
+                    headers: { 'Content-Type': uploadFile.type || 'image/webp' },
+                    body: uploadFile
+                });
+
+                if (!result.success || !result.data?.url) {
+                    throw new Error('Invalid upload response');
+                }
+
+                const imageUrl = result.data.url;
+                if (progressBar) progressBar.style.width = '100%';
+                if (urlInput) urlInput.value = imageUrl;
+                if (preview) {
+                    preview.src = imageUrl;
+                    preview.style.display = 'block';
+                }
+                showToast('Image uploaded successfully!', 'success');
+                setTimeout(() => {
+                    if (progressContainer) progressContainer.style.display = 'none';
+                    if (progressBar) progressBar.style.width = '0%';
+                }, 800);
+            } catch (err) {
+                console.error(`${prefix} image upload error:`, err);
+                showToast('Image upload failed. You can also paste a direct Image URL.', 'error');
+                if (progressContainer) progressContainer.style.display = 'none';
+            }
+        }
+
+        async function saveLiveNoticeConfig() {
+            const text = document.getElementById('live-notice-text')?.value?.trim() || '';
+            const link = document.getElementById('live-notice-link')?.value?.trim() || '';
+            const isActive = document.getElementById('live-notice-active')?.checked !== false;
+
+            setButtonLoading('save-live-notice-btn', true);
+            try {
+                await db.collection("app_config").doc("main").set({
+                    liveNoticeText: text,
+                    liveNoticeLink: link,
+                    liveNoticeActive: isActive,
+                    updatedAt: FieldValue.serverTimestamp(),
+                    updatedBy: currentStaff?.uid || ''
+                }, { merge: true });
+                const previewText = document.getElementById('live-notice-preview-text');
+                if (previewText) previewText.textContent = text || 'No live notice text set.';
+                showToast('Live Notice Bar updated on User Home!', 'success');
+                logRecentActivity('Updated Live Notice Bar');
+            } catch (err) {
+                console.error('Error saving live notice:', err);
+                showToast('Failed to save Live Notice Bar.', 'error');
+            } finally {
+                setButtonLoading('save-live-notice-btn', false);
+                const btn = document.getElementById('save-live-notice-btn');
+                if (btn) btn.innerHTML = '<i class="fas fa-save"></i> SAVE LIVE NOTICE BAR';
+            }
+        }
+
+        function resetPromoBannerForm() {
+            document.getElementById('banner-edit-id').value = '';
+            document.getElementById('banner-title-input').value = '';
+            document.getElementById('banner-subtitle-input').value = '';
+            document.getElementById('banner-image-url').value = '';
+            document.getElementById('banner-action-url').value = '';
+            document.getElementById('banner-sort-order').value = String(promoBanners.length + 1);
+            document.getElementById('banner-is-active').checked = true;
+            const preview = document.getElementById('banner-image-preview');
+            if (preview) { preview.src = ''; preview.style.display = 'none'; }
+            const btn = document.getElementById('save-promo-banner-btn');
+            if (btn) btn.innerHTML = '<i class="fas fa-plus-circle"></i> SAVE PROMOTIONAL BANNER';
+        }
+
+        async function savePromoBanner() {
+            const editId = document.getElementById('banner-edit-id').value.trim();
+            const title = document.getElementById('banner-title-input').value.trim();
+            const subtitle = document.getElementById('banner-subtitle-input').value.trim();
+            const imageUrl = document.getElementById('banner-image-url').value.trim();
+            const actionUrl = document.getElementById('banner-action-url').value.trim();
+            const sortOrder = parseInt(document.getElementById('banner-sort-order').value) || 1;
+            const isActive = document.getElementById('banner-is-active').checked;
+
+            if (!imageUrl) {
+                showToast('Please upload or paste a Banner Image URL.', 'error');
+                return;
+            }
+
+            setButtonLoading('save-promo-banner-btn', true);
+            try {
+                const payload = {
+                    title,
+                    subtitle,
+                    imageUrl,
+                    actionUrl,
+                    sortOrder,
+                    isActive,
+                    updatedAt: FieldValue.serverTimestamp()
+                };
+                if (editId) {
+                    await db.collection("promo_banners").doc(editId).update(payload);
+                    showToast('Promotional banner updated!', 'success');
+                } else {
+                    payload.createdAt = FieldValue.serverTimestamp();
+                    payload.createdBy = currentStaff?.uid || '';
+                    await db.collection("promo_banners").add(payload);
+                    showToast('Promotional banner added to User Home!', 'success');
+                }
+                clearUserPanelEcosystemCache();
+                resetPromoBannerForm();
+                logRecentActivity(editId ? `Updated banner: ${title || 'Promo'}` : `Created banner: ${title || 'Promo'}`);
+            } catch (err) {
+                console.error('Error saving promo banner:', err);
+                showToast('Failed to save promotional banner.', 'error');
+            } finally {
+                setButtonLoading('save-promo-banner-btn', false);
+                const btn = document.getElementById('save-promo-banner-btn');
+                if (btn) btn.innerHTML = '<i class="fas fa-plus-circle"></i> SAVE PROMOTIONAL BANNER';
+            }
+        }
+
+        function editPromoBanner(bannerId) {
+            const b = promoBanners.find(x => x.id === bannerId);
+            if (!b) return;
+            document.getElementById('banner-edit-id').value = b.id;
+            document.getElementById('banner-title-input').value = b.title || '';
+            document.getElementById('banner-subtitle-input').value = b.subtitle || '';
+            document.getElementById('banner-image-url').value = b.imageUrl || '';
+            document.getElementById('banner-action-url').value = b.actionUrl || '';
+            document.getElementById('banner-sort-order').value = b.sortOrder ?? 1;
+            document.getElementById('banner-is-active').checked = b.isActive !== false;
+            const preview = document.getElementById('banner-image-preview');
+            if (preview && b.imageUrl) {
+                preview.src = b.imageUrl;
+                preview.style.display = 'block';
+            }
+            const btn = document.getElementById('save-promo-banner-btn');
+            if (btn) btn.innerHTML = '<i class="fas fa-save"></i> UPDATE PROMOTIONAL BANNER';
+        }
+
+        async function togglePromoBannerStatus(bannerId, currentState) {
+            try {
+                await db.collection("promo_banners").doc(bannerId).update({
+                    isActive: !currentState,
+                    updatedAt: FieldValue.serverTimestamp()
+                });
+                clearUserPanelEcosystemCache();
+                showToast(`Banner ${!currentState ? 'activated' : 'hidden'}!`, 'success');
+            } catch (err) {
+                showToast('Failed to update banner status.', 'error');
+            }
+        }
+
+        async function deletePromoBanner(bannerId) {
+            if (!confirm('Delete this promotional banner?')) return;
+            try {
+                await db.collection("promo_banners").doc(bannerId).delete();
+                clearUserPanelEcosystemCache();
+                showToast('Banner deleted.', 'success');
+            } catch (err) {
+                showToast('Failed to delete banner.', 'error');
+            }
+        }
+
+        function renderPromoBannersAdmin() {
+            const container = document.getElementById('promo-banners-admin-list');
+            if (!container) return;
+            if (!promoBanners.length) {
+                container.innerHTML = `
+                    <div class="empty-state" style="padding:25px;">
+                        <i class="fas fa-images"></i>
+                        <h3>No Promotional Banners Yet</h3>
+                        <p>Add a promotional banner above to display on the User Panel Home Slider.</p>
+                    </div>`;
+                return;
+            }
+            container.innerHTML = promoBanners.map(b => `
+                <div class="admin-entity-card">
+                    <img src="${b.imageUrl || ''}" class="admin-banner-thumb" alt="Banner" onerror="setTournamentImageFallback(this)">
+                    <div class="admin-entity-info">
+                        <div class="admin-entity-title">
+                            <span>${b.title || 'Promotional Slide'}</span>
+                            <span class="status-badge ${b.isActive !== false ? 'status-active' : 'status-inactive'}">${b.isActive !== false ? 'Active' : 'Hidden'}</span>
+                            <span class="pill-count-blue">Order #${b.sortOrder ?? 1}</span>
+                        </div>
+                        <div class="admin-entity-sub">
+                            <span>${b.subtitle || 'No subtitle'}</span>
+                            ${b.actionUrl ? `<span>• Link: ${b.actionUrl}</span>` : ''}
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                        <button type="button" class="btn-outline-sm" onclick="editPromoBanner('${b.id}')"><i class="fas fa-edit"></i> Edit</button>
+                        <button type="button" class="btn-outline-sm" onclick="togglePromoBannerStatus('${b.id}', ${b.isActive !== false})">
+                            <i class="fas ${b.isActive !== false ? 'fa-eye-slash' : 'fa-eye'}"></i> ${b.isActive !== false ? 'Hide' : 'Show'}
+                        </button>
+                        <button type="button" class="btn-danger-sm" onclick="deletePromoBanner('${b.id}')"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function resetEsportsGameForm() {
+            document.getElementById('game-edit-id').value = '';
+            document.getElementById('game-name-input').value = '';
+            document.getElementById('game-tagline-input').value = '';
+            document.getElementById('game-image-url').value = '';
+            document.getElementById('game-sort-order').value = String(esportsGames.length + 1);
+            document.getElementById('game-is-active').checked = true;
+            const preview = document.getElementById('game-image-preview');
+            if (preview) { preview.src = ''; preview.style.display = 'none'; }
+            const btn = document.getElementById('save-game-btn');
+            if (btn) btn.innerHTML = '<i class="fas fa-save"></i> SAVE GAME';
+        }
+
+        async function saveEsportsGame() {
+            const editId = document.getElementById('game-edit-id').value.trim();
+            const name = document.getElementById('game-name-input').value.trim();
+            const tagline = document.getElementById('game-tagline-input').value.trim();
+            const imageUrl = document.getElementById('game-image-url').value.trim();
+            const sortOrder = parseInt(document.getElementById('game-sort-order').value) || 1;
+            const isActive = document.getElementById('game-is-active').checked;
+
+            if (!name) {
+                showToast('Please enter a Game Title (e.g., Free Fire Max).', 'error');
+                return;
+            }
+            if (!imageUrl) {
+                showToast('Please upload or paste a Game Cover Banner URL.', 'error');
+                return;
+            }
+
+            setButtonLoading('save-game-btn', true);
+            try {
+                const payload = {
+                    name,
+                    tagline,
+                    imageUrl,
+                    sortOrder,
+                    isActive,
+                    updatedAt: FieldValue.serverTimestamp()
+                };
+                if (editId) {
+                    await db.collection("esports_games").doc(editId).update(payload);
+                    showToast(`Game "${name}" updated!`, 'success');
+                } else {
+                    payload.createdAt = FieldValue.serverTimestamp();
+                    payload.createdBy = currentStaff?.uid || '';
+                    await db.collection("esports_games").add(payload);
+                    showToast(`Game "${name}" created!`, 'success');
+                }
+                clearUserPanelEcosystemCache();
+                resetEsportsGameForm();
+                logRecentActivity(editId ? `Updated Game: ${name}` : `Created Game: ${name}`);
+            } catch (err) {
+                console.error('Error saving game:', err);
+                showToast('Failed to save game.', 'error');
+            } finally {
+                setButtonLoading('save-game-btn', false);
+                const btn = document.getElementById('save-game-btn');
+                if (btn) btn.innerHTML = '<i class="fas fa-save"></i> SAVE GAME';
+            }
+        }
+
+        function editEsportsGame(gameId) {
+            const g = esportsGames.find(x => x.id === gameId);
+            if (!g) return;
+            document.getElementById('game-edit-id').value = g.id;
+            document.getElementById('game-name-input').value = g.name || '';
+            document.getElementById('game-tagline-input').value = g.tagline || '';
+            document.getElementById('game-image-url').value = g.imageUrl || '';
+            document.getElementById('game-sort-order').value = g.sortOrder ?? 1;
+            document.getElementById('game-is-active').checked = g.isActive !== false;
+            const preview = document.getElementById('game-image-preview');
+            if (preview && g.imageUrl) {
+                preview.src = g.imageUrl;
+                preview.style.display = 'block';
+            }
+            const btn = document.getElementById('save-game-btn');
+            if (btn) btn.innerHTML = '<i class="fas fa-save"></i> UPDATE GAME';
+        }
+
+        function clearUserPanelEcosystemCache() {
+            try {
+                localStorage.removeItem('techno_ecosystem_cache_v2');
+                localStorage.removeItem('techno_ecosystem_cache_v3');
+            } catch (e) {}
+        }
+
+        async function toggleEsportsGameStatus(gameId, currentState) {
+            try {
+                await db.collection("esports_games").doc(gameId).update({
+                    isActive: !currentState,
+                    updatedAt: FieldValue.serverTimestamp()
+                });
+                clearUserPanelEcosystemCache();
+                showToast(`Game ${!currentState ? 'activated' : 'deactivated'}!`, 'success');
+            } catch (err) {
+                showToast('Failed to update game status.', 'error');
+            }
+        }
+
+        async function deleteEsportsGame(gameId) {
+            const g = esportsGames.find(x => x.id === gameId);
+            if (!confirm(`Delete game "${g?.name || ''}" and its modes?`)) return;
+            try {
+                await db.collection("esports_games").doc(gameId).delete();
+                // Also delete any modes linked to this deleted game so they don't stay orphaned
+                const linkedModes = esportsModes.filter(m => m.gameId === gameId);
+                for (const m of linkedModes) {
+                    await db.collection("esports_modes").doc(m.id).delete().catch(() => {});
+                }
+                clearUserPanelEcosystemCache();
+                showToast('Game and linked modes deleted.', 'success');
+            } catch (err) {
+                showToast('Failed to delete game.', 'error');
+            }
+        }
+
+        function computeOpenMatchesForGame(gameId, gameName) {
+            return tournaments.filter(t => {
+                if (t.isActive === false || t.status === 'completed' || t.status === 'inactive') return false;
+                if (t.gameId && t.gameId === gameId) return true;
+                if (!t.gameId && gameName && (t.gameName || '').toLowerCase() === gameName.toLowerCase()) return true;
+                if (!t.gameId && esportsGames.length === 1 && esportsGames[0].id === gameId) return true;
+                return false;
+            }).length;
+        }
+
+        function computeOpenMatchesForMode(modeId, modeName) {
+            return tournaments.filter(t => {
+                if (t.isActive === false || t.status === 'completed' || t.status === 'inactive') return false;
+                if (t.modeId && t.modeId === modeId) return true;
+                if (!t.modeId && modeName && (t.modeName || '').toLowerCase() === modeName.toLowerCase()) return true;
+                return false;
+            }).length;
+        }
+
+        function renderEsportsGamesAdmin() {
+            const container = document.getElementById('esports-games-admin-list');
+            if (!container) return;
+            if (!esportsGames.length) {
+                container.innerHTML = `
+                    <div class="empty-state" style="padding:20px;">
+                        <i class="fas fa-gamepad"></i>
+                        <h3>No Games Created</h3>
+                        <p>Create a game (e.g., Free Fire Max) to display on User Home.</p>
+                    </div>`;
+                return;
+            }
+            container.innerHTML = esportsGames.map(g => {
+                const gameModesCount = esportsModes.filter(m => m.gameId === g.id && m.isActive !== false).length;
+                const openCount = computeOpenMatchesForGame(g.id, g.name);
+                return `
+                    <div class="admin-entity-card">
+                        <img src="${g.imageUrl || ''}" class="admin-entity-thumb" alt="${g.name}" onerror="setTournamentImageFallback(this)">
+                        <div class="admin-entity-info">
+                            <div class="admin-entity-title">
+                                <span>${g.name}</span>
+                                <span class="status-badge ${g.isActive !== false ? 'status-active' : 'status-inactive'}">${g.isActive !== false ? 'Active' : 'Inactive'}</span>
+                            </div>
+                            <div class="admin-entity-sub">
+                                <span class="pill-count-blue"><i class="fas fa-layer-group"></i> ${gameModesCount} modes</span>
+                                <span class="pill-count-green"><span class="pulse-dot-green"></span> ${openCount} open</span>
+                                <span>Order #${g.sortOrder ?? 1}</span>
+                            </div>
+                        </div>
+                        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                            <button type="button" class="btn-outline-sm" onclick="editEsportsGame('${g.id}')"><i class="fas fa-edit"></i></button>
+                            <button type="button" class="btn-outline-sm" onclick="toggleEsportsGameStatus('${g.id}', ${g.isActive !== false})">
+                                <i class="fas ${g.isActive !== false ? 'fa-eye-slash' : 'fa-eye'}"></i>
+                            </button>
+                            <button type="button" class="btn-danger-sm" onclick="deleteEsportsGame('${g.id}')"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function resetEsportsModeForm() {
+            document.getElementById('mode-edit-id').value = '';
+            document.getElementById('mode-name-input').value = '';
+            document.getElementById('mode-image-url').value = '';
+            document.getElementById('mode-map-input').value = 'Bermuda';
+            document.getElementById('mode-perspective-select').value = 'TPP';
+            document.getElementById('mode-sort-order').value = String(esportsModes.length + 1);
+            document.getElementById('mode-is-active').checked = true;
+            const preview = document.getElementById('mode-image-preview');
+            if (preview) { preview.src = ''; preview.style.display = 'none'; }
+            const btn = document.getElementById('save-mode-btn');
+            if (btn) btn.innerHTML = '<i class="fas fa-save"></i> SAVE MODE';
+        }
+
+        async function saveEsportsMode() {
+            const editId = document.getElementById('mode-edit-id').value.trim();
+            const gameId = document.getElementById('mode-game-select').value;
+            const gameObj = esportsGames.find(g => g.id === gameId);
+            const name = document.getElementById('mode-name-input').value.trim();
+            const thumbnailUrl = document.getElementById('mode-image-url').value.trim();
+            const defaultMap = document.getElementById('mode-map-input').value.trim() || 'Bermuda';
+            const defaultPerspective = document.getElementById('mode-perspective-select').value || 'TPP';
+            const sortOrder = parseInt(document.getElementById('mode-sort-order').value) || 1;
+            const isActive = document.getElementById('mode-is-active').checked;
+
+            if (!gameId) {
+                showToast('Please select a Parent Game first.', 'error');
+                return;
+            }
+            if (!name) {
+                showToast('Please enter a Mode Name (e.g., FF Survival, Full Map, Lone Wolf).', 'error');
+                return;
+            }
+            if (!thumbnailUrl) {
+                showToast('Please upload or paste a Mode Thumbnail URL.', 'error');
+                return;
+            }
+
+            setButtonLoading('save-mode-btn', true);
+            try {
+                const payload = {
+                    gameId,
+                    gameName: gameObj ? gameObj.name : '',
+                    name,
+                    thumbnailUrl,
+                    imageUrl: thumbnailUrl,
+                    defaultMap,
+                    defaultPerspective,
+                    sortOrder,
+                    isActive,
+                    updatedAt: FieldValue.serverTimestamp()
+                };
+                if (editId) {
+                    await db.collection("esports_modes").doc(editId).update(payload);
+                    showToast(`Mode "${name}" updated!`, 'success');
+                } else {
+                    payload.createdAt = FieldValue.serverTimestamp();
+                    payload.createdBy = currentStaff?.uid || '';
+                    await db.collection("esports_modes").add(payload);
+                    showToast(`Mode "${name}" created under ${gameObj?.name || 'Game'}!`, 'success');
+                }
+                clearUserPanelEcosystemCache();
+                resetEsportsModeForm();
+                logRecentActivity(editId ? `Updated Mode: ${name}` : `Created Mode: ${name}`);
+            } catch (err) {
+                console.error('Error saving mode:', err);
+                showToast('Failed to save mode.', 'error');
+            } finally {
+                setButtonLoading('save-mode-btn', false);
+                const btn = document.getElementById('save-mode-btn');
+                if (btn) btn.innerHTML = '<i class="fas fa-save"></i> SAVE MODE';
+            }
+        }
+
+        function editEsportsMode(modeId) {
+            const m = esportsModes.find(x => x.id === modeId);
+            if (!m) return;
+            document.getElementById('mode-edit-id').value = m.id;
+            document.getElementById('mode-game-select').value = m.gameId || '';
+            document.getElementById('mode-name-input').value = m.name || '';
+            document.getElementById('mode-image-url').value = m.thumbnailUrl || m.imageUrl || '';
+            document.getElementById('mode-map-input').value = m.defaultMap || 'Bermuda';
+            document.getElementById('mode-perspective-select').value = m.defaultPerspective || 'TPP';
+            document.getElementById('mode-sort-order').value = m.sortOrder ?? 1;
+            document.getElementById('mode-is-active').checked = m.isActive !== false;
+            const preview = document.getElementById('mode-image-preview');
+            if (preview && (m.thumbnailUrl || m.imageUrl)) {
+                preview.src = m.thumbnailUrl || m.imageUrl;
+                preview.style.display = 'block';
+            }
+            const btn = document.getElementById('save-mode-btn');
+            if (btn) btn.innerHTML = '<i class="fas fa-save"></i> UPDATE MODE';
+        }
+
+        async function toggleEsportsModeStatus(modeId, currentState) {
+            try {
+                await db.collection("esports_modes").doc(modeId).update({
+                    isActive: !currentState,
+                    updatedAt: FieldValue.serverTimestamp()
+                });
+                clearUserPanelEcosystemCache();
+                showToast(`Mode ${!currentState ? 'activated' : 'deactivated'}!`, 'success');
+            } catch (err) {
+                showToast('Failed to update mode status.', 'error');
+            }
+        }
+
+        async function deleteEsportsMode(modeId) {
+            const m = esportsModes.find(x => x.id === modeId);
+            if (!confirm(`Delete mode "${m?.name || ''}"?`)) return;
+            try {
+                await db.collection("esports_modes").doc(modeId).delete();
+                clearUserPanelEcosystemCache();
+                showToast('Mode deleted.', 'success');
+            } catch (err) {
+                showToast('Failed to delete mode.', 'error');
+            }
+        }
+
+        function renderEsportsModesAdmin() {
+            const container = document.getElementById('esports-modes-admin-list');
+            if (!container) return;
+            if (!esportsModes.length) {
+                container.innerHTML = `
+                    <div class="empty-state" style="padding:20px;">
+                        <i class="fas fa-layer-group"></i>
+                        <h3>No Modes Created</h3>
+                        <p>Create modes linked to your game so matches route into them.</p>
+                    </div>`;
+                return;
+            }
+            container.innerHTML = esportsModes.map(m => {
+                const openCount = computeOpenMatchesForMode(m.id, m.name);
+                const gameObj = esportsGames.find(g => g.id === m.gameId);
+                return `
+                    <div class="admin-entity-card">
+                        <img src="${m.thumbnailUrl || ''}" class="admin-entity-thumb" alt="${m.name}" onerror="setTournamentImageFallback(this)">
+                        <div class="admin-entity-info">
+                            <div class="admin-entity-title">
+                                <span>${m.name}</span>
+                                <span class="pill-count-green"><span class="pulse-dot-green"></span> ${openCount} open &gt;</span>
+                                <span class="status-badge ${m.isActive !== false ? 'status-active' : 'status-inactive'}">${m.isActive !== false ? 'Active' : 'Inactive'}</span>
+                            </div>
+                            <div class="admin-entity-sub">
+                                <span class="pill-count-blue">${gameObj ? gameObj.name : (m.gameName || 'Game')}</span>
+                                <span>${m.defaultMap || 'Bermuda'} • ${m.defaultPerspective || 'TPP'}</span>
+                                <span>Order #${m.sortOrder ?? 1}</span>
+                            </div>
+                        </div>
+                        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                            <button type="button" class="btn-outline-sm" onclick="editEsportsMode('${m.id}')"><i class="fas fa-edit"></i></button>
+                            <button type="button" class="btn-outline-sm" onclick="toggleEsportsModeStatus('${m.id}', ${m.isActive !== false})">
+                                <i class="fas ${m.isActive !== false ? 'fa-eye-slash' : 'fa-eye'}"></i>
+                            </button>
+                            <button type="button" class="btn-danger-sm" onclick="deleteEsportsMode('${m.id}')"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function populateGameDropdowns() {
+            const ids = ['mode-game-select', 'match-game-select', 'legacy-assign-game-select'];
+            ids.forEach(selectId => {
+                const sel = document.getElementById(selectId);
+                if (!sel) return;
+                const prev = sel.value;
+                sel.innerHTML = '<option value="">-- Select Game --</option>';
+                esportsGames.forEach(g => {
+                    const opt = document.createElement('option');
+                    opt.value = g.id;
+                    opt.textContent = g.name + (g.isActive === false ? ' (Inactive)' : '');
+                    sel.appendChild(opt);
+                });
+                if (prev && esportsGames.some(g => g.id === prev)) {
+                    sel.value = prev;
+                } else if (esportsGames.length > 0) {
+                    sel.value = esportsGames[0].id;
+                }
+            });
+            const matchGameVal = document.getElementById('match-game-select')?.value || '';
+            if (matchGameVal) {
+                populateModeDropdownForGame(matchGameVal, 'match-mode-select');
+            }
+            const legacyGameVal = document.getElementById('legacy-assign-game-select')?.value || '';
+            if (legacyGameVal) {
+                populateModeDropdownForGame(legacyGameVal, 'legacy-assign-mode-select');
+            }
+        }
+
+        function populateModeDropdowns() {
+            const matchGameVal = document.getElementById('match-game-select')?.value || '';
+            populateModeDropdownForGame(matchGameVal, 'match-mode-select');
+            const legacyGameVal = document.getElementById('legacy-assign-game-select')?.value || '';
+            populateModeDropdownForGame(legacyGameVal, 'legacy-assign-mode-select');
+        }
+
+        function populateModeDropdownForGame(gameId, targetSelectId) {
+            const sel = document.getElementById(targetSelectId);
+            if (!sel) return;
+            const prev = sel.value;
+            sel.innerHTML = '<option value="">-- Select Mode --</option>';
+            const filteredModes = gameId ? esportsModes.filter(m => m.gameId === gameId) : esportsModes;
+            filteredModes.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m.id;
+                opt.textContent = m.name + (m.isActive === false ? ' (Inactive)' : '');
+                sel.appendChild(opt);
+            });
+            if (prev && filteredModes.some(m => m.id === prev)) {
+                sel.value = prev;
+            } else if (filteredModes.length > 0) {
+                sel.value = filteredModes[0].id;
+                if (targetSelectId === 'match-mode-select') {
+                    onCascadeModeChange(filteredModes[0].id);
+                }
+            }
+        }
+
+        function onCascadeGameChange(gameId) {
+            populateModeDropdownForGame(gameId, 'match-mode-select');
+        }
+
+        function onCascadeModeChange(modeId) {
+            const modeObj = esportsModes.find(m => m.id === modeId);
+            if (!modeObj) return;
+            const mapInput = document.getElementById('match-map-input');
+            const perspSelect = document.getElementById('match-perspective-select');
+            if (mapInput && modeObj.defaultMap) mapInput.value = modeObj.defaultMap;
+            if (perspSelect && modeObj.defaultPerspective) perspSelect.value = modeObj.defaultPerspective;
+        }
+
+        function onCascadeFormatChange(format) {
+            if (!format) return;
+            switchTournamentCategory(format.toLowerCase());
+        }
+
+        async function assignLegacyTournamentsToMode() {
+            const gameId = document.getElementById('legacy-assign-game-select')?.value || '';
+            const modeId = document.getElementById('legacy-assign-mode-select')?.value || '';
+            const gameObj = esportsGames.find(g => g.id === gameId);
+            const modeObj = esportsModes.find(m => m.id === modeId);
+            if (!gameId || !modeId || !gameObj || !modeObj) {
+                showToast('Please select both a Target Game and Target Mode.', 'error');
+                return;
+            }
+            setButtonLoading('assign-legacy-btn', true);
+            try {
+                const batch = db.batch();
+                let updatedCount = 0;
+                tournaments.forEach(t => {
+                    if (!t.gameId || !t.modeId) {
+                        const ref = db.collection("tournaments").doc(t.id);
+                        batch.update(ref, {
+                            gameId: gameObj.id,
+                            gameName: gameObj.name,
+                            modeId: modeObj.id,
+                            modeName: modeObj.name,
+                            mapName: t.mapName || modeObj.defaultMap || 'Bermuda',
+                            perspective: t.perspective || modeObj.defaultPerspective || 'TPP',
+                            updatedAt: FieldValue.serverTimestamp()
+                        });
+                        updatedCount++;
+                    }
+                });
+                const tmplSnap = await db.collection("tournament_templates").get();
+                tmplSnap.forEach(doc => {
+                    const d = doc.data();
+                    if (!d.gameId || !d.modeId) {
+                        batch.update(doc.ref, {
+                            gameId: gameObj.id,
+                            gameName: gameObj.name,
+                            modeId: modeObj.id,
+                            modeName: modeObj.name,
+                            mapName: d.mapName || modeObj.defaultMap || 'Bermuda',
+                            perspective: d.perspective || modeObj.defaultPerspective || 'TPP'
+                        });
+                    }
+                });
+                await batch.commit();
+                showToast(`Linked ${updatedCount} unassigned matches to ${gameObj.name} -> ${modeObj.name}!`, 'success');
+                logRecentActivity(`Linked ${updatedCount} matches to ${modeObj.name}`);
+            } catch (err) {
+                console.error('Error assigning legacy matches:', err);
+                showToast('Failed to assign matches.', 'error');
+            } finally {
+                setButtonLoading('assign-legacy-btn', false);
+                const btn = document.getElementById('assign-legacy-btn');
+                if (btn) btn.innerHTML = '<i class="fas fa-check-double"></i> Link Unassigned Matches &amp; Templates';
             }
         }
 
@@ -3819,18 +5113,35 @@
             document.getElementById('duo-tournaments-content').style.display = category === 'duo' ? 'block' : 'none';
             document.getElementById('squad-tournaments-content').style.display = category === 'squad' ? 'block' : 'none';
 
+            const formatSelect = document.getElementById('match-format-select');
+            if (formatSelect && formatSelect.value !== category) {
+                formatSelect.value = category;
+            }
+
             refreshTemplates(category);
         }
 
-        // ===== UPDATED: saveTemplate includes imageUrl and solo-prizes =====
+        // ===== UPDATED: saveTemplate includes imageUrl, solo-prizes, and Game/Mode classification =====
         async function saveTemplate(category) {
             if (!hasPermissions.manageTournaments) {
                 showToast("You don't have permission to save templates.", 'error');
                 return;
             }
 
+            const selectedGameId = document.getElementById('match-game-select')?.value || '';
+            const selectedModeId = document.getElementById('match-mode-select')?.value || '';
+            const selectedGameObj = esportsGames.find(g => g.id === selectedGameId);
+            const selectedModeObj = esportsModes.find(m => m.id === selectedModeId);
+
             let templateData = {
                 category: category,
+                gameId: selectedGameId,
+                gameName: selectedGameObj ? selectedGameObj.name : '',
+                modeId: selectedModeId,
+                modeName: selectedModeObj ? selectedModeObj.name : '',
+                mapName: document.getElementById('match-map-input')?.value?.trim() || 'Bermuda',
+                perspective: document.getElementById('match-perspective-select')?.value || 'TPP',
+                prizePool: document.getElementById('match-prize-pool-input')?.value?.trim() || '',
                 createdBy: currentStaff.uid,
                 createdByName: staffData.name,
                 createdAt: FieldValue.serverTimestamp()
@@ -3997,6 +5308,24 @@
         // Forcefully maps every field to the DOM
         // ============================================================
         function applyTemplateData(category, data) {
+            // Cascading Game / Mode / Map / Perspective / PrizePool
+            if (data.gameId && document.getElementById('match-game-select')) {
+                document.getElementById('match-game-select').value = data.gameId;
+                populateModeDropdownForGame(data.gameId, 'match-mode-select');
+            }
+            if (data.modeId && document.getElementById('match-mode-select')) {
+                document.getElementById('match-mode-select').value = data.modeId;
+            }
+            if (data.mapName && document.getElementById('match-map-input')) {
+                document.getElementById('match-map-input').value = data.mapName;
+            }
+            if (data.perspective && document.getElementById('match-perspective-select')) {
+                document.getElementById('match-perspective-select').value = data.perspective;
+            }
+            if (data.prizePool !== undefined && document.getElementById('match-prize-pool-input')) {
+                document.getElementById('match-prize-pool-input').value = data.prizePool || '';
+            }
+
             // Base fields
             document.getElementById(`${category}-title`).value = data.title || '';
             document.getElementById(`${category}-entry-fee`).value = data.entryFee || 0;
@@ -4033,7 +5362,7 @@
                 preview.src = imageUrl;
                 preview.style.display = 'block';
                 if (uploadText) {
-                    uploadText.innerHTML = `<i class="fas fa-check-circle" style="color: #26a269;"></i><br>Template image loaded`;
+                    uploadText.innerHTML = `<i class="fas fa-check-circle" style="color: #10B981;"></i><br>Template image loaded`;
                 }
             } else {
                 preview.src = '';
@@ -4105,7 +5434,7 @@
             const templatesContainer = document.getElementById('templates-list-container');
             if (templatesContainer) {
                 templatesContainer.innerHTML =
-                    '<div style="text-align:center; color:#666; padding:20px;"><i class="fas fa-spinner fa-spin"></i> Loading templates...</div>';
+                    '<div style="text-align:center; color:#aaa; padding:20px;"><i class="fas fa-spinner fa-spin"></i> Loading templates...</div>';
             }
 
             try {
@@ -4141,15 +5470,17 @@
                                             ${imageHtml}
                                             <span>${title}</span>
                                         </div>
-                                        <span style="color:#888; font-size:0.8em;">${category.toUpperCase()}</span>
+                                        <span class="pill-count-blue">${category.toUpperCase()}</span>
                                     </div>
                                     <div class="automation-meta">
                                         Saved: ${dateStr}
+                                        ${data.gameName ? ` • ${data.gameName}` : ''}
+                                        ${data.modeName ? ` (${data.modeName})` : ''}
                                         ${data.entryFee ? ` • Fee: ₹${data.entryFee}` : ''}
                                         ${data.maxParticipants ? ` • Max: ${data.maxParticipants}` : ''}
                                     </div>
                                     <div class="automation-actions">
-                                        <button class="btn-sm" onclick="applyTemplateFromList('${doc.id}', '${category}')" style="background:#333;">
+                                        <button class="btn-sm" onclick="applyTemplateFromList('${doc.id}', '${category}')">
                                             <i class="fas fa-upload"></i> Load
                                         </button>
                                         <button class="btn-danger-sm" onclick="deleteTemplate('${doc.id}')">
@@ -4167,7 +5498,7 @@
                 console.error("Error loading templates:", error);
                 if (templatesContainer) {
                     templatesContainer.innerHTML =
-                        '<p style="color:#d72638; text-align:center; padding:20px;">Failed to load templates.</p>';
+                        '<p style="color:#EF4444; text-align:center; padding:20px;">Failed to load templates.</p>';
                 }
             }
 
@@ -4175,7 +5506,7 @@
             const autorepeatContainer = document.getElementById('autorepeat-list-container');
             if (autorepeatContainer) {
                 autorepeatContainer.innerHTML =
-                    '<div style="text-align:center; color:#666; padding:20px;"><i class="fas fa-spinner fa-spin"></i> Loading auto-repeat tournaments...</div>';
+                    '<div style="text-align:center; color:#aaa; padding:20px;"><i class="fas fa-spinner fa-spin"></i> Loading auto-repeat tournaments...</div>';
             }
 
             try {
@@ -4214,7 +5545,7 @@
                                 const title = data.title || 'Unnamed Tournament';
                                 const category = data.category ? data.category.toUpperCase() : '?';
                                 const status = data.status || 'active';
-                                const statusColor = status === 'active' ? '#26a269' : '#ffc700';
+                                const statusColor = status === 'active' ? '#10B981' : '#F59E0B';
                                 const imageHtml = data.imageUrl ?
                                     `<img src="${data.imageUrl}" class="automation-thumb" alt="tournament image">` : '';
 
@@ -4225,10 +5556,10 @@
                                                 ${imageHtml}
                                                 <span>${title}</span>
                                             </div>
-                                            <span style="color:${statusColor}; font-size:0.8em; font-weight:600;">${status.toUpperCase()}</span>
+                                            <span style="color:${statusColor}; font-size:0.8em; font-weight:700;">${status.toUpperCase()}</span>
                                         </div>
                                         <div class="automation-meta">
-                                            ${category} • ${data.entryFee ? `₹${data.entryFee} fee` : ''}
+                                            ${category} ${data.modeName ? `• ${data.modeName}` : ''} • ${data.entryFee ? `₹${data.entryFee} fee` : ''}
                                             ${data.maxParticipants ? ` • ${data.maxParticipants} max` : ''}
                                             ${data.conductingDate ? ` • ${new Date(data.conductingDate).toLocaleDateString()}` : ''}
                                         </div>
@@ -4249,7 +5580,7 @@
                 console.error("Error loading auto-repeat tournaments:", error);
                 if (autorepeatContainer) {
                     autorepeatContainer.innerHTML =
-                        '<p style="color:#d72638; text-align:center; padding:20px;">Failed to load auto-repeat tournaments.</p>';
+                        '<p style="color:#EF4444; text-align:center; padding:20px;">Failed to load auto-repeat tournaments.</p>';
                 }
             }
 
@@ -4264,12 +5595,29 @@
 
             checkShiftStatus();
 
+            const selectedGameId = document.getElementById('match-game-select')?.value || '';
+            const selectedModeId = document.getElementById('match-mode-select')?.value || '';
+            const selectedGameObj = esportsGames.find(g => g.id === selectedGameId);
+            const selectedModeObj = esportsModes.find(m => m.id === selectedModeId);
+            const mapName = document.getElementById('match-map-input')?.value?.trim() || (selectedModeObj?.defaultMap || 'Bermuda');
+            const perspective = document.getElementById('match-perspective-select')?.value || (selectedModeObj?.defaultPerspective || 'TPP');
+            const prizePoolInput = document.getElementById('match-prize-pool-input')?.value?.trim() || '';
+
+            if (esportsGames.length > 0 && !selectedGameId) {
+                showToast("Please select a Game in Step 1 of Match Classification.", 'error');
+                return;
+            }
+            if (esportsModes.length > 0 && !selectedModeId) {
+                showToast("Please select a Mode in Step 2 of Match Classification.", 'error');
+                return;
+            }
+
             let formData = {};
 
-            const imageUrl = document.getElementById(`${category}-image-url`).value.trim();
+            const imageUrl = document.getElementById(`${category}-image-url`).value.trim() || selectedModeObj?.thumbnailUrl || selectedGameObj?.imageUrl || '';
 
             if (!imageUrl) {
-                showToast("Please upload a tournament image first.", 'error');
+                showToast("Please upload or enter a tournament image first.", 'error');
                 return;
             }
 
@@ -4291,6 +5639,13 @@
                     showCredentials: document.getElementById('solo-show-credentials').checked,
                     status: document.getElementById('solo-tournament-status').value,
                     category: category,
+                    gameId: selectedGameId,
+                    gameName: selectedGameObj ? selectedGameObj.name : '',
+                    modeId: selectedModeId,
+                    modeName: selectedModeObj ? selectedModeObj.name : '',
+                    mapName: mapName,
+                    perspective: perspective,
+                    prizePool: prizePoolInput,
                     participants: 0,
                     createdBy: currentStaff.uid,
                     createdByName: staffData.name,
@@ -4315,6 +5670,13 @@
                     showCredentials: document.getElementById('duo-show-credentials').checked,
                     status: document.getElementById('duo-tournament-status').value,
                     category: category,
+                    gameId: selectedGameId,
+                    gameName: selectedGameObj ? selectedGameObj.name : '',
+                    modeId: selectedModeId,
+                    modeName: selectedModeObj ? selectedModeObj.name : '',
+                    mapName: mapName,
+                    perspective: perspective,
+                    prizePool: prizePoolInput,
                     participants: 0,
                     createdBy: currentStaff.uid,
                     createdByName: staffData.name,
@@ -4339,6 +5701,13 @@
                     showCredentials: document.getElementById('squad-show-credentials').checked,
                     status: document.getElementById('squad-tournament-status').value,
                     category: category,
+                    gameId: selectedGameId,
+                    gameName: selectedGameObj ? selectedGameObj.name : '',
+                    modeId: selectedModeId,
+                    modeName: selectedModeObj ? selectedModeObj.name : '',
+                    mapName: mapName,
+                    perspective: perspective,
+                    prizePool: prizePoolInput,
                     participants: 0,
                     createdBy: currentStaff.uid,
                     createdByName: staffData.name,
@@ -4391,7 +5760,7 @@
 
                 await db.collection("tournaments").add(formData);
 
-                showToast(`${category} tournament created successfully!`, 'success');
+                showToast(`${category.toUpperCase()} tournament created in ${formData.modeName || 'selected mode'}!`, 'success');
 
                 await logStaffAction('created_tournament', `${category.toUpperCase()} tournament: ${formData.title} (ID: ${formData.tournamentId})`, formData.entryFee || 0);
 
@@ -4439,7 +5808,7 @@
         function setTournamentImageFallback(image) {
             image.onerror = null;
             image.src = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(
-                '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="150" viewBox="0 0 400 150"><rect width="100%" height="100%" fill="#1b2633"/><text x="50%" y="50%" fill="#9aa7b5" font-family="sans-serif" font-size="18" text-anchor="middle" dominant-baseline="middle">Image unavailable</text></svg>'
+                '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="150" viewBox="0 0 400 150"><rect width="100%" height="100%" fill="#EFF6FF"/><text x="50%" y="50%" fill="#00a8ff" font-family="sans-serif" font-weight="bold" font-size="16" text-anchor="middle" dominant-baseline="middle">TECHNO E-SPORTS MATCH</text></svg>'
             );
         }
 
@@ -4515,63 +5884,71 @@
 
             const credentialsVisible = tournament.showCredentials !== false;
             const visibilityText = credentialsVisible ? 'Visible to Users' : 'Hidden from Users';
-            const visibilityColor = credentialsVisible ? '#26a269' : '#d72638';
+            const visibilityColor = credentialsVisible ? '#10B981' : '#EF4444';
 
             const autoRepeatText = tournament.isAutoRepeat ? '✅ Auto-Repeat ON' : 'Auto-Repeat OFF';
-            const autoRepeatColor = tournament.isAutoRepeat ? '#26a269' : '#888';
+            const autoRepeatColor = tournament.isAutoRepeat ? '#10B981' : '#aaa';
+
+            const gameBadge = tournament.gameName ? `<span class="pill-count-blue"><i class="fas fa-gamepad"></i> ${tournament.gameName}</span>` : '';
+            const modeBadge = tournament.modeName ? `<span class="pill-count-green"><i class="fas fa-layer-group"></i> ${tournament.modeName}</span>` : `<span style="font-size:0.75rem; color:#F59E0B; font-weight:700;">Unassigned Mode</span>`;
 
             card.innerHTML = `
                     <div class="tournament-header">
-                        <div style="font-weight: bold; color: #00a8ff;">${tournament.title}</div>
+                        <div style="font-weight: 800; color: #00a8ff;">${tournament.title}</div>
                         ${statusBadge}
                     </div>
 
                     <div style="padding: 15px;">
+                        <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;">
+                            ${gameBadge}
+                            ${modeBadge}
+                            <span class="pill-count-blue">${tournament.mapName || 'Bermuda'} • ${tournament.perspective || 'TPP'}</span>
+                        </div>
                         <div style="text-align: center; margin-bottom: 15px;">
-                            <img src="${tournament.imageUrl || ''}" alt="${tournament.title}" loading="lazy" decoding="async" style="max-width: 100%; max-height: 150px; border-radius: 6px; border: 1px solid #333;">
+                            <img src="${tournament.imageUrl || ''}" alt="${tournament.title}" loading="lazy" decoding="async" style="max-width: 100%; max-height: 150px; border-radius: 10px; border: 1px solid #333; object-fit:cover;">
                         </div>
 
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
                             <div>
-                                <div style="color: #aaa; font-size: 0.8em;">Date & Time</div>
-                                <div style="color: #fff; font-size: 0.9em;">${tournamentDate} - ${tournament.conductingTime || 'TBA'}</div>
+                                <div style="color: #aaa; font-size: 0.78em; font-weight:600;">Date & Time</div>
+                                <div style="color: #fff; font-size: 0.9em; font-weight:700;">${tournamentDate} - ${tournament.conductingTime || 'TBA'}</div>
                             </div>
                             <div>
-                                <div style="color: #aaa; font-size: 0.8em;">Entry Fee</div>
-                                <div style="color: #ffd700; font-weight: bold;">₹${tournament.entryFee || 0}</div>
+                                <div style="color: #aaa; font-size: 0.78em; font-weight:600;">Entry Fee</div>
+                                <div style="color: #10B981; font-weight: 800;">₹${tournament.entryFee || 0}</div>
                             </div>
                         </div>
 
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
                             <div>
-                                <div style="color: #aaa; font-size: 0.8em;">Max Players</div>
-                                <div style="color: #fff; font-size: 0.9em;">${tournament.maxParticipants || 0}</div>
+                                <div style="color: #aaa; font-size: 0.78em; font-weight:600;">Max Slots</div>
+                                <div style="color: #fff; font-size: 0.9em; font-weight:700;">${tournament.maxParticipants || 0}</div>
                             </div>
                             <div>
-                                <div style="color: #aaa; font-size: 0.8em;">Registered</div>
-                                <div style="color: #fff; font-size: 0.9em;">${tournament.participants || 0}</div>
+                                <div style="color: #aaa; font-size: 0.78em; font-weight:600;">Registered</div>
+                                <div style="color: #00a8ff; font-size: 0.9em; font-weight:800;">${tournament.participants || 0}</div>
                             </div>
                         </div>
 
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
                             <div>
-                                <div style="color: #aaa; font-size: 0.8em;">Credentials</div>
-                                <div style="color: ${visibilityColor}; font-size: 0.9em;">${visibilityText}</div>
+                                <div style="color: #aaa; font-size: 0.78em; font-weight:600;">Credentials</div>
+                                <div style="color: ${visibilityColor}; font-size: 0.88em; font-weight:700;">${visibilityText}</div>
                             </div>
                             <div>
-                                <div style="color: #aaa; font-size: 0.8em;">Auto-Repeat</div>
-                                <div style="color: ${autoRepeatColor}; font-size: 0.9em;">${autoRepeatText}</div>
+                                <div style="color: #aaa; font-size: 0.78em; font-weight:600;">Auto-Repeat</div>
+                                <div style="color: ${autoRepeatColor}; font-size: 0.88em; font-weight:700;">${autoRepeatText}</div>
                             </div>
                         </div>
 
                         <div class="tournament-actions">
-                            <button onclick="showCredentialsModal('${tournament.id}')" style="background: #333; flex: 1;">
-                                <i class="fas fa-key"></i> View Credentials
+                            <button onclick="showCredentialsModal('${tournament.id}')" class="btn-outline-sm" style="flex: 1;">
+                                <i class="fas fa-key"></i> Credentials
                             </button>
                             <button onclick="toggleTournamentStatus('${tournament.id}', '${tournament.status}')" style="flex: 1;">
-                                <i class="fas fa-edit"></i> Edit Status
+                                <i class="fas fa-edit"></i> Status
                             </button>
-                            <button onclick="deleteTournament('${tournament.id}')" style="background: #d72638; flex: 1;">
+                            <button onclick="deleteTournament('${tournament.id}')" class="btn-danger-sm" style="flex: 1;">
                                 <i class="fas fa-trash"></i> Delete
                             </button>
                         </div>
