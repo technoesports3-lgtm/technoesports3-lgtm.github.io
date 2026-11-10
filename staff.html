@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
@@ -23,21 +24,25 @@
             text-size-adjust: 100%;
             overflow-x: auto;
         }
+
         .app-container {
             max-width: 1000px;
             margin: 0 auto;
             background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
             min-height: 100vh;
         }
+
         .section {
             padding: 15px;
             display: none;
         }
+
         h1,
         h2,
         h3 {
             color: #00a8ff;
         }
+
         button {
             background: linear-gradient(135deg, #00a8ff 0%, #0097e6 100%);
             color: white;
@@ -51,17 +56,20 @@
             letter-spacing: 0.5px;
             box-shadow: 0 4px 15px rgba(0, 168, 255, 0.2);
         }
+
         button:hover {
             background: linear-gradient(135deg, #1ab2ff 0%, #0a9fff 100%);
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(0, 168, 255, 0.3);
         }
+
         button:disabled {
             background: #666;
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
         }
+
         input[type="text"],
         input[type="email"],
         input[type="password"],
@@ -82,6 +90,7 @@
             color: #fff;
             transition: border-color 0.3s;
         }
+
         input:focus,
         select:focus,
         textarea:focus {
@@ -89,19 +98,23 @@
             outline: none;
             box-shadow: 0 0 0 2px rgba(0, 168, 255, 0.2);
         }
+
         .form-group {
             margin-bottom: 15px;
         }
+
         .password-input-group {
             position: relative;
             display: flex;
             align-items: center;
         }
+
         .password-input-group input {
             width: 100%;
             padding-right: 40px;
             margin: 0;
         }
+
         .toggle-password {
             position: absolute;
             right: 10px;
@@ -110,6 +123,7 @@
             font-size: 1.1em;
             padding: 8px;
         }
+
         #loading-screen {
             position: fixed;
             top: 0;
@@ -123,12 +137,14 @@
             align-items: center;
             z-index: 9999;
         }
+
         .loading-animation {
             width: 150px;
             height: 150px;
             margin-bottom: 20px;
             position: relative;
         }
+
         .staff-icon {
             position: absolute;
             width: 100px;
@@ -145,6 +161,7 @@
             font-size: 40px;
             color: white;
         }
+
         .loading-text {
             font-size: 1.2em;
             color: #00a8ff;
@@ -153,6 +170,7 @@
             text-transform: uppercase;
             letter-spacing: 2px;
         }
+
         .loading-spinner-large {
             width: 40px;
             height: 40px;
@@ -161,20 +179,25 @@
             border-top-color: #00a8ff;
             animation: spin 1s ease-in-out infinite;
         }
+
         @keyframes pulse {
+
             0%,
             100% {
                 transform: translate(-50%, -50%) scale(1);
             }
+
             50% {
                 transform: translate(-50%, -50%) scale(1.05);
             }
         }
+
         @keyframes spin {
             to {
                 transform: rotate(360deg);
             }
         }
+
         .professional-auth-container {
             display: flex;
             flex-direction: column;
@@ -184,6 +207,7 @@
             background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
             padding: 15px;
         }
+
         .professional-auth-box {
             background: rgba(30, 30, 30, 0.95);
             border-radius: 12px;
@@ -193,6 +217,7 @@
             overflow: hidden;
             border: 1px solid #333;
         }
+
         .auth-header {
             background: linear-gradient(135deg, #00a8ff 0%, #0097e6 100%);
             padding: 30px 15px;
@@ -200,6 +225,7 @@
             position: relative;
             overflow: hidden;
         }
+
         .auth-icon {
             width: 80px;
             height: 80px;
@@ -213,11 +239,13 @@
             position: relative;
             z-index: 2;
         }
+
         .auth-icon img {
             width: 50px;
             height: 50px;
             filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
         }
+
         .auth-slogan {
             font-size: 1.2em;
             color: white;
@@ -227,9 +255,11 @@
             position: relative;
             z-index: 2;
         }
+
         .auth-body {
             padding: 25px;
         }
+
         .auth-button {
             width: 100%;
             padding: 12px;
@@ -245,16 +275,19 @@
             margin-top: 10px;
             font-size: 0.95em;
         }
+
         .auth-button:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 15px rgba(0, 168, 255, 0.3);
         }
+
         .auth-button:disabled {
             background: #666;
             transform: none;
             box-shadow: none;
             cursor: not-allowed;
         }
+
         .toast-notification {
             position: fixed;
             top: 80px;
@@ -274,29 +307,35 @@
             transition: transform 0.3s ease-out;
             backdrop-filter: blur(10px);
         }
+
         .toast-notification.show {
             transform: translateX(0);
         }
+
         .toast-icon {
             font-size: 1.2em;
             margin-right: 10px;
             color: #00a8ff;
         }
+
         .toast-content {
             display: flex;
             align-items: center;
         }
+
         .toast-title {
             font-weight: bold;
             font-size: 0.95em;
             margin-bottom: 3px;
             color: #fff;
         }
+
         .toast-message {
             font-size: 0.85em;
             color: #aaa;
             line-height: 1.3;
         }
+
         .toast-close {
             position: absolute;
             right: 10px;
@@ -306,30 +345,39 @@
             font-size: 0.9em;
             padding: 5px;
         }
+
         .toast-success {
             border-left-color: #26a269;
         }
+
         .toast-success .toast-icon {
             color: #26a269;
         }
+
         .toast-error {
             border-left-color: #d72638;
         }
+
         .toast-error .toast-icon {
             color: #d72638;
         }
+
         .toast-info {
             border-left-color: #1c71d8;
         }
+
         .toast-info .toast-icon {
             color: #1c71d8;
         }
+
         .toast-warning {
             border-left-color: #ffc700;
         }
+
         .toast-warning .toast-icon {
             color: #ffc700;
         }
+
         .app-header {
             display: flex;
             justify-content: space-between;
@@ -343,6 +391,7 @@
             z-index: 100;
             height: 50px;
         }
+
         .menu-icon {
             font-size: 1.4em;
             cursor: pointer;
@@ -350,9 +399,11 @@
             border-radius: 6px;
             transition: background-color 0.3s;
         }
+
         .menu-icon:hover {
             background: rgba(255, 255, 255, 0.1);
         }
+
         .app-name {
             font-size: 1.1em;
             font-weight: bold;
@@ -360,6 +411,7 @@
             letter-spacing: 1px;
             text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         }
+
         .refresh-button {
             background: rgba(255, 255, 255, 0.1);
             border: none;
@@ -373,10 +425,12 @@
             align-items: center;
             gap: 5px;
         }
+
         .refresh-button:hover {
             background: rgba(255, 255, 255, 0.2);
             transform: rotate(90deg);
         }
+
         #sidebar-menu {
             position: fixed;
             top: 0;
@@ -391,9 +445,11 @@
             backdrop-filter: blur(10px);
             border-right: 1px solid #333;
         }
+
         #sidebar-menu.open {
             left: 0;
         }
+
         .sidebar-overlay {
             position: fixed;
             top: 0;
@@ -405,6 +461,7 @@
             display: none;
             backdrop-filter: blur(3px);
         }
+
         .sidebar-header-banner {
             background: linear-gradient(135deg, #00a8ff 0%, #0097e6 100%);
             color: white;
@@ -414,6 +471,7 @@
             position: relative;
             overflow: hidden;
         }
+
         .sidebar-header-banner h3 {
             margin: 0;
             font-size: 1.2em;
@@ -421,11 +479,13 @@
             text-transform: uppercase;
             letter-spacing: 1px;
         }
+
         .sidebar-header-banner p {
             margin: 5px 0 0;
             font-size: 0.8em;
             opacity: 0.9;
         }
+
         .sidebar-menu-item {
             display: flex;
             align-items: center;
@@ -437,11 +497,13 @@
             border-bottom: 1px solid #333;
             transition: all 0.3s;
         }
+
         .sidebar-menu-item:hover {
             background: rgba(0, 168, 255, 0.1);
             color: #00a8ff;
             padding-left: 25px;
         }
+
         .sidebar-menu-item .menu-icon-symbol {
             font-size: 1.2em;
             margin-right: 15px;
@@ -449,20 +511,24 @@
             text-align: center;
             color: #00a8ff;
         }
+
         #content-area {
             padding-bottom: 20px;
             position: relative;
             overflow-x: hidden;
         }
+
         .dashboard-content {
             padding: 15px;
         }
+
         .dashboard-title {
             text-align: center;
             margin-bottom: 25px;
             padding-bottom: 15px;
             border-bottom: 2px solid #333;
         }
+
         .dashboard-title h1 {
             color: #00a8ff;
             font-size: 1.8em;
@@ -470,18 +536,21 @@
             text-transform: uppercase;
             letter-spacing: 1px;
         }
+
         .dashboard-title h2 {
             color: #fff;
             font-size: 1.2em;
             margin: 0;
             font-weight: normal;
         }
+
         .dashboard-title h3 {
             color: #ccc;
             font-size: 0.9em;
             margin: 5px 0 0 0;
             font-weight: normal;
         }
+
         .staff-info-card {
             background: rgba(30, 30, 30, 0.8);
             border-radius: 8px;
@@ -490,12 +559,14 @@
             border: 1px solid #333;
             text-align: center;
         }
+
         .staff-name {
             color: #00a8ff;
             font-size: 1.4em;
             margin: 0 0 8px 0;
             font-weight: bold;
         }
+
         .staff-position {
             color: #aaa;
             font-size: 0.9em;
@@ -503,12 +574,14 @@
             text-transform: uppercase;
             letter-spacing: 1px;
         }
+
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 15px;
             margin-bottom: 30px;
         }
+
         .stat-card {
             background: linear-gradient(135deg, rgba(0, 168, 255, 0.1) 0%, rgba(0, 151, 230, 0.1) 100%);
             border-radius: 8px;
@@ -519,11 +592,13 @@
             position: relative;
             overflow: hidden;
         }
+
         .stat-card:hover {
             transform: translateY(-2px);
             border-color: #00a8ff;
             box-shadow: 0 5px 15px rgba(0, 168, 255, 0.2);
         }
+
         .stat-card::before {
             content: '';
             position: absolute;
@@ -533,11 +608,13 @@
             height: 3px;
             background: linear-gradient(90deg, #00a8ff, #0097e6);
         }
+
         .stat-icon {
             font-size: 2em;
             color: #00a8ff;
             margin-bottom: 12px;
         }
+
         .stat-value {
             font-size: 2em;
             font-weight: bold;
@@ -545,12 +622,14 @@
             margin-bottom: 5px;
             text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
         }
+
         .stat-label {
             font-size: 0.8em;
             color: #aaa;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
+
         .performance-display {
             background: rgba(30, 30, 30, 0.8);
             border-radius: 8px;
@@ -559,6 +638,7 @@
             border: 1px solid #333;
             text-align: center;
         }
+
         .performance-title {
             color: #00a8ff;
             font-size: 1.2em;
@@ -566,6 +646,7 @@
             text-transform: uppercase;
             letter-spacing: 1px;
         }
+
         .performance-bar {
             height: 10px;
             background: #333;
@@ -574,6 +655,7 @@
             overflow: hidden;
             position: relative;
         }
+
         .performance-fill {
             height: 100%;
             background: linear-gradient(90deg, #00a8ff, #0097e6);
@@ -582,6 +664,7 @@
             position: relative;
             overflow: hidden;
         }
+
         .performance-fill::after {
             content: '';
             position: absolute;
@@ -595,26 +678,31 @@
                     rgba(255, 255, 255, 0.1) 100%);
             animation: shimmer 2s infinite;
         }
+
         @keyframes shimmer {
             0% {
                 transform: translateX(-100%);
             }
+
             100% {
                 transform: translateX(100%);
             }
         }
+
         .performance-percentage {
             color: #00a8ff;
             font-weight: bold;
             font-size: 1.1em;
             margin-top: 10px;
         }
+
         .quick-actions {
             background: rgba(30, 30, 30, 0.8);
             border-radius: 8px;
             padding: 20px;
             border: 1px solid #333;
         }
+
         .quick-actions-title {
             color: #00a8ff;
             font-size: 1.2em;
@@ -623,11 +711,13 @@
             letter-spacing: 1px;
             text-align: center;
         }
+
         .actions-grid {
             display: grid;
             grid-template-columns: repeat(1, 1fr);
             gap: 15px;
         }
+
         .action-card {
             background: linear-gradient(135deg, rgba(30, 30, 30, 0.9) 0%, rgba(20, 20, 20, 0.9) 100%);
             border-radius: 8px;
@@ -639,17 +729,20 @@
             text-decoration: none;
             display: block;
         }
+
         .action-card:hover {
             transform: translateY(-3px);
             border-color: #00a8ff;
             box-shadow: 0 5px 15px rgba(0, 168, 255, 0.3);
             background: linear-gradient(135deg, rgba(0, 168, 255, 0.1) 0%, rgba(0, 151, 230, 0.1) 100%);
         }
+
         .action-icon {
             font-size: 2em;
             color: #00a8ff;
             margin-bottom: 12px;
         }
+
         .action-title {
             color: #fff;
             font-size: 1em;
@@ -658,11 +751,13 @@
             text-transform: uppercase;
             letter-spacing: 1px;
         }
+
         .action-subtitle {
             color: #aaa;
             font-size: 0.8em;
             margin: 0;
         }
+
         .content-card {
             background: rgba(30, 30, 30, 0.8);
             border-radius: 8px;
@@ -672,18 +767,22 @@
             border: 1px solid #333;
             transition: transform 0.3s, box-shadow 0.3s;
         }
+
         .content-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 0px 15px rgba(0, 168, 255, 0.2);
         }
+
         .content-header {
             background: rgba(0, 0, 0, 0.3);
             padding: 15px;
             border-bottom: 1px solid #333;
         }
+
         .content-body {
             padding: 15px;
         }
+
         .tournament-admin-card {
             background: rgba(30, 30, 30, 0.8);
             border-radius: 8px;
@@ -691,27 +790,33 @@
             margin: 10px 0;
             border: 1px solid #333;
         }
+
         .tournament-admin-banner {
             width: 100%;
             height: 150px;
             object-fit: cover;
         }
+
         .tournament-admin-details {
             padding: 12px;
         }
+
         .tournament-admin-detail {
             display: flex;
             justify-content: space-between;
             margin-bottom: 8px;
             font-size: 0.85em;
         }
+
         .tournament-admin-detail label {
             color: #aaa;
         }
+
         .tournament-admin-detail span {
             color: #fff;
             font-weight: 500;
         }
+
         .status-badge {
             display: inline-block;
             padding: 3px 8px;
@@ -720,26 +825,32 @@
             font-weight: bold;
             text-transform: uppercase;
         }
+
         .status-active {
             background: rgba(38, 162, 105, 0.2);
             color: #26a269;
         }
+
         .status-pending {
             background: rgba(255, 199, 0, 0.2);
             color: #ffc700;
         }
+
         .status-rejected {
             background: rgba(215, 38, 56, 0.2);
             color: #d72638;
         }
+
         .status-blocked {
             background: rgba(255, 70, 85, 0.2);
             color: #ff4655;
         }
+
         .status-inactive {
             background: rgba(102, 102, 102, 0.2);
             color: #aaa;
         }
+
         .application-card {
             background: rgba(30, 30, 30, 0.8);
             border-radius: 8px;
@@ -748,39 +859,48 @@
             border: 1px solid #333;
             transition: all 0.3s;
         }
+
         .application-card:hover {
             border-color: #00a8ff;
         }
+
         .application-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 10px;
         }
+
         .application-title {
             font-weight: bold;
             color: #fff;
             font-size: 0.95em;
         }
+
         .application-details {
             font-size: 0.85em;
             color: #aaa;
             margin-bottom: 10px;
         }
+
         .application-actions {
             display: flex;
             gap: 8px;
             margin-top: 10px;
         }
+
         .approve-btn {
             background: linear-gradient(135deg, #26a269 0%, #2ec27e 100%);
         }
+
         .reject-btn {
             background: linear-gradient(135deg, #d72638 0%, #ff4655 100%);
         }
+
         .delete-btn {
             background: linear-gradient(135deg, #ff4655 0%, #d72638 100%);
         }
+
         .back-button {
             background: #333;
             color: white;
@@ -794,9 +914,11 @@
             font-size: 0.9em;
             margin-bottom: 15px;
         }
+
         .back-button:hover {
             background: #444;
         }
+
         .fullscreen-screenshot-viewer {
             position: fixed;
             top: 0;
@@ -812,6 +934,7 @@
             display: none;
             backdrop-filter: blur(10px);
         }
+
         .screenshot-header {
             position: absolute;
             top: 0;
@@ -825,11 +948,13 @@
             z-index: 10001;
             border-bottom: 1px solid #333;
         }
+
         .screenshot-title {
             color: #fff;
             font-size: 1.1em;
             font-weight: bold;
         }
+
         .screenshot-close-btn {
             background: rgba(255, 255, 255, 0.1);
             color: white;
@@ -843,9 +968,11 @@
             font-size: 0.9em;
             transition: all 0.3s;
         }
+
         .screenshot-close-btn:hover {
             background: rgba(255, 255, 255, 0.2);
         }
+
         .screenshot-container {
             width: 100%;
             height: calc(100% - 70px);
@@ -855,6 +982,7 @@
             padding: 20px;
             margin-top: 60px;
         }
+
         .screenshot-image-full {
             max-width: 100%;
             max-height: 100%;
@@ -863,16 +991,19 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
             animation: fadeIn 0.3s ease;
         }
+
         @keyframes fadeIn {
             from {
                 opacity: 0;
                 transform: scale(0.95);
             }
+
             to {
                 opacity: 1;
                 transform: scale(1);
             }
         }
+
         .screenshot-nav {
             position: absolute;
             bottom: 20px;
@@ -882,29 +1013,35 @@
             padding: 10px;
             background: rgba(0, 0, 0, 0.7);
         }
+
         .screenshot-error {
             text-align: center;
             color: #ff4655;
             padding: 40px;
         }
+
         .screenshot-error i {
             font-size: 3em;
             margin-bottom: 15px;
         }
+
         .empty-state {
             text-align: center;
             padding: 50px 15px;
             color: #666;
         }
+
         .empty-state i {
             font-size: 3em;
             margin-bottom: 15px;
             color: #333;
         }
+
         .empty-state h3 {
             color: #888;
             margin-bottom: 8px;
         }
+
         .modal {
             display: none;
             position: fixed;
@@ -917,6 +1054,7 @@
             background: rgba(0, 0, 0, 0.9);
             backdrop-filter: blur(5px);
         }
+
         .modal-content {
             background: rgba(30, 30, 30, 0.95);
             margin: 5% auto;
@@ -928,6 +1066,7 @@
             position: relative;
             box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
         }
+
         .close-button {
             color: #aaa;
             float: right;
@@ -939,9 +1078,11 @@
             cursor: pointer;
             transition: color 0.3s;
         }
+
         .close-button:hover {
             color: #00a8ff;
         }
+
         .file-upload-container {
             border: 2px dashed #444;
             border-radius: 8px;
@@ -953,26 +1094,32 @@
             background: rgba(0, 0, 0, 0.2);
             position: relative;
         }
+
         .file-upload-container:hover {
             border-color: #00a8ff;
             background: rgba(0, 168, 255, 0.1);
         }
+
         .file-upload-container.dragover {
             border-color: #00a8ff;
             background: rgba(0, 168, 255, 0.15);
         }
+
         .file-upload-icon {
             font-size: 2em;
             color: #00a8ff;
             margin-bottom: 10px;
         }
+
         .file-upload-text {
             color: #aaa;
             font-size: 0.9em;
         }
+
         .file-input-hidden {
             display: none;
         }
+
         .uploaded-image-preview {
             max-width: 200px;
             max-height: 150px;
@@ -981,6 +1128,7 @@
             border: 2px solid #333;
             display: none;
         }
+
         .upload-progress {
             width: 100%;
             height: 4px;
@@ -990,12 +1138,14 @@
             overflow: hidden;
             display: none;
         }
+
         .upload-progress-bar {
             height: 100%;
             background: linear-gradient(90deg, #00a8ff, #0097e6);
             width: 0%;
             transition: width 0.3s;
         }
+
         .welcome-popup {
             position: fixed;
             top: 50%;
@@ -1012,18 +1162,22 @@
             animation: fadeout 3s forwards;
             display: none;
         }
+
         @keyframes fadeout {
             0% {
                 opacity: 1;
             }
+
             70% {
                 opacity: 1;
             }
+
             100% {
                 opacity: 0;
                 display: none;
             }
         }
+
         .staff-profile {
             background: rgba(30, 30, 30, 0.8);
             border-radius: 8px;
@@ -1031,12 +1185,14 @@
             margin: 15px;
             border: 1px solid #333;
         }
+
         .profile-header {
             display: flex;
             align-items: center;
             gap: 15px;
             margin-bottom: 20px;
         }
+
         .profile-avatar {
             width: 70px;
             height: 70px;
@@ -1048,6 +1204,7 @@
             font-size: 30px;
             color: white;
         }
+
         .permission-badge {
             display: inline-block;
             background: rgba(0, 168, 255, 0.2);
@@ -1058,6 +1215,7 @@
             margin-right: 6px;
             margin-bottom: 6px;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
@@ -1067,6 +1225,7 @@
             overflow: hidden;
             border: 1px solid #333;
         }
+
         th,
         td {
             border: 1px solid #333;
@@ -1074,6 +1233,7 @@
             text-align: left;
             font-size: 0.85em;
         }
+
         th {
             background: linear-gradient(135deg, #00a8ff 0%, #0097e6 100%);
             color: white;
@@ -1081,12 +1241,15 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
+
         tbody tr:nth-child(even) {
             background: rgba(50, 50, 50, 0.5);
         }
+
         tbody tr:hover {
             background: rgba(0, 168, 255, 0.1);
         }
+
         .category-tabs {
             display: flex;
             background: #222;
@@ -1095,6 +1258,7 @@
             overflow: hidden;
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
         }
+
         .category-tab {
             flex: 1;
             text-align: center;
@@ -1108,20 +1272,24 @@
             font-size: 0.85em;
             border-bottom: 3px solid transparent;
         }
+
         .category-tab.active {
             color: #00a8ff;
             background: rgba(0, 168, 255, 0.1);
             border-bottom-color: #00a8ff;
         }
+
         .tournament-form-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
             margin-bottom: 15px;
         }
+
         .tournament-form-grid .form-group {
             margin-bottom: 0;
         }
+
         .show-credentials-toggle {
             display: flex;
             align-items: center;
@@ -1131,17 +1299,20 @@
             background: rgba(0, 0, 0, 0.2);
             border-radius: 6px;
         }
+
         .toggle-switch {
             position: relative;
             display: inline-block;
             width: 50px;
             height: 24px;
         }
+
         .toggle-switch input {
             opacity: 0;
             width: 0;
             height: 0;
         }
+
         .toggle-slider {
             position: absolute;
             cursor: pointer;
@@ -1153,6 +1324,7 @@
             transition: .4s;
             border-radius: 24px;
         }
+
         .toggle-slider:before {
             position: absolute;
             content: "";
@@ -1164,18 +1336,22 @@
             transition: .4s;
             border-radius: 50%;
         }
+
         input:checked+.toggle-slider {
             background-color: #00a8ff;
         }
+
         input:checked+.toggle-slider:before {
             transform: translateX(26px);
         }
+
         .current-tournament-list {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 15px;
             margin-top: 20px;
         }
+
         .tournament-card {
             background: rgba(30, 30, 30, 0.8);
             border-radius: 8px;
@@ -1183,11 +1359,13 @@
             border: 1px solid #333;
             transition: all 0.3s;
         }
+
         .tournament-card:hover {
             border-color: #00a8ff;
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0, 168, 255, 0.2);
         }
+
         .tournament-header {
             display: flex;
             justify-content: space-between;
@@ -1196,11 +1374,13 @@
             background: rgba(0, 0, 0, 0.3);
             border-bottom: 1px solid #333;
         }
+
         .tournament-actions {
             display: flex;
             gap: 8px;
             margin-top: 15px;
         }
+
         .credentials-display {
             background: rgba(0, 0, 0, 0.3);
             border-radius: 8px;
@@ -1208,6 +1388,7 @@
             margin: 15px 0;
             border: 1px solid #333;
         }
+
         .credentials-item {
             display: flex;
             justify-content: space-between;
@@ -1217,16 +1398,19 @@
             background: rgba(255, 255, 255, 0.05);
             border-radius: 6px;
         }
+
         .credentials-label {
             color: #aaa;
             font-weight: 500;
         }
+
         .credentials-value {
             color: #fff;
             font-weight: bold;
             font-family: monospace;
             letter-spacing: 1px;
         }
+
         .copy-btn {
             background: #333;
             color: white;
@@ -1237,12 +1421,15 @@
             font-size: 0.8em;
             transition: all 0.3s;
         }
+
         .copy-btn:hover {
             background: #00a8ff;
         }
+
         .copy-btn.copied {
             background: #26a269;
         }
+
         .loading-spinner {
             display: inline-block;
             width: 18px;
@@ -1253,6 +1440,7 @@
             animation: spin 1s ease-in-out infinite;
             margin-right: 8px;
         }
+
         .user-card {
             background: rgba(30, 30, 30, 0.8);
             border-radius: 8px;
@@ -1260,20 +1448,24 @@
             margin: 8px 0;
             border: 1px solid #333;
         }
+
         .user-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 8px;
         }
+
         .user-name {
             font-weight: bold;
             color: #fff;
         }
+
         .user-details {
             font-size: 0.85em;
             color: #aaa;
         }
+
         /* Template & Auto-Repeat Styles */
         .template-controls {
             display: flex;
@@ -1286,26 +1478,32 @@
             margin-bottom: 15px;
             border: 1px solid #333;
         }
+
         .template-controls .form-group {
             margin: 0;
             flex: 1;
             min-width: 150px;
         }
+
         .template-controls .form-group select {
             margin: 0;
         }
+
         .template-controls button {
             padding: 8px 14px;
             font-size: 0.85em;
             white-space: nowrap;
         }
+
         .template-controls .save-template-btn {
             background: linear-gradient(135deg, #ffc700 0%, #f5a623 100%);
             color: #1a1a1a;
         }
+
         .template-controls .save-template-btn:hover {
             background: linear-gradient(135deg, #ffd633 0%, #f5b82e 100%);
         }
+
         .auto-repeat-toggle {
             display: flex;
             align-items: center;
@@ -1316,6 +1514,7 @@
             border-radius: 6px;
             border: 1px solid #333;
         }
+
         .auto-repeat-toggle .toggle-label {
             color: #ddd;
             font-size: 0.95em;
@@ -1323,13 +1522,16 @@
             align-items: center;
             gap: 8px;
         }
+
         .auto-repeat-toggle .toggle-label i {
             color: #00a8ff;
         }
+
         .auto-repeat-toggle .toggle-switch {
             width: 50px;
             height: 24px;
         }
+
         /* --- NEW: Automations & Templates card styles --- */
         .automation-card {
             background: rgba(30, 30, 30, 0.8);
@@ -1339,30 +1541,36 @@
             border: 1px solid #333;
             transition: all 0.3s;
         }
+
         .automation-card:hover {
             border-color: #00a8ff;
         }
+
         .automation-card .automation-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 8px;
         }
+
         .automation-card .automation-title {
             font-weight: bold;
             color: #fff;
             font-size: 1em;
         }
+
         .automation-card .automation-meta {
             font-size: 0.85em;
             color: #aaa;
         }
+
         .automation-card .automation-actions {
             margin-top: 10px;
             display: flex;
             gap: 8px;
             flex-wrap: wrap;
         }
+
         .automation-card .automation-thumb {
             max-width: 80px;
             max-height: 60px;
@@ -1371,52 +1579,63 @@
             object-fit: cover;
             margin-right: 12px;
         }
+
         .template-item {
             display: flex;
             align-items: center;
             gap: 12px;
             flex-wrap: wrap;
         }
+
         .template-item .template-info {
             flex: 1;
             min-width: 150px;
         }
+
         .btn-sm {
             padding: 5px 12px;
             font-size: 0.8em;
         }
+
         .btn-danger-sm {
             background: linear-gradient(135deg, #d72638 0%, #ff4655 100%);
             padding: 5px 12px;
             font-size: 0.8em;
         }
+
         .btn-danger-sm:hover {
             background: linear-gradient(135deg, #ff4655 0%, #d72638 100%);
         }
+
         .btn-warning-sm {
             background: linear-gradient(135deg, #ffc700 0%, #f5a623 100%);
             color: #1a1a1a;
             padding: 5px 12px;
             font-size: 0.8em;
         }
+
         .btn-warning-sm:hover {
             background: linear-gradient(135deg, #ffd633 0%, #f5b82e 100%);
         }
+
         .btn-outline-sm {
             background: transparent;
             border: 1px solid #555;
             padding: 5px 12px;
             font-size: 0.8em;
         }
+
         .btn-outline-sm:hover {
             background: rgba(255, 255, 255, 0.05);
             border-color: #00a8ff;
         }
+
         .automation-grid {
             display: grid;
             grid-template-columns: 1fr;
             gap: 12px;
         }
+
         /* Slot-based registration cards */
         .team-card {
             background: rgba(40, 40, 40, 0.7);
@@ -1426,9 +1645,11 @@
             border: 1px solid #444;
             transition: all 0.3s;
         }
+
         .team-card:hover {
             border-color: #00a8ff;
         }
+
         .team-header {
             display: flex;
             justify-content: space-between;
@@ -1437,16 +1658,19 @@
             padding-bottom: 8px;
             border-bottom: 1px solid #333;
         }
+
         .team-number {
             font-weight: bold;
             font-size: 1.1em;
             color: #00a8ff;
         }
+
         .team-members {
             display: grid;
             grid-template-columns: 1fr;
             gap: 6px;
         }
+
         .slot-player {
             display: flex;
             justify-content: space-between;
@@ -1456,120 +1680,151 @@
             border-radius: 4px;
             font-size: 0.9em;
         }
+
         .slot-player .slot-badge {
             color: #888;
             font-weight: 600;
             min-width: 40px;
         }
+
         .slot-player .player-name {
             color: #fff;
             flex: 1;
             margin: 0 8px;
         }
+
         .slot-player .player-uid {
             color: #aaa;
             font-family: monospace;
             font-size: 0.85em;
         }
+
         @media (min-width: 768px) {
             .stats-grid {
                 grid-template-columns: repeat(4, 1fr);
             }
+
             .actions-grid {
                 grid-template-columns: repeat(3, 1fr);
             }
+
             .action-card {
                 padding: 25px;
             }
+
             .automation-grid {
                 grid-template-columns: 1fr 1fr;
             }
+
             .team-members {
                 grid-template-columns: 1fr 1fr;
             }
         }
+
         @media (max-width: 768px) {
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
                 margin: 12px;
                 gap: 12px;
             }
+
             .category-tabs {
                 margin: 12px;
             }
+
             .content-card {
                 margin: 8px 12px;
             }
+
             .welcome-popup {
                 font-size: 24px;
                 padding: 30px 40px;
             }
+
             .modal-content {
                 width: 95%;
                 padding: 15px;
                 margin: 10% auto;
             }
+
             .actions-grid {
                 grid-template-columns: repeat(1, 1fr);
             }
+
             .tournament-form-grid {
                 grid-template-columns: 1fr;
             }
+
             .template-controls {
                 flex-direction: column;
                 align-items: stretch;
             }
+
             .template-controls .form-group {
                 flex: unset;
                 min-width: unset;
             }
+
             .template-controls button {
                 width: 100%;
             }
+
             .automation-grid {
                 grid-template-columns: 1fr;
             }
+
             .template-item {
                 flex-direction: column;
                 align-items: flex-start;
             }
+
             .team-members {
                 grid-template-columns: 1fr;
             }
         }
+
         @media (max-width: 480px) {
             .app-header {
                 padding: 8px 12px;
                 height: 45px;
             }
+
             .app-name {
                 font-size: 1em;
             }
+
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
                 gap: 8px;
                 margin: 8px;
             }
+
             .stat-card {
                 padding: 15px;
             }
+
             .stat-value {
                 font-size: 1.5em;
             }
+
             .action-card {
                 padding: 15px;
             }
+
             .current-tournament-list {
                 grid-template-columns: 1fr;
             }
+
             .slot-player {
                 flex-wrap: wrap;
                 gap: 4px;
             }
+
             .slot-player .player-name {
                 flex: 1 1 100%;
                 margin: 2px 0;
             }
+
             .admin-entity-card {
                 flex-direction: column;
                 align-items: flex-start;
@@ -1591,6 +1846,7 @@
             --accent-green: #10B981;
             --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
         }
+
         .cascade-selector-bar {
             background: rgba(25, 25, 25, 0.95);
             border: 1px solid rgba(0, 168, 255, 0.35);
@@ -1599,6 +1855,7 @@
             margin: 15px 0;
             box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
         }
+
         .cascade-selector-title {
             display: flex;
             align-items: center;
@@ -1607,6 +1864,7 @@
             margin-bottom: 14px;
             flex-wrap: wrap;
         }
+
         .cascade-selector-title h3 {
             margin: 0;
             font-size: 1rem;
@@ -1616,11 +1874,13 @@
             align-items: center;
             gap: 8px;
         }
+
         .cascade-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
             gap: 12px;
         }
+
         .cascade-step-badge {
             display: inline-flex;
             align-items: center;
@@ -1634,12 +1894,14 @@
             font-weight: 800;
             margin-right: 6px;
         }
+
         .builder-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 16px;
             margin: 15px 0;
         }
+
         .admin-entity-card {
             display: flex;
             align-items: center;
@@ -1651,10 +1913,12 @@
             margin-bottom: 10px;
             transition: all 0.2s ease;
         }
+
         .admin-entity-card:hover {
             border-color: #00a8ff;
             box-shadow: 0 5px 15px rgba(0, 168, 255, 0.18);
         }
+
         .admin-entity-thumb {
             width: 64px;
             height: 64px;
@@ -1664,6 +1928,7 @@
             border: 1px solid #333;
             flex-shrink: 0;
         }
+
         .admin-banner-thumb {
             width: 110px;
             height: 62px;
@@ -1673,10 +1938,12 @@
             border: 1px solid #333;
             flex-shrink: 0;
         }
+
         .admin-entity-info {
             flex: 1;
             min-width: 0;
         }
+
         .admin-entity-title {
             font-weight: 700;
             font-size: 0.96rem;
@@ -1687,6 +1954,7 @@
             gap: 8px;
             flex-wrap: wrap;
         }
+
         .admin-entity-sub {
             font-size: 0.8rem;
             color: #aaa;
@@ -1695,6 +1963,7 @@
             gap: 8px;
             flex-wrap: wrap;
         }
+
         .pill-count-green {
             display: inline-flex;
             align-items: center;
@@ -1707,6 +1976,7 @@
             border-radius: 999px;
             border: 1px solid rgba(16, 185, 129, 0.35);
         }
+
         .pill-count-blue {
             display: inline-flex;
             align-items: center;
@@ -1719,6 +1989,7 @@
             border-radius: 999px;
             border: 1px solid rgba(0, 168, 255, 0.35);
         }
+
         .live-notice-preview {
             display: flex;
             align-items: center;
@@ -1732,6 +2003,7 @@
             font-size: 0.86rem;
             font-weight: 600;
         }
+
         .pulse-dot-green {
             width: 8px;
             height: 8px;
@@ -1741,13 +2013,23 @@
             animation: pulseGreenDot 1.8s infinite;
             display: inline-block;
         }
+
         @keyframes pulseGreenDot {
-            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); }
-            70% { box-shadow: 0 0 0 7px rgba(16, 185, 129, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+            0% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6);
+            }
+
+            70% {
+                box-shadow: 0 0 0 7px rgba(16, 185, 129, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+            }
         }
     </style>
 </head>
+
 <body>
 
     <div class="app-container">
@@ -1821,7 +2103,8 @@
                     </div>
                     <div class="form-group password-input-group">
                         <input type="password" id="login-password" placeholder="Password" required>
-                        <span class="toggle-password" onclick="togglePasswordVisibility('login-password')"><i class="fas fa-eye"></i></span>
+                        <span class="toggle-password" onclick="togglePasswordVisibility('login-password')"><i
+                                class="fas fa-eye"></i></span>
                     </div>
                     <button class="auth-button" onclick="handleStaffLogin()" id="login-button">Login</button>
                     <p style="text-align: center; margin-top: 15px; color: #aaa; font-size: 0.85em;">
@@ -1855,31 +2138,39 @@
                 <div class="sidebar-menu-item" onclick="showSection('profile-section')">
                     <span class="menu-icon-symbol"><i class="fas fa-user-circle"></i></span> My Profile
                 </div>
-                <div class="sidebar-menu-item" onclick="showSection('announcements-section')" id="announcements-menu-item">
+                <div class="sidebar-menu-item" onclick="showSection('announcements-section')"
+                    id="announcements-menu-item">
                     <span class="menu-icon-symbol"><i class="fas fa-images"></i></span> Banners &amp; Notices
                 </div>
                 <div class="sidebar-menu-item" onclick="showSection('games-modes-section')" id="games-modes-menu-item">
                     <span class="menu-icon-symbol"><i class="fas fa-layer-group"></i></span> Games &amp; Modes
                 </div>
-                <div class="sidebar-menu-item" onclick="showSection('manage-users-section')" id="users-menu-item" style="display: none;">
+                <div class="sidebar-menu-item" onclick="showSection('manage-users-section')" id="users-menu-item"
+                    style="display: none;">
                     <span class="menu-icon-symbol"><i class="fas fa-users"></i></span> Manage Users
                 </div>
-                <div class="sidebar-menu-item" onclick="showSection('tournaments-section')" id="tournaments-menu-item" style="display: none;">
+                <div class="sidebar-menu-item" onclick="showSection('tournaments-section')" id="tournaments-menu-item"
+                    style="display: none;">
                     <span class="menu-icon-symbol"><i class="fas fa-gamepad"></i></span> Tournaments
                 </div>
-                <div class="sidebar-menu-item" onclick="showSection('automations-section')" id="automations-menu-item" style="display: none;">
+                <div class="sidebar-menu-item" onclick="showSection('automations-section')" id="automations-menu-item"
+                    style="display: none;">
                     <span class="menu-icon-symbol"><i class="fas fa-robot"></i></span> Automations &amp; Templates
                 </div>
-                <div class="sidebar-menu-item" onclick="showSection('registered-users-section')" id="view-menu-item" style="display: none;">
+                <div class="sidebar-menu-item" onclick="showSection('registered-users-section')" id="view-menu-item"
+                    style="display: none;">
                     <span class="menu-icon-symbol"><i class="fas fa-list-alt"></i></span> View Registrations
                 </div>
-                <div class="sidebar-menu-item" onclick="showSection('prize-distribution-section')" id="prize-menu-item" style="display: none;">
+                <div class="sidebar-menu-item" onclick="showSection('prize-distribution-section')" id="prize-menu-item"
+                    style="display: none;">
                     <span class="menu-icon-symbol"><i class="fas fa-trophy"></i></span> Prize Distribution
                 </div>
-                <div class="sidebar-menu-item" onclick="showSection('withdrawals-section')" id="withdrawals-menu-item" style="display: none;">
+                <div class="sidebar-menu-item" onclick="showSection('withdrawals-section')" id="withdrawals-menu-item"
+                    style="display: none;">
                     <span class="menu-icon-symbol"><i class="fas fa-money-bill-wave"></i></span> Withdrawals
                 </div>
-                <div class="sidebar-menu-item" onclick="showSection('match-results-section')" id="match-results-menu-item" style="display: none;">
+                <div class="sidebar-menu-item" onclick="showSection('match-results-section')"
+                    id="match-results-menu-item" style="display: none;">
                     <span class="menu-icon-symbol"><i class="fas fa-list-check"></i></span> Match Results
                 </div>
                 <div class="sidebar-menu-item" onclick="showLogoutConfirmation()">
@@ -1943,17 +2234,20 @@
                         <div class="quick-actions">
                             <div class="quick-actions-title">Quick Actions</div>
                             <div class="actions-grid">
-                                <a class="action-card" onclick="showSection('tournaments-section')" id="quick-tournament">
+                                <a class="action-card" onclick="showSection('tournaments-section')"
+                                    id="quick-tournament">
                                     <div class="action-icon"><i class="fas fa-plus-circle"></i></div>
                                     <div class="action-title">Create Tournament</div>
                                     <div class="action-subtitle">Game &rarr; Mode &rarr; Format</div>
                                 </a>
-                                <a class="action-card" onclick="showSection('games-modes-section')" id="quick-games-modes">
+                                <a class="action-card" onclick="showSection('games-modes-section')"
+                                    id="quick-games-modes">
                                     <div class="action-icon"><i class="fas fa-layer-group"></i></div>
                                     <div class="action-title">Games &amp; Modes</div>
                                     <div class="action-subtitle">Manage games &amp; mode buckets</div>
                                 </a>
-                                <a class="action-card" onclick="showSection('announcements-section')" id="quick-banners">
+                                <a class="action-card" onclick="showSection('announcements-section')"
+                                    id="quick-banners">
                                     <div class="action-icon"><i class="fas fa-images"></i></div>
                                     <div class="action-title">Banners &amp; Notices</div>
                                     <div class="action-subtitle">Promo sliders &amp; live notice bar</div>
@@ -1989,16 +2283,19 @@
                             <div class="tournament-form-grid">
                                 <div class="form-group" style="grid-column: 1 / -1;">
                                     <label>LIVE ANNOUNCEMENT BAR TEXT</label>
-                                    <input type="text" id="live-notice-text" placeholder="e.g., Welcome to TECHNO E-SPORTS! Room ID & Password shared 15 mins before match start.">
+                                    <input type="text" id="live-notice-text"
+                                        placeholder="e.g., Welcome to TECHNO E-SPORTS! Room ID & Password shared 15 mins before match start.">
                                 </div>
                                 <div class="form-group">
                                     <label>ACTION LINK / ROUTE (OPTIONAL)</label>
-                                    <input type="text" id="live-notice-link" placeholder="e.g., https://... or leave blank">
+                                    <input type="text" id="live-notice-link"
+                                        placeholder="e.g., https://... or leave blank">
                                 </div>
                                 <div class="form-group">
                                     <label>NOTICE BAR STATUS</label>
                                     <div class="show-credentials-toggle" style="margin:0;">
-                                        <span style="font-weight:700; font-size:0.88em;">Show Notice Bar on User Home</span>
+                                        <span style="font-weight:700; font-size:0.88em;">Show Notice Bar on User
+                                            Home</span>
                                         <label class="toggle-switch">
                                             <input type="checkbox" id="live-notice-active" checked>
                                             <span class="toggle-slider"></span>
@@ -2011,7 +2308,8 @@
                                 <i class="fas fa-volume-up" style="color:var(--primary-blue);"></i>
                                 <span id="live-notice-preview-text">Live notice preview will appear here...</span>
                             </div>
-                            <button type="button" onclick="saveLiveNoticeConfig()" id="save-live-notice-btn" style="margin-top:14px; width:100%;">
+                            <button type="button" onclick="saveLiveNoticeConfig()" id="save-live-notice-btn"
+                                style="margin-top:14px; width:100%;">
                                 <i class="fas fa-save"></i> SAVE LIVE NOTICE BAR
                             </button>
                         </div>
@@ -2027,33 +2325,42 @@
                             <div class="tournament-form-grid">
                                 <div class="form-group">
                                     <label>BANNER HEADLINE (OPTIONAL)</label>
-                                    <input type="text" id="banner-title-input" placeholder="e.g., Grand Free Fire Max Series">
+                                    <input type="text" id="banner-title-input"
+                                        placeholder="e.g., Grand Free Fire Max Series">
                                 </div>
                                 <div class="form-group">
                                     <label>BANNER SUBTITLE / BADGE (OPTIONAL)</label>
-                                    <input type="text" id="banner-subtitle-input" placeholder="e.g., Win Daily Instant Rewards">
+                                    <input type="text" id="banner-subtitle-input"
+                                        placeholder="e.g., Win Daily Instant Rewards">
                                 </div>
                             </div>
                             <div class="tournament-form-grid">
                                 <div class="form-group">
                                     <label>UPLOAD OR PASTE BANNER IMAGE</label>
-                                    <div class="file-upload-container" onclick="document.getElementById('banner-image-file').click()">
+                                    <div class="file-upload-container"
+                                        onclick="document.getElementById('banner-image-file').click()">
                                         <div class="file-upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
                                         <div class="file-upload-text">
                                             Click to upload promo banner (16:9 recommended)<br>
                                             <small>Supported: JPG, PNG, WebP</small>
                                         </div>
-                                        <img id="banner-image-preview" class="uploaded-image-preview" alt="Banner Preview">
-                                        <input type="file" id="banner-image-file" class="file-input-hidden" accept="image/*" onchange="handleCustomAssetUpload('banner', this.files[0])">
+                                        <img id="banner-image-preview" class="uploaded-image-preview"
+                                            alt="Banner Preview">
+                                        <input type="file" id="banner-image-file" class="file-input-hidden"
+                                            accept="image/*"
+                                            onchange="handleCustomAssetUpload('banner', this.files[0])">
                                         <div class="upload-progress" id="banner-upload-progress">
                                             <div class="upload-progress-bar" id="banner-upload-progress-bar"></div>
                                         </div>
                                     </div>
-                                    <input type="text" id="banner-image-url" placeholder="Or paste direct Banner Image URL (https://...)" style="margin-top:8px;">
+                                    <input type="text" id="banner-image-url"
+                                        placeholder="Or paste direct Banner Image URL (https://...)"
+                                        style="margin-top:8px;">
                                 </div>
                                 <div class="form-group">
                                     <label>TARGET ACTION / LINK (OPTIONAL)</label>
-                                    <input type="text" id="banner-action-url" placeholder="External URL or leave blank to open Games">
+                                    <input type="text" id="banner-action-url"
+                                        placeholder="External URL or leave blank to open Games">
                                     <label style="margin-top:12px;">SORT ORDER (LOWER SHOWS FIRST)</label>
                                     <input type="number" id="banner-sort-order" value="1" min="0">
                                     <div class="show-credentials-toggle" style="margin-top:12px;">
@@ -2066,15 +2373,18 @@
                                 </div>
                             </div>
                             <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                                <button type="button" onclick="savePromoBanner()" id="save-promo-banner-btn" style="flex:1;">
+                                <button type="button" onclick="savePromoBanner()" id="save-promo-banner-btn"
+                                    style="flex:1;">
                                     <i class="fas fa-plus-circle"></i> SAVE PROMOTIONAL BANNER
                                 </button>
-                                <button type="button" class="btn-outline-sm" onclick="resetPromoBannerForm()" style="padding:12px 18px;">
+                                <button type="button" class="btn-outline-sm" onclick="resetPromoBannerForm()"
+                                    style="padding:12px 18px;">
                                     <i class="fas fa-undo"></i> Clear
                                 </button>
                             </div>
 
-                            <h4 style="margin:22px 0 12px 0; color:var(--primary-blue);">ACTIVE &amp; SAVED PROMOTIONAL BANNERS</h4>
+                            <h4 style="margin:22px 0 12px 0; color:var(--primary-blue);">ACTIVE &amp; SAVED PROMOTIONAL
+                                BANNERS</h4>
                             <div id="promo-banners-admin-list">
                                 <div class="empty-state" style="padding:25px;">
                                     <i class="fas fa-images"></i>
@@ -2091,16 +2401,20 @@
                             <h3><i class="fas fa-bell"></i> Send Global Push Notification</h3>
                         </div>
                         <div class="content-body">
-                            <div style="color: #00a8ff; background: rgba(25, 118, 210, 0.08); border: 1px solid rgba(25, 118, 210, 0.2); padding: 10px 14px; border-radius: 10px; margin-bottom: 15px; font-weight: 500;">
-                                <i class="fas fa-info-circle"></i> This message will be sent as a Push Notification to all users who have allowed notifications.
+                            <div
+                                style="color: #00a8ff; background: rgba(25, 118, 210, 0.08); border: 1px solid rgba(25, 118, 210, 0.2); padding: 10px 14px; border-radius: 10px; margin-bottom: 15px; font-weight: 500;">
+                                <i class="fas fa-info-circle"></i> This message will be sent as a Push Notification to
+                                all users who have allowed notifications.
                             </div>
 
                             <div class="form-group">
                                 <label>Message Content</label>
-                                <textarea id="announcement-message" rows="4" placeholder="Type your update/announcement here..." required></textarea>
+                                <textarea id="announcement-message" rows="4"
+                                    placeholder="Type your update/announcement here..." required></textarea>
                             </div>
 
-                            <button class="auth-button" onclick="sendCustomPushAnnouncement()" id="send-push-announcement-btn">
+                            <button class="auth-button" onclick="sendCustomPushAnnouncement()"
+                                id="send-push-announcement-btn">
                                 <i class="fas fa-bell"></i> Send Push Notification (Free)
                             </button>
                         </div>
@@ -2123,23 +2437,27 @@
                                 </div>
                                 <div class="form-group">
                                     <label>GAME TAGLINE / SUBTITLE (OPTIONAL)</label>
-                                    <input type="text" id="game-tagline-input" placeholder="e.g., Official Battle Royale & Clash Squad">
+                                    <input type="text" id="game-tagline-input"
+                                        placeholder="e.g., Official Battle Royale & Clash Squad">
                                 </div>
                                 <div class="form-group">
                                     <label>GAME COVER BANNER / THUMBNAIL</label>
-                                    <div class="file-upload-container" onclick="document.getElementById('game-image-file').click()">
+                                    <div class="file-upload-container"
+                                        onclick="document.getElementById('game-image-file').click()">
                                         <div class="file-upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
                                         <div class="file-upload-text">
                                             Click to upload Game Banner Image<br>
                                             <small>Supported: JPG, PNG, WebP</small>
                                         </div>
                                         <img id="game-image-preview" class="uploaded-image-preview" alt="Game Preview">
-                                        <input type="file" id="game-image-file" class="file-input-hidden" accept="image/*" onchange="handleCustomAssetUpload('game', this.files[0])">
+                                        <input type="file" id="game-image-file" class="file-input-hidden"
+                                            accept="image/*" onchange="handleCustomAssetUpload('game', this.files[0])">
                                         <div class="upload-progress" id="game-upload-progress">
                                             <div class="upload-progress-bar" id="game-upload-progress-bar"></div>
                                         </div>
                                     </div>
-                                    <input type="text" id="game-image-url" placeholder="Or paste Game Cover URL (https://...)" style="margin-top:8px;">
+                                    <input type="text" id="game-image-url"
+                                        placeholder="Or paste Game Cover URL (https://...)" style="margin-top:8px;">
                                 </div>
                                 <div class="tournament-form-grid">
                                     <div class="form-group">
@@ -2158,10 +2476,12 @@
                                     </div>
                                 </div>
                                 <div style="display:flex; gap:8px; margin-top:10px;">
-                                    <button type="button" onclick="saveEsportsGame()" id="save-game-btn" style="flex:1;">
+                                    <button type="button" onclick="saveEsportsGame()" id="save-game-btn"
+                                        style="flex:1;">
                                         <i class="fas fa-save"></i> SAVE GAME
                                     </button>
-                                    <button type="button" class="btn-outline-sm" onclick="resetEsportsGameForm()" style="padding:10px 14px;">
+                                    <button type="button" class="btn-outline-sm" onclick="resetEsportsGameForm()"
+                                        style="padding:10px 14px;">
                                         <i class="fas fa-undo"></i> Reset
                                     </button>
                                 </div>
@@ -2192,28 +2512,33 @@
                                 </div>
                                 <div class="form-group">
                                     <label>MODE NAME</label>
-                                    <input type="text" id="mode-name-input" placeholder="e.g., FF Survival, Full Map, Lone Wolf, Headshot, CS-New">
+                                    <input type="text" id="mode-name-input"
+                                        placeholder="e.g., FF Survival, Full Map, Lone Wolf, Headshot, CS-New">
                                 </div>
                                 <div class="form-group">
                                     <label>MODE THUMBNAIL ICON / IMAGE</label>
-                                    <div class="file-upload-container" onclick="document.getElementById('mode-image-file').click()">
+                                    <div class="file-upload-container"
+                                        onclick="document.getElementById('mode-image-file').click()">
                                         <div class="file-upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
                                         <div class="file-upload-text">
                                             Click to upload Mode Thumbnail<br>
                                             <small>Square 1:1 or 4:3 image recommended</small>
                                         </div>
                                         <img id="mode-image-preview" class="uploaded-image-preview" alt="Mode Preview">
-                                        <input type="file" id="mode-image-file" class="file-input-hidden" accept="image/*" onchange="handleCustomAssetUpload('mode', this.files[0])">
+                                        <input type="file" id="mode-image-file" class="file-input-hidden"
+                                            accept="image/*" onchange="handleCustomAssetUpload('mode', this.files[0])">
                                         <div class="upload-progress" id="mode-upload-progress">
                                             <div class="upload-progress-bar" id="mode-upload-progress-bar"></div>
                                         </div>
                                     </div>
-                                    <input type="text" id="mode-image-url" placeholder="Or paste Mode Thumbnail URL (https://...)" style="margin-top:8px;">
+                                    <input type="text" id="mode-image-url"
+                                        placeholder="Or paste Mode Thumbnail URL (https://...)" style="margin-top:8px;">
                                 </div>
                                 <div class="tournament-form-grid">
                                     <div class="form-group">
                                         <label>DEFAULT MAP</label>
-                                        <input type="text" id="mode-map-input" placeholder="e.g., Bermuda / Iron Cage" value="Bermuda">
+                                        <input type="text" id="mode-map-input" placeholder="e.g., Bermuda / Iron Cage"
+                                            value="Bermuda">
                                     </div>
                                     <div class="form-group">
                                         <label>DEFAULT PERSPECTIVE</label>
@@ -2241,15 +2566,18 @@
                                     </div>
                                 </div>
                                 <div style="display:flex; gap:8px; margin-top:10px;">
-                                    <button type="button" onclick="saveEsportsMode()" id="save-mode-btn" style="flex:1;">
+                                    <button type="button" onclick="saveEsportsMode()" id="save-mode-btn"
+                                        style="flex:1;">
                                         <i class="fas fa-save"></i> SAVE MODE
                                     </button>
-                                    <button type="button" class="btn-outline-sm" onclick="resetEsportsModeForm()" style="padding:10px 14px;">
+                                    <button type="button" class="btn-outline-sm" onclick="resetEsportsModeForm()"
+                                        style="padding:10px 14px;">
                                         <i class="fas fa-undo"></i> Reset
                                     </button>
                                 </div>
 
-                                <h4 style="margin:20px 0 10px 0; color:var(--primary-blue);">CREATED MODES &amp; OPEN MATCH COUNTS</h4>
+                                <h4 style="margin:20px 0 10px 0; color:var(--primary-blue);">CREATED MODES &amp; OPEN
+                                    MATCH COUNTS</h4>
                                 <div id="esports-modes-admin-list">
                                     <div class="empty-state" style="padding:20px;">
                                         <i class="fas fa-layer-group"></i>
@@ -2264,16 +2592,21 @@
                     <!-- Bulk Assign Legacy / Unclassified Matches Helper -->
                     <div class="content-card">
                         <div class="content-header">
-                            <h3><i class="fas fa-link"></i> Assign Existing / Legacy Matches to a Game &amp; Mode Bucket</h3>
+                            <h3><i class="fas fa-link"></i> Assign Existing / Legacy Matches to a Game &amp; Mode Bucket
+                            </h3>
                         </div>
                         <div class="content-body">
                             <p style="color:var(--text-muted); font-size:0.88em; margin-top:0; margin-bottom:12px;">
-                                If you have older tournaments or templates created before Game &amp; Mode buckets were set up, you can link all unassigned tournaments to a target Game &amp; Mode in one click.
+                                If you have older tournaments or templates created before Game &amp; Mode buckets were
+                                set up, you can link all unassigned tournaments to a target Game &amp; Mode in one
+                                click.
                             </p>
                             <div class="cascade-grid" style="align-items:end;">
                                 <div class="form-group" style="margin:0;">
                                     <label>TARGET GAME</label>
-                                    <select id="legacy-assign-game-select" onchange="populateModeDropdownForGame(this.value, 'legacy-assign-mode-select')" style="margin:0;">
+                                    <select id="legacy-assign-game-select"
+                                        onchange="populateModeDropdownForGame(this.value, 'legacy-assign-mode-select')"
+                                        style="margin:0;">
                                         <option value="">-- Select Game --</option>
                                     </select>
                                 </div>
@@ -2305,9 +2638,12 @@
                                     </div>
                                     <div class="profile-info">
                                         <h3 id="profile-name">Loading...</h3>
-                                        <div style="color: #aaa; font-size: 0.9em;" id="profile-email">Email: Loading...</div>
-                                        <div style="color: #aaa; font-size: 0.9em;" id="profile-phone">Phone: Loading...</div>
-                                        <div style="color: #00a8ff; font-weight: bold;" id="profile-position">Position: Loading...</div>
+                                        <div style="color: #aaa; font-size: 0.9em;" id="profile-email">Email: Loading...
+                                        </div>
+                                        <div style="color: #aaa; font-size: 0.9em;" id="profile-phone">Phone: Loading...
+                                        </div>
+                                        <div style="color: #00a8ff; font-weight: bold;" id="profile-position">Position:
+                                            Loading...</div>
                                     </div>
                                 </div>
 
@@ -2323,29 +2659,35 @@
                                     <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
                                         <div style="text-align: center;">
                                             <div style="color: #aaa; font-size: 0.8em;">Applications Processed</div>
-                                            <div style="color: #fff; font-size: 24px; font-weight: bold;" id="stats-apps">0</div>
+                                            <div style="color: #fff; font-size: 24px; font-weight: bold;"
+                                                id="stats-apps">0</div>
                                         </div>
                                         <div style="text-align: center;">
                                             <div style="color: #aaa; font-size: 0.8em;">Tournaments Managed</div>
-                                            <div style="color: #fff; font-size: 24px; font-weight: bold;" id="stats-tours">0</div>
+                                            <div style="color: #fff; font-size: 24px; font-weight: bold;"
+                                                id="stats-tours">0</div>
                                         </div>
                                         <div style="text-align: center;">
                                             <div style="color: #aaa; font-size: 0.8em;">Users Managed</div>
-                                            <div style="color: #fff; font-size: 24px; font-weight: bold;" id="stats-users">0</div>
+                                            <div style="color: #fff; font-size: 24px; font-weight: bold;"
+                                                id="stats-users">0</div>
                                         </div>
                                         <div style="text-align: center;">
                                             <div style="color: #aaa; font-size: 0.8em;">Performance</div>
-                                            <div style="color: #00a8ff; font-size: 24px; font-weight: bold;" id="stats-perf">0%</div>
+                                            <div style="color: #00a8ff; font-size: 24px; font-weight: bold;"
+                                                id="stats-perf">0%</div>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div style="color: #aaa; font-size: 0.8em; margin-top: 20px;">
                                     <div>Joined: <span id="join-date" style="color: #fff;">Loading...</span></div>
-                                    <div>Last Active: <span id="last-active" style="color: #fff;">Loading...</span></div>
+                                    <div>Last Active: <span id="last-active" style="color: #fff;">Loading...</span>
+                                    </div>
                                     <div style="margin-top:10px; padding-top:10px; border-top:1px solid #333;">
                                         <span style="color:#aaa;">Shift: </span>
-                                        <span id="shift-display" style="color:#00a8ff; font-weight:700;">Loading...</span>
+                                        <span id="shift-display"
+                                            style="color:#00a8ff; font-weight:700;">Loading...</span>
                                     </div>
                                 </div>
                             </div>
@@ -2360,8 +2702,10 @@
                             <h3>Manage Users</h3>
                         </div>
                         <div class="content-body">
-                            <div style="color: #00a8ff; background: rgba(25, 118, 210, 0.08); border: 1px solid rgba(25, 118, 210, 0.2); padding: 10px 14px; border-radius: 10px; margin-bottom: 15px;">
-                                <i class="fas fa-exclamation-triangle"></i> You can block/unblock users based on your permissions.
+                            <div
+                                style="color: #00a8ff; background: rgba(25, 118, 210, 0.08); border: 1px solid rgba(25, 118, 210, 0.2); padding: 10px 14px; border-radius: 10px; margin-bottom: 15px;">
+                                <i class="fas fa-exclamation-triangle"></i> You can block/unblock users based on your
+                                permissions.
                             </div>
                             <table>
                                 <thead>
@@ -2376,7 +2720,9 @@
                                     </tr>
                                 </thead>
                                 <tbody id="users-table-body">
-                                    <tr><td colspan="7">Loading users...</td></tr>
+                                    <tr>
+                                        <td colspan="7">Loading users...</td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -2393,27 +2739,32 @@
                             <!-- Cascading Classification Bar: Select Game -> Select Mode -> Select Format (Solo/Duo/Squad) -->
                             <div class="cascade-selector-bar">
                                 <div class="cascade-selector-title">
-                                    <h3><i class="fas fa-sitemap"></i> Match Classification Routing (Staff &rarr; User Feed)</h3>
-                                    <button type="button" class="btn-outline-sm" onclick="showSection('games-modes-section')">
+                                    <h3><i class="fas fa-sitemap"></i> Match Classification Routing (Staff &rarr; User
+                                        Feed)</h3>
+                                    <button type="button" class="btn-outline-sm"
+                                        onclick="showSection('games-modes-section')">
                                         <i class="fas fa-plus"></i> Manage Games &amp; Modes
                                     </button>
                                 </div>
                                 <div class="cascade-grid">
                                     <div class="form-group" style="margin:0;">
                                         <label><span class="cascade-step-badge">1</span>SELECT GAME</label>
-                                        <select id="match-game-select" onchange="onCascadeGameChange(this.value)" style="margin:0;">
+                                        <select id="match-game-select" onchange="onCascadeGameChange(this.value)"
+                                            style="margin:0;">
                                             <option value="">-- Select Game --</option>
                                         </select>
                                     </div>
                                     <div class="form-group" style="margin:0;">
                                         <label><span class="cascade-step-badge">2</span>SELECT MODE</label>
-                                        <select id="match-mode-select" onchange="onCascadeModeChange(this.value)" style="margin:0;">
+                                        <select id="match-mode-select" onchange="onCascadeModeChange(this.value)"
+                                            style="margin:0;">
                                             <option value="">-- Select Mode --</option>
                                         </select>
                                     </div>
                                     <div class="form-group" style="margin:0;">
                                         <label><span class="cascade-step-badge">3</span>SELECT FORMAT</label>
-                                        <select id="match-format-select" onchange="onCascadeFormatChange(this.value)" style="margin:0;">
+                                        <select id="match-format-select" onchange="onCascadeFormatChange(this.value)"
+                                            style="margin:0;">
                                             <option value="solo">SOLO</option>
                                             <option value="duo">DUO</option>
                                             <option value="squad">SQUAD</option>
@@ -2421,7 +2772,8 @@
                                     </div>
                                     <div class="form-group" style="margin:0;">
                                         <label>MAP NAME</label>
-                                        <input type="text" id="match-map-input" value="Bermuda" placeholder="e.g., Bermuda" style="margin:0;">
+                                        <input type="text" id="match-map-input" value="Bermuda"
+                                            placeholder="e.g., Bermuda" style="margin:0;">
                                     </div>
                                     <div class="form-group" style="margin:0;">
                                         <label>PERSPECTIVE / MODE</label>
@@ -2433,7 +2785,8 @@
                                     </div>
                                     <div class="form-group" style="margin:0;">
                                         <label>TOTAL PRIZE POOL (₹)</label>
-                                        <input type="text" id="match-prize-pool-input" placeholder="e.g., 500 (Auto-detected if blank)" style="margin:0;">
+                                        <input type="text" id="match-prize-pool-input"
+                                            placeholder="e.g., 500 (Auto-detected if blank)" style="margin:0;">
                                     </div>
                                 </div>
                             </div>
@@ -2446,7 +2799,8 @@
 
                             <!-- Solo Tournament Form -->
                             <div id="solo-tournaments-content">
-                                <h3 style="text-align: center; margin: 20px 0 15px 0; color: #00a8ff;">CREATE SOLO TOURNAMENT</h3>
+                                <h3 style="text-align: center; margin: 20px 0 15px 0; color: #00a8ff;">CREATE SOLO
+                                    TOURNAMENT</h3>
 
                                 <div class="content-card">
                                     <div class="content-body">
@@ -2458,10 +2812,12 @@
                                                     <option value="">-- Select a Template --</option>
                                                 </select>
                                             </div>
-                                            <button class="save-template-btn" onclick="saveTemplate('solo')" style="margin-top:6px;">
+                                            <button class="save-template-btn" onclick="saveTemplate('solo')"
+                                                style="margin-top:6px;">
                                                 <i class="fas fa-save"></i> Save as Template
                                             </button>
-                                            <button onclick="refreshTemplates('solo')" class="btn-outline-sm" style="margin-top:6px;">
+                                            <button onclick="refreshTemplates('solo')" class="btn-outline-sm"
+                                                style="margin-top:6px;">
                                                 <i class="fas fa-sync-alt"></i>
                                             </button>
                                         </div>
@@ -2469,7 +2825,8 @@
                                         <div class="tournament-form-grid">
                                             <div class="form-group">
                                                 <label>TOURNAMENT TITLE</label>
-                                                <input type="text" id="solo-title" placeholder="e.g., Solo Battle Royale Championship" required>
+                                                <input type="text" id="solo-title"
+                                                    placeholder="e.g., Solo Battle Royale Championship" required>
                                             </div>
 
                                             <div class="form-group">
@@ -2482,13 +2839,19 @@
                                                         Click to upload tournament image<br>
                                                         <small>Supported: JPG, PNG, WebP (Max: 5MB)</small>
                                                     </div>
-                                                    <img id="solo-image-preview" class="uploaded-image-preview" alt="Image Preview">
-                                                    <input type="file" id="solo-image-file" class="file-input-hidden" accept="image/*" onchange="handleImageUpload('solo', this.files[0])">
+                                                    <img id="solo-image-preview" class="uploaded-image-preview"
+                                                        alt="Image Preview">
+                                                    <input type="file" id="solo-image-file" class="file-input-hidden"
+                                                        accept="image/*"
+                                                        onchange="handleImageUpload('solo', this.files[0])">
                                                     <div class="upload-progress" id="solo-upload-progress">
-                                                        <div class="upload-progress-bar" id="solo-upload-progress-bar"></div>
+                                                        <div class="upload-progress-bar" id="solo-upload-progress-bar">
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <input type="text" id="solo-image-url" placeholder="Image URL (uploads automatically or paste URL here)" style="margin-top: 10px;">
+                                                <input type="text" id="solo-image-url"
+                                                    placeholder="Image URL (uploads automatically or paste URL here)"
+                                                    style="margin-top: 10px;">
                                             </div>
                                         </div>
 
@@ -2506,7 +2869,9 @@
 
                                         <div class="form-group">
                                             <label>TOURNAMENT DETAILS</label>
-                                            <textarea id="solo-details" rows="3" placeholder="Enter tournament rules, format, and other details." required></textarea>
+                                            <textarea id="solo-details" rows="3"
+                                                placeholder="Enter tournament rules, format, and other details."
+                                                required></textarea>
                                         </div>
 
                                         <div style="height: 1px; background: #333; margin: 20px 0;"></div>
@@ -2514,12 +2879,14 @@
                                         <div class="tournament-form-grid">
                                             <div class="form-group">
                                                 <label>MAX PLAYERS</label>
-                                                <input type="number" id="solo-max-players" placeholder="e.g., 100" min="1" required>
+                                                <input type="number" id="solo-max-players" placeholder="e.g., 100"
+                                                    min="1" required>
                                             </div>
 
                                             <div class="form-group">
                                                 <label>ENTRY FEE (₹)</label>
-                                                <input type="number" id="solo-entry-fee" placeholder="e.g., 50" min="0" required>
+                                                <input type="number" id="solo-entry-fee" placeholder="e.g., 50" min="0"
+                                                    required>
                                             </div>
                                         </div>
 
@@ -2531,14 +2898,16 @@
 
                                             <div class="form-group">
                                                 <label>PRIZES</label>
-                                                <textarea id="solo-prizes" rows="2" placeholder="1st: ₹1000, 2nd: ₹500, 3rd: ₹250" required></textarea>
+                                                <textarea id="solo-prizes" rows="2"
+                                                    placeholder="1st: ₹1000, 2nd: ₹500, 3rd: ₹250" required></textarea>
                                             </div>
                                         </div>
 
                                         <div class="tournament-form-grid">
                                             <div class="form-group">
                                                 <label>TOURNAMENT ID</label>
-                                                <input type="text" id="solo-tournament-id" placeholder="e.g., SOL0123" required>
+                                                <input type="text" id="solo-tournament-id" placeholder="e.g., SOL0123"
+                                                    required>
                                             </div>
 
                                             <div class="form-group">
@@ -2562,7 +2931,8 @@
 
                                         <div class="form-group">
                                             <label>TOURNAMENT PASSWORD</label>
-                                            <input type="text" id="solo-tournament-password" placeholder="Password for tournament" required>
+                                            <input type="text" id="solo-tournament-password"
+                                                placeholder="Password for tournament" required>
                                         </div>
 
                                         <!-- Daily Auto-Repeat Toggle -->
@@ -2576,7 +2946,8 @@
                                             </label>
                                         </div>
 
-                                        <button type="button" onclick="createTournament('solo')" style="width: 100%; margin-top: 20px;">
+                                        <button type="button" onclick="createTournament('solo')"
+                                            style="width: 100%; margin-top: 20px;">
                                             <i class="fas fa-plus-circle"></i> CREATE SOLO TOURNAMENT
                                         </button>
                                     </div>
@@ -2595,7 +2966,8 @@
 
                             <!-- Duo Tournament Form -->
                             <div id="duo-tournaments-content" style="display: none;">
-                                <h3 style="text-align: center; margin: 20px 0 15px 0; color: #00a8ff;">CREATE DUO TOURNAMENT</h3>
+                                <h3 style="text-align: center; margin: 20px 0 15px 0; color: #00a8ff;">CREATE DUO
+                                    TOURNAMENT</h3>
 
                                 <div class="content-card">
                                     <div class="content-body">
@@ -2607,10 +2979,12 @@
                                                     <option value="">-- Select a Template --</option>
                                                 </select>
                                             </div>
-                                            <button class="save-template-btn" onclick="saveTemplate('duo')" style="margin-top:6px;">
+                                            <button class="save-template-btn" onclick="saveTemplate('duo')"
+                                                style="margin-top:6px;">
                                                 <i class="fas fa-save"></i> Save as Template
                                             </button>
-                                            <button onclick="refreshTemplates('duo')" class="btn-outline-sm" style="margin-top:6px;">
+                                            <button onclick="refreshTemplates('duo')" class="btn-outline-sm"
+                                                style="margin-top:6px;">
                                                 <i class="fas fa-sync-alt"></i>
                                             </button>
                                         </div>
@@ -2618,7 +2992,8 @@
                                         <div class="tournament-form-grid">
                                             <div class="form-group">
                                                 <label>TOURNAMENT TITLE</label>
-                                                <input type="text" id="duo-title" placeholder="e.g., Duo Battle Royale Championship" required>
+                                                <input type="text" id="duo-title"
+                                                    placeholder="e.g., Duo Battle Royale Championship" required>
                                             </div>
 
                                             <div class="form-group">
@@ -2631,13 +3006,19 @@
                                                         Click to upload tournament image<br>
                                                         <small>Supported: JPG, PNG, WebP (Max: 5MB)</small>
                                                     </div>
-                                                    <img id="duo-image-preview" class="uploaded-image-preview" alt="Image Preview">
-                                                    <input type="file" id="duo-image-file" class="file-input-hidden" accept="image/*" onchange="handleImageUpload('duo', this.files[0])">
+                                                    <img id="duo-image-preview" class="uploaded-image-preview"
+                                                        alt="Image Preview">
+                                                    <input type="file" id="duo-image-file" class="file-input-hidden"
+                                                        accept="image/*"
+                                                        onchange="handleImageUpload('duo', this.files[0])">
                                                     <div class="upload-progress" id="duo-upload-progress">
-                                                        <div class="upload-progress-bar" id="duo-upload-progress-bar"></div>
+                                                        <div class="upload-progress-bar" id="duo-upload-progress-bar">
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <input type="text" id="duo-image-url" placeholder="Image URL (uploads automatically or paste URL here)" style="margin-top: 10px;">
+                                                <input type="text" id="duo-image-url"
+                                                    placeholder="Image URL (uploads automatically or paste URL here)"
+                                                    style="margin-top: 10px;">
                                             </div>
                                         </div>
 
@@ -2655,7 +3036,9 @@
 
                                         <div class="form-group">
                                             <label>TOURNAMENT DETAILS</label>
-                                            <textarea id="duo-details" rows="3" placeholder="Enter tournament rules, format, and other details." required></textarea>
+                                            <textarea id="duo-details" rows="3"
+                                                placeholder="Enter tournament rules, format, and other details."
+                                                required></textarea>
                                         </div>
 
                                         <div style="height: 1px; background: #333; margin: 20px 0;"></div>
@@ -2663,24 +3046,28 @@
                                         <div class="tournament-form-grid">
                                             <div class="form-group">
                                                 <label>MAX TEAMS</label>
-                                                <input type="number" id="duo-max-teams" placeholder="e.g., 50" min="1" required>
+                                                <input type="number" id="duo-max-teams" placeholder="e.g., 50" min="1"
+                                                    required>
                                             </div>
 
                                             <div class="form-group">
                                                 <label>ENTRY FEE (₹)</label>
-                                                <input type="number" id="duo-entry-fee" placeholder="e.g., 100" min="0" required>
+                                                <input type="number" id="duo-entry-fee" placeholder="e.g., 100" min="0"
+                                                    required>
                                             </div>
                                         </div>
 
                                         <div class="form-group">
                                             <label>PRIZES</label>
-                                            <textarea id="duo-prizes" rows="2" placeholder="1st: ₹1000, 2nd: ₹500, 3rd: ₹250" required></textarea>
+                                            <textarea id="duo-prizes" rows="2"
+                                                placeholder="1st: ₹1000, 2nd: ₹500, 3rd: ₹250" required></textarea>
                                         </div>
 
                                         <div class="tournament-form-grid">
                                             <div class="form-group">
                                                 <label>TOURNAMENT ID</label>
-                                                <input type="text" id="duo-tournament-id" placeholder="e.g., DUO0123" required>
+                                                <input type="text" id="duo-tournament-id" placeholder="e.g., DUO0123"
+                                                    required>
                                             </div>
 
                                             <div class="form-group">
@@ -2704,7 +3091,8 @@
 
                                         <div class="form-group">
                                             <label>TOURNAMENT PASSWORD</label>
-                                            <input type="text" id="duo-tournament-password" placeholder="Password for tournament" required>
+                                            <input type="text" id="duo-tournament-password"
+                                                placeholder="Password for tournament" required>
                                         </div>
 
                                         <!-- Daily Auto-Repeat Toggle -->
@@ -2718,7 +3106,8 @@
                                             </label>
                                         </div>
 
-                                        <button type="button" onclick="createTournament('duo')" style="width: 100%; margin-top: 20px;">
+                                        <button type="button" onclick="createTournament('duo')"
+                                            style="width: 100%; margin-top: 20px;">
                                             <i class="fas fa-plus-circle"></i> CREATE DUO TOURNAMENT
                                         </button>
                                     </div>
@@ -2737,7 +3126,8 @@
 
                             <!-- Squad Tournament Form -->
                             <div id="squad-tournaments-content" style="display: none;">
-                                <h3 style="text-align: center; margin: 20px 0 15px 0; color: #00a8ff;">CREATE SQUAD TOURNAMENT</h3>
+                                <h3 style="text-align: center; margin: 20px 0 15px 0; color: #00a8ff;">CREATE SQUAD
+                                    TOURNAMENT</h3>
 
                                 <div class="content-card">
                                     <div class="content-body">
@@ -2749,10 +3139,12 @@
                                                     <option value="">-- Select a Template --</option>
                                                 </select>
                                             </div>
-                                            <button class="save-template-btn" onclick="saveTemplate('squad')" style="margin-top:6px;">
+                                            <button class="save-template-btn" onclick="saveTemplate('squad')"
+                                                style="margin-top:6px;">
                                                 <i class="fas fa-save"></i> Save as Template
                                             </button>
-                                            <button onclick="refreshTemplates('squad')" class="btn-outline-sm" style="margin-top:6px;">
+                                            <button onclick="refreshTemplates('squad')" class="btn-outline-sm"
+                                                style="margin-top:6px;">
                                                 <i class="fas fa-sync-alt"></i>
                                             </button>
                                         </div>
@@ -2760,7 +3152,8 @@
                                         <div class="tournament-form-grid">
                                             <div class="form-group">
                                                 <label>TOURNAMENT TITLE</label>
-                                                <input type="text" id="squad-title" placeholder="e.g., Squad Battle Royale Championship" required>
+                                                <input type="text" id="squad-title"
+                                                    placeholder="e.g., Squad Battle Royale Championship" required>
                                             </div>
 
                                             <div class="form-group">
@@ -2773,13 +3166,19 @@
                                                         Click to upload tournament image<br>
                                                         <small>Supported: JPG, PNG, WebP (Max: 5MB)</small>
                                                     </div>
-                                                    <img id="squad-image-preview" class="uploaded-image-preview" alt="Image Preview">
-                                                    <input type="file" id="squad-image-file" class="file-input-hidden" accept="image/*" onchange="handleImageUpload('squad', this.files[0])">
+                                                    <img id="squad-image-preview" class="uploaded-image-preview"
+                                                        alt="Image Preview">
+                                                    <input type="file" id="squad-image-file" class="file-input-hidden"
+                                                        accept="image/*"
+                                                        onchange="handleImageUpload('squad', this.files[0])">
                                                     <div class="upload-progress" id="squad-upload-progress">
-                                                        <div class="upload-progress-bar" id="squad-upload-progress-bar"></div>
+                                                        <div class="upload-progress-bar" id="squad-upload-progress-bar">
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <input type="text" id="squad-image-url" placeholder="Image URL (uploads automatically or paste URL here)" style="margin-top: 10px;">
+                                                <input type="text" id="squad-image-url"
+                                                    placeholder="Image URL (uploads automatically or paste URL here)"
+                                                    style="margin-top: 10px;">
                                             </div>
                                         </div>
 
@@ -2797,7 +3196,9 @@
 
                                         <div class="form-group">
                                             <label>TOURNAMENT DETAILS</label>
-                                            <textarea id="squad-details" rows="3" placeholder="Enter tournament rules, format, and other details." required></textarea>
+                                            <textarea id="squad-details" rows="3"
+                                                placeholder="Enter tournament rules, format, and other details."
+                                                required></textarea>
                                         </div>
 
                                         <div style="height: 1px; background: #333; margin: 20px 0;"></div>
@@ -2805,24 +3206,28 @@
                                         <div class="tournament-form-grid">
                                             <div class="form-group">
                                                 <label>MAX SQUADS</label>
-                                                <input type="number" id="squad-max-squads" placeholder="e.g., 25" min="1" required>
+                                                <input type="number" id="squad-max-squads" placeholder="e.g., 25"
+                                                    min="1" required>
                                             </div>
 
                                             <div class="form-group">
                                                 <label>ENTRY FEE (₹)</label>
-                                                <input type="number" id="squad-entry-fee" placeholder="e.g., 200" min="0" required>
+                                                <input type="number" id="squad-entry-fee" placeholder="e.g., 200"
+                                                    min="0" required>
                                             </div>
                                         </div>
 
                                         <div class="form-group">
                                             <label>PRIZES</label>
-                                            <textarea id="squad-prizes" rows="2" placeholder="1st: ₹2000, 2nd: ₹1000, 3rd: ₹500" required></textarea>
+                                            <textarea id="squad-prizes" rows="2"
+                                                placeholder="1st: ₹2000, 2nd: ₹1000, 3rd: ₹500" required></textarea>
                                         </div>
 
                                         <div class="tournament-form-grid">
                                             <div class="form-group">
                                                 <label>TOURNAMENT ID</label>
-                                                <input type="text" id="squad-tournament-id" placeholder="e.g., SQUAD0123" required>
+                                                <input type="text" id="squad-tournament-id"
+                                                    placeholder="e.g., SQUAD0123" required>
                                             </div>
 
                                             <div class="form-group">
@@ -2846,7 +3251,8 @@
 
                                         <div class="form-group">
                                             <label>TOURNAMENT PASSWORD</label>
-                                            <input type="text" id="squad-tournament-password" placeholder="Password for tournament" required>
+                                            <input type="text" id="squad-tournament-password"
+                                                placeholder="Password for tournament" required>
                                         </div>
 
                                         <!-- Daily Auto-Repeat Toggle -->
@@ -2860,7 +3266,8 @@
                                             </label>
                                         </div>
 
-                                        <button type="button" onclick="createTournament('squad')" style="width: 100%; margin-top: 20px;">
+                                        <button type="button" onclick="createTournament('squad')"
+                                            style="width: 100%; margin-top: 20px;">
                                             <i class="fas fa-plus-circle"></i> CREATE SQUAD TOURNAMENT
                                         </button>
                                     </div>
@@ -2903,9 +3310,11 @@
 
                             <!-- Auto-Repeat Tournaments Sub-section -->
                             <!-- Added "Run Auto-Repeat Now" button -->
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                                 <h4 style="color:#00a8ff; margin:0;">Active Auto-Repeat Tournaments</h4>
-                                <button onclick="triggerAutoRepeatManually()" id="trigger-repeat-btn" style="background:linear-gradient(135deg, #1e8b57 0%, #26a269 100%); padding:8px 15px; font-size:13px; border: none; border-radius: 6px; cursor: pointer; color: white; font-weight: 600; box-shadow: 0 4px 15px rgba(38, 162, 105, 0.3);">
+                                <button onclick="triggerAutoRepeatManually()" id="trigger-repeat-btn"
+                                    style="background:linear-gradient(135deg, #1e8b57 0%, #26a269 100%); padding:8px 15px; font-size:13px; border: none; border-radius: 6px; cursor: pointer; color: white; font-weight: 600; box-shadow: 0 4px 15px rgba(38, 162, 105, 0.3);">
                                     <i class="fas fa-bolt"></i> Run Auto-Repeat Now
                                 </button>
                             </div>
@@ -2929,8 +3338,10 @@
                             <h3>Registered Users</h3>
                         </div>
                         <div class="content-body">
-                            <div style="color: #ffc700; background: rgba(255, 199, 0, 0.1); padding: 10px; border-radius: 6px; margin-bottom: 15px;">
-                                <i class="fas fa-exclamation-triangle"></i> View all registered users for tournaments with payment screenshots.
+                            <div
+                                style="color: #ffc700; background: rgba(255, 199, 0, 0.1); padding: 10px; border-radius: 6px; margin-bottom: 15px;">
+                                <i class="fas fa-exclamation-triangle"></i> View all registered users for tournaments
+                                with payment screenshots.
                             </div>
 
                             <div class="form-group">
@@ -2940,7 +3351,8 @@
                                 </select>
                             </div>
 
-                            <button id="download-csv-btn" onclick="downloadTournamentData()" style="display:none; background: #26a269; margin: 15px 0; width:100%; border-radius: 6px; padding: 12px; font-weight: bold; color: white; border: none; cursor: pointer;">
+                            <button id="download-csv-btn" onclick="downloadTournamentData()"
+                                style="display:none; background: #26a269; margin: 15px 0; width:100%; border-radius: 6px; padding: 12px; font-weight: bold; color: white; border: none; cursor: pointer;">
                                 <i class="fas fa-file-excel"></i> DOWNLOAD APPROVED PLAYERS (CSV/EXCEL)
                             </button>
 
@@ -2966,8 +3378,10 @@
                             <h3><i class="fas fa-trophy"></i> Prize Distribution</h3>
                         </div>
                         <div class="content-body">
-                            <div style="color: #00a8ff; background: rgba(0, 168, 255, 0.1); border: 1px solid rgba(0, 168, 255, 0.35); padding: 10px; border-radius: 6px; margin-bottom: 15px;">
-                                <i class="fas fa-info-circle"></i> Step 1: Select tournament. Step 2: Enter kills / team stats. Step 3: Preview and distribute.
+                            <div
+                                style="color: #00a8ff; background: rgba(0, 168, 255, 0.1); border: 1px solid rgba(0, 168, 255, 0.35); padding: 10px; border-radius: 6px; margin-bottom: 15px;">
+                                <i class="fas fa-info-circle"></i> Step 1: Select tournament. Step 2: Enter kills / team
+                                stats. Step 3: Preview and distribute.
                             </div>
 
                             <div class="form-group">
@@ -2976,7 +3390,9 @@
                                     <option value="">-- Select a Tournament --</option>
                                 </select>
                             </div>
-                            <div id="prize-tournament-details" style="display:none; margin-bottom:12px; color:#ccc; background: rgba(0,0,0,0.25); border:1px solid #333; border-radius:8px; padding:10px;"></div>
+                            <div id="prize-tournament-details"
+                                style="display:none; margin-bottom:12px; color:#ccc; background: rgba(0,0,0,0.25); border:1px solid #333; border-radius:8px; padding:10px;">
+                            </div>
 
                             <!-- PER-KILL READONLY (kept) -->
                             <div style="margin-bottom:12px; color:#aaa;">
@@ -2993,7 +3409,8 @@
                             </div>
 
                             <!-- PREVIEW CONTAINER -->
-                            <div id="prize-preview-container" style="display: none; margin-top: 15px; background: rgba(0,0,0,0.25); border: 1px solid #333; border-radius: 8px; padding: 12px;">
+                            <div id="prize-preview-container"
+                                style="display: none; margin-top: 15px; background: rgba(0,0,0,0.25); border: 1px solid #333; border-radius: 8px; padding: 12px;">
                                 <h4 style="margin-top: 0; color: #00a8ff;">Prize Preview</h4>
                                 <div id="prize-preview-list" style="margin-bottom: 10px;"></div>
                                 <div style="display: flex; justify-content: space-between; font-size: 1.05em;">
@@ -3002,15 +3419,19 @@
                                 </div>
                             </div>
 
-                            <button id="preview-prizes-btn" onclick="recalculatePrizePreview()" style="width:100%; margin-top:12px; background: #333;">
+                            <button id="preview-prizes-btn" onclick="recalculatePrizePreview()"
+                                style="width:100%; margin-top:12px; background: #333;">
                                 <i class="fas fa-eye"></i> Preview Prizes
                             </button>
 
-                            <button id="distribute-prizes-btn" onclick="distributePrizes()" style="width: 100%; margin-top: 15px; background: linear-gradient(135deg, #00a8ff 0%, #0088cc 100%); display: none;">
+                            <button id="distribute-prizes-btn" onclick="distributePrizes()"
+                                style="width: 100%; margin-top: 15px; background: linear-gradient(135deg, #00a8ff 0%, #0088cc 100%); display: none;">
                                 <i class="fas fa-coins"></i> Distribute Now
                             </button>
 
-                            <div id="distribution-result-container" style="display:none; margin-top:15px; background: rgba(38,162,105,0.1); border:1px solid #26a269; border-radius:8px; padding:12px;"></div>
+                            <div id="distribution-result-container"
+                                style="display:none; margin-top:15px; background: rgba(38,162,105,0.1); border:1px solid #26a269; border-radius:8px; padding:12px;">
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -3021,8 +3442,10 @@
                             <h3>Match Results</h3>
                         </div>
                         <div class="content-body">
-                            <div style="color: #00a8ff; background: rgba(0, 168, 255, 0.1); border: 1px solid rgba(0, 168, 255, 0.35); padding: 10px; border-radius: 6px; margin-bottom: 15px;">
-                                <i class="fas fa-info-circle"></i> Quick entry for kills and positions, then calculate and distribute prizes.
+                            <div
+                                style="color: #00a8ff; background: rgba(0, 168, 255, 0.1); border: 1px solid rgba(0, 168, 255, 0.35); padding: 10px; border-radius: 6px; margin-bottom: 15px;">
+                                <i class="fas fa-info-circle"></i> Quick entry for kills and positions, then calculate
+                                and distribute prizes.
                             </div>
                             <div class="form-group">
                                 <label>Select Tournament</label>
@@ -3037,7 +3460,8 @@
                                     <p>Please select a tournament to continue.</p>
                                 </div>
                             </div>
-                            <button onclick="recalculatePrizePreview()" style="width:100%; margin-top:12px; background:#333;">
+                            <button onclick="recalculatePrizePreview()"
+                                style="width:100%; margin-top:12px; background:#333;">
                                 <i class="fas fa-calculator"></i> Calculate & Preview
                             </button>
                             <button onclick="distributePrizes()" style="width:100%; margin-top:12px;">
@@ -3053,14 +3477,18 @@
                             <h3><i class="fas fa-money-bill-wave"></i> Withdrawal Requests</h3>
                         </div>
                         <div class="content-body">
-                            <div style="color: #ffc700; background: rgba(255,199,0,0.1); padding: 10px; border-radius: 6px; margin-bottom: 15px;">
-                                <i class="fas fa-info-circle"></i> Pay the user via GPay/PhonePe then click "Mark as Paid"
+                            <div
+                                style="color: #ffc700; background: rgba(255,199,0,0.1); padding: 10px; border-radius: 6px; margin-bottom: 15px;">
+                                <i class="fas fa-info-circle"></i> Pay the user via GPay/PhonePe then click "Mark as
+                                Paid"
                             </div>
 
                             <div style="display:flex; gap:10px; margin-bottom:15px;">
-                                <button onclick="filterWithdrawals('all')" id="filter-all" style="background:#333;">All</button>
+                                <button onclick="filterWithdrawals('all')" id="filter-all"
+                                    style="background:#333;">All</button>
                                 <button onclick="filterWithdrawals('pending')" id="filter-pending">Pending</button>
-                                <button onclick="filterWithdrawals('paid')" id="filter-paid" style="background:#26a269;">Paid</button>
+                                <button onclick="filterWithdrawals('paid')" id="filter-paid"
+                                    style="background:#26a269;">Paid</button>
                             </div>
 
                             <div id="withdrawals-container">
@@ -3084,7 +3512,8 @@
                 <span class="close-button" onclick="closeModal('rejection-modal')">&times;</span>
                 <h3 style="font-size: 1.2em;">Reject Application</h3>
                 <div class="form-group">
-                    <textarea id="rejection-reason" rows="4" placeholder="Enter reason for rejection..." style="width: 100%;"></textarea>
+                    <textarea id="rejection-reason" rows="4" placeholder="Enter reason for rejection..."
+                        style="width: 100%;"></textarea>
                 </div>
                 <div style="display: flex; gap: 10px;">
                     <button class="back-button" onclick="closeModal('rejection-modal')">
@@ -3118,11 +3547,13 @@
                 <div class="credentials-display" id="credentials-display">
                     <div class="credentials-item">
                         <div class="credentials-label">Edit Tournament ID:</div>
-                        <input type="text" id="edit-modal-id" style="background:#222; border:1px solid #00a8ff; color:white; width:100%; padding: 8px;">
+                        <input type="text" id="edit-modal-id"
+                            style="background:#222; border:1px solid #00a8ff; color:white; width:100%; padding: 8px;">
                     </div>
                     <div class="credentials-item">
                         <div class="credentials-label">Edit Password:</div>
-                        <input type="text" id="edit-modal-pass" style="background:#222; border:1px solid #00a8ff; color:white; width:100%; padding: 8px;">
+                        <input type="text" id="edit-modal-pass"
+                            style="background:#222; border:1px solid #00a8ff; color:white; width:100%; padding: 8px;">
                     </div>
                     <div class="credentials-label">Status:</div>
                     <div style="color: #fff; font-weight: bold;" id="credentials-status">Loading...</div>
@@ -3584,12 +4015,12 @@
             errorDiv.style.display = 'none';
             viewer.style.display = 'flex';
 
-            image.onload = function() {
+            image.onload = function () {
                 image.style.display = 'block';
                 errorDiv.style.display = 'none';
             };
 
-            image.onerror = function() {
+            image.onerror = function () {
                 image.style.display = 'none';
                 errorDiv.style.display = 'block';
                 showToast("Failed to load image", 'error');
@@ -3599,7 +4030,7 @@
 
             document.addEventListener('keydown', handleFullscreenKeyPress);
 
-            viewer.addEventListener('click', function(e) {
+            viewer.addEventListener('click', function (e) {
                 if (e.target === viewer || e.target.classList.contains('screenshot-container')) {
                     closeFullscreenScreenshot();
                 }
@@ -3657,6 +4088,34 @@
             }
         }
 
+        async function optimizeImageToCompactDataUri(file, maxDimension = 640, quality = 0.76) {
+            let bitmap;
+            try {
+                if (typeof createImageBitmap === 'function') {
+                    bitmap = await createImageBitmap(file);
+                    const scale = Math.min(1, maxDimension / Math.max(bitmap.width, bitmap.height));
+                    const canvas = document.createElement('canvas');
+                    canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+                    canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+                    const ctx = canvas.getContext('2d');
+                    if (ctx) {
+                        ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+                        return canvas.toDataURL('image/webp', quality);
+                    }
+                }
+            } catch (e) {
+                console.warn('Compact data URI optimization fallback:', e);
+            } finally {
+                if (bitmap && typeof bitmap.close === 'function') bitmap.close();
+            }
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
         async function handleImageUpload(category, file) {
             if (!file) return;
 
@@ -3681,18 +4140,27 @@
                 showToast(`Uploading ${file.name}...`, 'info');
                 const uploadFile = await optimizeTournamentImage(file);
 
-                const formData = new FormData();
-                formData.append("image", uploadFile);
-                const result = await staffApiRequest('/api/staff/image-upload', {
-                    method: 'POST',
-                    body: formData
-                });
+                let imageUrl = '';
+                try {
+                    const result = await staffApiRequest('/api/staff/image-upload', {
+                        method: 'POST',
+                        headers: { 'Content-Type': uploadFile.type || 'image/webp' },
+                        body: uploadFile
+                    });
+                    if (result.success && result.data?.url && !String(result.data.url).includes('ibb.co')) {
+                        imageUrl = result.data.url;
+                    }
+                } catch (backendErr) {
+                    console.warn('Backend image upload fallback triggered:', backendErr.message);
+                }
+
+                if (!imageUrl) {
+                    imageUrl = await optimizeImageToCompactDataUri(uploadFile, 640, 0.76);
+                }
 
                 progressBarFill.style.width = '100%';
 
-                if (result.success && result.data?.url) {
-                    const imageUrl = result.data.url;
-
+                if (imageUrl) {
                     document.getElementById(`${category}-image-url`).value = imageUrl;
 
                     const preview = document.getElementById(`${category}-image-preview`);
@@ -4265,17 +4733,26 @@
                 const uploadFile = await optimizeTournamentImage(file);
                 if (progressBar) progressBar.style.width = '65%';
 
-                const result = await staffApiRequest('/api/staff/image-upload', {
-                    method: 'POST',
-                    headers: { 'Content-Type': uploadFile.type || 'image/webp' },
-                    body: uploadFile
-                });
-
-                if (!result.success || !result.data?.url) {
-                    throw new Error('Invalid upload response');
+                let imageUrl = '';
+                try {
+                    const result = await staffApiRequest('/api/staff/image-upload', {
+                        method: 'POST',
+                        headers: { 'Content-Type': uploadFile.type || 'image/webp' },
+                        body: uploadFile
+                    });
+                    if (result.success && result.data?.url && !String(result.data.url).includes('ibb.co')) {
+                        imageUrl = result.data.url;
+                    }
+                } catch (backendErr) {
+                    console.warn('Backend image upload fallback triggered:', backendErr.message);
                 }
 
-                const imageUrl = result.data.url;
+                // Fallback: if backend upload returned ImgBB or failed, convert optimized WebP to inline Data URI so it NEVER shows "imgbb.com service unavailable"
+                if (!imageUrl) {
+                    const compactFile = await optimizeImageToCompactDataUri(uploadFile, 640, 0.76);
+                    imageUrl = compactFile;
+                }
+
                 if (progressBar) progressBar.style.width = '100%';
                 if (urlInput) urlInput.value = imageUrl;
                 if (preview) {
@@ -4547,7 +5024,7 @@
             try {
                 localStorage.removeItem('techno_ecosystem_cache_v2');
                 localStorage.removeItem('techno_ecosystem_cache_v3');
-            } catch (e) {}
+            } catch (e) { }
         }
 
         async function toggleEsportsGameStatus(gameId, currentState) {
@@ -4571,7 +5048,7 @@
                 // Also delete any modes linked to this deleted game so they don't stay orphaned
                 const linkedModes = esportsModes.filter(m => m.gameId === gameId);
                 for (const m of linkedModes) {
-                    await db.collection("esports_modes").doc(m.id).delete().catch(() => {});
+                    await db.collection("esports_modes").doc(m.id).delete().catch(() => { });
                 }
                 clearUserPanelEcosystemCache();
                 showToast('Game and linked modes deleted.', 'success');
@@ -4989,24 +5466,24 @@
                             <div style="color:#666;
                             font-size:0.8em;">
                               ${req.createdAt ?
-                                new Date(req.createdAt)
-                                    .toLocaleString() : 'N/A'}
+                        new Date(req.createdAt)
+                            .toLocaleString() : 'N/A'}
                             </div>
                         </div>
                         <div>
                             <span style="background:
                             ${req.status === 'paid' ?
-                                'rgba(38,162,105,0.2)' :
-                                'rgba(255,199,0,0.2)'};
+                        'rgba(38,162,105,0.2)' :
+                        'rgba(255,199,0,0.2)'};
                             color:
                             ${req.status === 'paid' ?
-                                '#26a269' : '#ffc700'};
+                        '#26a269' : '#ffc700'};
                             padding:4px 10px;
                             border-radius:12px;
                             font-size:0.8em;
                             font-weight:700;">
                                 ${req.status === 'paid'
-                                ? 'PAID' : 'PENDING'}
+                        ? 'PAID' : 'PENDING'}
                             </span>
                         </div>
                     </div>
@@ -5056,8 +5533,8 @@
 
         async function markWithdrawalPaid(requestId) {
             if (!confirm(
-                    'Did you send the payment via GPay/PhonePe?'
-                    + ' Click OK only after paying!')) return;
+                'Did you send the payment via GPay/PhonePe?'
+                + ' Click OK only after paying!')) return;
 
             try {
                 const data = await staffApiRequest('/api/wallet/withdraw/mark-paid', {
@@ -6047,7 +6524,7 @@
                         // Fallback: send using tag-based targeting (for users who might not have playerId stored)
                         const targetTag = "tour_" + currentTournamentId;
                         const roomId = document.getElementById('edit-modal-id').value.trim() || tournament.tournamentId ||
-                        '';
+                            '';
                         const roomPass = document.getElementById('edit-modal-pass').value.trim() || tournament
                             .tournamentPassword || '';
                         const fallbackMsg =
@@ -6451,7 +6928,7 @@
                             reg.playerDetails.forEach((p, pIdx) => {
                                 soloPlayers.push({
                                     userId: reg.userId || '',
-                                    name: p?.inGameName || p?.name || reg.name || `Player ${idx+1}`,
+                                    name: p?.inGameName || p?.name || reg.name || `Player ${idx + 1}`,
                                     uid: p?.uid || p?.freeFireId || 'N/A',
                                     kills: 0,
                                     extraPrize: 0,
@@ -6463,7 +6940,7 @@
                         } else {
                             soloPlayers.push({
                                 userId: reg.userId || '',
-                                name: reg.name || `Player ${idx+1}`,
+                                name: reg.name || `Player ${idx + 1}`,
                                 uid: reg.userId || 'N/A',
                                 kills: 0,
                                 extraPrize: 0,
@@ -7141,7 +7618,7 @@
             document.getElementById('confirmation-message').innerHTML = message;
 
             const confirmBtn = document.getElementById('confirm-action-btn');
-            confirmBtn.onclick = function() {
+            confirmBtn.onclick = function () {
                 closeModal('confirmation-modal');
                 confirmCallback();
             };
@@ -7305,4 +7782,5 @@
         console.log("  - [FIXED] parseInt() replaced with `parseInt(...) || 0` in createTournament to prevent Firestore NaN errors");
     </script>
 </body>
+
 </html>
