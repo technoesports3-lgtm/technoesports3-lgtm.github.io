@@ -5577,6 +5577,17 @@
                         </div>
                         <div id="user-esports-games-container"></div>
 
+                        <!-- Starting Soon Tournaments (Sorted by Shortest Remaining Time) -->
+                        <div id="home-starting-soon-wrapper" style="display:none; margin-top: 8px; margin-bottom: 14px;">
+                            <div class="home-section-header">
+                                <div class="home-section-title">
+                                    <i class="fas fa-bolt" style="color:#F59E0B;"></i> Starting Soon Tournaments
+                                </div>
+                                <div class="home-section-sub" id="home-starting-soon-count-label"></div>
+                            </div>
+                            <div id="user-starting-soon-container"></div>
+                        </div>
+
                         <!-- My Upcoming Matches Widget -->
                         <div class="home-section-header" style="margin-top: 8px;">
                             <div class="home-section-title">
@@ -7614,43 +7625,61 @@
         function formatTime(h, m, s) { return `${String(h).padStart(2,'0')}hr ${String(m).padStart(2,'0')}min ${String(s).padStart(2,'0')}s`; }
 
         function updateTournamentTimer(tournamentId, tournamentDateTime) {
-            const el = document.getElementById(`tournament-timer-${tournamentId}`);
-            const badgeEl = document.getElementById(`pro-countdown-${tournamentId}`);
+            const els = document.querySelectorAll(`[data-tournament-timer="${tournamentId}"], #tournament-timer-${tournamentId}`);
+            const badgeEls = document.querySelectorAll(`[data-pro-countdown="${tournamentId}"], #pro-countdown-${tournamentId}`);
             const t = calculateTimeRemaining(tournamentDateTime);
             if (t.expired) {
-                if (el) {
+                els.forEach(el => {
                     el.innerHTML =
-                        `<div class="tournament-timer-label">Tournament Started</div><div class="tournament-timer-display">00hr 00min 00s</div>`;
+                        `<div class="tournament-timer-label"><span class="pulse-dot red"></span> Tournament Started</div><div class="tournament-timer-display">LIVE NOW</div>`;
                     el.classList.add('tournament-timer-expired');
-                }
-                if (badgeEl) {
+                });
+                badgeEls.forEach(badgeEl => {
                     badgeEl.className = 'pro-countdown-badge live';
                     badgeEl.innerHTML = '<span class="pulse-dot red"></span> LIVE NOW';
-                }
+                });
                 if (tournamentTimers.has(tournamentId)) {
                     clearInterval(tournamentTimers.get(tournamentId));
                     tournamentTimers.delete(tournamentId);
                 }
             } else {
-                if (el) {
+                els.forEach(el => {
                     el.innerHTML =
-                        `<div class="tournament-timer-label">Starts in:</div><div class="tournament-timer-display">${formatTime(t.hours,t.minutes,t.seconds)}</div>`;
+                        `<div class="tournament-timer-label"><i class="far fa-clock"></i> Starts in:</div><div class="tournament-timer-display">${formatTime(t.hours,t.minutes,t.seconds)}</div>`;
                     el.classList.remove('tournament-timer-expired');
-                }
-                if (badgeEl) {
+                });
+                badgeEls.forEach(badgeEl => {
                     const shortCountdown = t.hours > 0
-                        ? `Starts in ${t.hours}h ${t.minutes}m`
+                        ? `Starts in ${t.hours}h ${t.minutes}m ${t.seconds}s`
                         : `Starts in ${t.minutes}m ${t.seconds}s`;
                     badgeEl.innerHTML = `<i class="far fa-clock"></i> ${shortCountdown}`;
-                }
+                });
             }
         }
 
+        function getTournamentStartDateTime(t) {
+            if (!t || !t.conductingDate) return null;
+            const parts = String(t.conductingDate).split('-');
+            let d;
+            if (parts.length === 3) {
+                d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]), 0, 0, 0, 0);
+            } else {
+                d = new Date(t.conductingDate);
+            }
+            if (isNaN(d.getTime())) return null;
+            if (t.conductingTime) {
+                const timeParts = String(t.conductingTime).split(':');
+                d.setHours(parseInt(timeParts[0]) || 0, parseInt(timeParts[1]) || 0, 0, 0);
+            } else {
+                d.setHours(23, 59, 59, 0);
+            }
+            return d;
+        }
+
         function startTournamentStartTimer(tournament) {
-            if (!tournament.conductingDate || !tournament.conductingTime) return;
-            const d = new Date(tournament.conductingDate),
-                [h, m] = tournament.conductingTime.split(':');
-            d.setHours(parseInt(h), parseInt(m), 0, 0);
+            if (!tournament || !tournament.conductingDate || !tournament.conductingTime) return;
+            const d = getTournamentStartDateTime(tournament);
+            if (!d) return;
             const id = tournament.id;
             if (tournamentTimers.has(id)) clearInterval(tournamentTimers.get(id));
             updateTournamentTimer(id, d);
@@ -7991,13 +8020,66 @@
             return esportsModes.filter(m => m.isActive !== false && (!game || !m.gameId || m.gameId === game.id));
         }
 
+        // ─── SMART IMAGE SANITIZER & ANTI-IMGBB PLACEHOLDER ENGINE ───
+        function resolveSafeImageUrl(url, fallbackUrl) {
+            if (!url || typeof url !== 'string' || !url.trim()) return fallbackUrl;
+            const trimmed = url.trim();
+            if (/imgbb\.com|via\.placeholder\.com/i.test(trimmed)) return fallbackUrl;
+            return trimmed;
+        }
+
+        function guardImageAgainstUnavailablePlaceholder(imgEl, fallbackUrl) {
+            if (!imgEl || !fallbackUrl) return;
+            imgEl.onerror = function() {
+                imgEl.onerror = null;
+                imgEl.src = fallbackUrl;
+                imgEl.classList.add('loaded');
+            };
+            // Also detect if ImgBB served its 180x180 or small "imgbb.com service unavailable" 200 OK placeholder banner
+            imgEl.addEventListener('load', function onImgLoad() {
+                imgEl.classList.add('loaded');
+                const src = String(imgEl.currentSrc || imgEl.src || '');
+                if (src.includes('ibb.co')) {
+                    const nw = imgEl.naturalWidth || 0;
+                    const nh = imgEl.naturalHeight || 0;
+                    // ImgBB's "service unavailable" placeholder image is a square 180x180 or 200x200 blue graphic
+                    if ((nw > 0 && nw <= 220 && nh > 0 && nh <= 220 && nw === nh)) {
+                        imgEl.removeEventListener('load', onImgLoad);
+                        imgEl.src = fallbackUrl;
+                    }
+                }
+            });
+        }
+
         function setTournamentImageFallback(image, category = 'solo') {
+            if (!image) return;
             image.onerror = null;
             image.classList.add('loaded');
             const cat = String(category || 'solo').toLowerCase();
             if (cat === 'squad') image.src = ESPORTS_ARTWORK.matchSquad;
             else if (cat === 'duo') image.src = ESPORTS_ARTWORK.matchDuo;
             else image.src = ESPORTS_ARTWORK.matchSolo;
+        }
+
+        // Helper: Sort tournaments so the soonest starting tournament appears first!
+        function sortTournamentsByTimeRemaining(tournamentsList) {
+            const nowMs = Date.now();
+            return [...tournamentsList].sort((a, b) => {
+                const dateA = getTournamentStartDateTime(a);
+                const dateB = getTournamentStartDateTime(b);
+                const timeA = dateA ? dateA.getTime() : Number.MAX_SAFE_INTEGER;
+                const timeB = dateB ? dateB.getTime() : Number.MAX_SAFE_INTEGER;
+                const diffA = timeA - nowMs;
+                const diffB = timeB - nowMs;
+
+                // Both in the future (upcoming): smaller positive diff (soonest to start) comes FIRST!
+                if (diffA > 0 && diffB > 0) return diffA - diffB;
+                // Future upcoming matches come before past/unscheduled ones when sorting upcoming
+                if (diffA > 0 && diffB <= 0) return -1;
+                if (diffB > 0 && diffA <= 0) return 1;
+                // If both are live/past, most recently started comes first
+                return timeB - timeA;
+            });
         }
 
         // ─── CUSTOM INLINE VECTOR ESPORTS ILLUSTRATIONS & 3D COIN ICON ───
@@ -8306,15 +8388,18 @@
             container.innerHTML = `
                 <div class="promo-slider-wrap" id="promo-slider-touch-area">
                     <div class="promo-slider-track" id="promo-slider-track" style="transform: translateX(-${currentPromoSlideIndex * 100}%);">
-                        ${activeBanners.map(b => `
+                        ${activeBanners.map(b => {
+                            const safeBannerImg = resolveSafeImageUrl(b.imageUrl, ESPORTS_ARTWORK.promoDefault);
+                            return `
                             <div class="promo-slide" onclick="${b.actionUrl ? `window.open('${b.actionUrl.replace(/'/g, "\\'")}', '_blank')` : firstGameId ? `openGameModesView('${firstGameId}')` : ''}">
-                                <img src="${b.imageUrl}" alt="${(b.title || 'Promo Banner').replace(/"/g, '&quot;')}" class="progressive-img loaded" onerror="setTournamentImageFallback(this)">
+                                <img src="${safeBannerImg}" alt="${(b.title || 'Promo Banner').replace(/"/g, '&quot;')}" class="progressive-img loaded" onload="guardImageAgainstUnavailablePlaceholder(this, 'promoDefault')" onerror="setTournamentImageFallback(this)">
                                 <div class="promo-slide-overlay">
                                     ${b.subtitle ? `<span class="promo-slide-subtitle"><span class="pulse-dot green"></span> ${b.subtitle}</span>` : ''}
                                     ${b.title ? `<div class="promo-slide-title" style="font-family:var(--font-heading);font-size:1.22rem;letter-spacing:0.5px;">${b.title}</div>` : ''}
                                 </div>
                             </div>
-                        `).join('')}
+                        `;
+                        }).join('')}
                     </div>
                     ${activeBanners.length > 1 ? `
                         <div class="promo-dots">
@@ -8399,11 +8484,12 @@
                         const openMatchesCount = gameTournaments.filter(t => getTournamentTemporalStatus(t) === 'upcoming' && (t.participants || 0) < (t.maxParticipants || 999)).length;
                         const liveMatchesCount = gameTournaments.filter(t => getTournamentTemporalStatus(t) === 'live').length;
                         const fallbackArt = idx % 2 === 0 ? ESPORTS_ARTWORK.gameFreeFireMax : ESPORTS_ARTWORK.gameClashSquad;
+                        const safeGameImg = resolveSafeImageUrl(game.imageUrl, fallbackArt);
 
                         return `
                             <div class="hero-game-card pressable" onclick="openGameModesView('${game.id}')">
                                 <div class="hero-game-thumb-wrap">
-                                    <img src="${game.imageUrl || fallbackArt}" alt="${(game.name || 'Game').replace(/"/g, '&quot;')}" class="progressive-img loaded" onerror="this.onerror=null;this.src='${fallbackArt}'">
+                                    <img src="${safeGameImg}" data-fallback-src="${fallbackArt}" alt="${(game.name || 'Game').replace(/"/g, '&quot;')}" class="progressive-img loaded" onerror="this.onerror=null;this.src='${fallbackArt}'">
                                     <div class="hero-game-badges-top">
                                         <span class="glass-badge open-green">
                                             <span class="pulse-dot green"></span> ${openMatchesCount} open
@@ -8433,6 +8519,39 @@
                     }).join('')}
                 </div>
             `;
+            container.querySelectorAll('img[data-fallback-src]').forEach(img => {
+                guardImageAgainstUnavailablePlaceholder(img, img.getAttribute('data-fallback-src'));
+            });
+        }
+
+        function renderStartingSoonTournaments() {
+            const wrapper = document.getElementById('home-starting-soon-wrapper');
+            const container = document.getElementById('user-starting-soon-container');
+            const countLabel = document.getElementById('home-starting-soon-count-label');
+            if (!wrapper || !container) return;
+
+            const upcomingOrLive = currentTournaments.filter(t => {
+                if (t.isActive === false) return false;
+                const st = getTournamentTemporalStatus(t);
+                return st === 'upcoming' || st === 'live';
+            });
+
+            // Sort so the tournament with the shortest remaining time before start comes FIRST!
+            const sorted = sortTournamentsByTimeRemaining(upcomingOrLive);
+
+            if (!sorted.length) {
+                wrapper.style.display = 'none';
+                container.innerHTML = '';
+                return;
+            }
+
+            wrapper.style.display = 'block';
+            if (countLabel) {
+                countLabel.textContent = `${sorted.length} ${sorted.length === 1 ? 'Match' : 'Matches'} • Shortest Time First`;
+            }
+
+            container.innerHTML = '';
+            sorted.forEach(t => container.appendChild(createProTournamentCard(t)));
         }
 
         function renderMyUpcomingMatches() {
@@ -8446,11 +8565,13 @@
                     .map(r => r.tournamentId)
             );
 
-            const myUpcoming = currentTournaments.filter(t => {
-                if (!joinedTournamentIds.has(t.id)) return false;
-                const st = getTournamentTemporalStatus(t);
-                return st === 'upcoming' || st === 'live';
-            });
+            const myUpcoming = sortTournamentsByTimeRemaining(
+                currentTournaments.filter(t => {
+                    if (!joinedTournamentIds.has(t.id)) return false;
+                    const st = getTournamentTemporalStatus(t);
+                    return st === 'upcoming' || st === 'live';
+                })
+            );
 
             if (countLabel) {
                 countLabel.textContent = myUpcoming.length ? `${myUpcoming.length} Joined` : '0 Joined';
@@ -8474,15 +8595,17 @@
                 }
                 const tDate = t.conductingDate ? new Date(t.conductingDate).toLocaleDateString() : 'TBA';
                 const hasCreds = Boolean(t.tournamentId && t.tournamentPassword);
+                const safeThumb = resolveSafeImageUrl(t.imageUrl, ESPORTS_ARTWORK.modeAll);
 
                 return `
                     <div class="my-upcoming-card pressable" onclick="showTournamentDetails('${t.id}')">
-                        <img src="${t.imageUrl || ESPORTS_ARTWORK.modeAll}" alt="${(t.title || 'Match').replace(/"/g, '&quot;')}" class="my-upcoming-thumb" onerror="setTournamentImageFallback(this, '${t.category || 'solo'}')">
+                        <img src="${safeThumb}" data-fallback-src="${ESPORTS_ARTWORK.modeAll}" alt="${(t.title || 'Match').replace(/"/g, '&quot;')}" class="my-upcoming-thumb" onerror="setTournamentImageFallback(this, '${t.category || 'solo'}')">
                         <div style="flex:1;min-width:0;">
                             <div style="font-family:var(--font-heading);font-size:1rem;font-weight:800;color:#0F172A;">${t.title}</div>
-                            <div style="font-size:0.75rem;color:#64748B;display:flex;gap:8px;align-items:center;margin-top:2px;">
+                            <div style="font-size:0.75rem;color:#64748B;display:flex;gap:8px;align-items:center;margin-top:2px;flex-wrap:wrap;">
                                 <span><i class="far fa-calendar-alt"></i> ${tDate} • ${tTime}</span>
                                 <span style="text-transform:uppercase;color:#0D5C9E;font-weight:800;">${t.category || 'SOLO'}</span>
+                                <span class="pro-countdown-badge" data-pro-countdown="${t.id}" style="padding:2px 8px;font-size:0.64rem;"><i class="far fa-clock"></i> Starting soon</span>
                             </div>
                         </div>
                         <button type="button" class="pro-btn-join pressable" style="padding:8px 12px;font-size:0.72rem;" onclick="event.stopPropagation(); ${hasCreds ? `showTournamentCredentials('${t.id}')` : `showTournamentDetails('${t.id}')`}">
@@ -8491,12 +8614,22 @@
                     </div>
                 `;
             }).join('');
+
+            container.querySelectorAll('img[data-fallback-src]').forEach(img => {
+                guardImageAgainstUnavailablePlaceholder(img, img.getAttribute('data-fallback-src'));
+            });
+            myUpcoming.forEach(t => {
+                if (t.conductingDate && t.conductingTime) {
+                    setTimeout(() => startTournamentStartTimer(t), 40);
+                }
+            });
         }
 
         function renderHomeDashboard() {
             renderLiveNoticeBar();
             renderPromoSlider();
             renderEsportsGamesGrid();
+            renderStartingSoonTournaments();
             renderMyUpcomingMatches();
         }
 
@@ -8539,11 +8672,12 @@
                 const modeMatches = currentTournaments.filter(t => t.isActive !== false && doesTournamentBelongToMode(t, mode));
                 const upcomingCount = modeMatches.filter(t => getTournamentTemporalStatus(t) === 'upcoming').length;
                 const openCount = modeMatches.filter(t => getTournamentTemporalStatus(t) === 'upcoming' && (t.participants || 0) < (t.maxParticipants || 999)).length;
-                const thumbSrc = mode.thumbnailUrl || mode.imageUrl || fallbackThumbs[idx % fallbackThumbs.length];
+                const fallbackThumb = fallbackThumbs[idx % fallbackThumbs.length];
+                const thumbSrc = resolveSafeImageUrl(mode.thumbnailUrl || mode.imageUrl, fallbackThumb);
 
                 return `
                     <div class="mode-classification-card pressable" onclick="openModeTournamentsView('${mode.id}')">
-                        <img src="${thumbSrc}" alt="${(mode.name || 'Mode').replace(/"/g, '&quot;')}" class="mode-card-thumb progressive-img loaded" onerror="this.onerror=null;this.src='${fallbackThumbs[idx % fallbackThumbs.length]}'">
+                        <img src="${thumbSrc}" data-fallback-src="${fallbackThumb}" alt="${(mode.name || 'Mode').replace(/"/g, '&quot;')}" class="mode-card-thumb progressive-img loaded" onerror="this.onerror=null;this.src='${fallbackThumb}'">
                         <div class="mode-card-info">
                             <div class="mode-card-name">${mode.name}</div>
                             <div class="mode-card-sub">
@@ -8557,6 +8691,10 @@
                     </div>
                 `;
             }).join('');
+
+            container.querySelectorAll('img[data-fallback-src]').forEach(img => {
+                guardImageAgainstUnavailablePlaceholder(img, img.getAttribute('data-fallback-src'));
+            });
         }
 
         // ─── VIEW C RENDERER: MODE-SPECIFIC TOURNAMENT FEED & MODERNIZED CARD ───
@@ -8582,14 +8720,16 @@
             const targetStatus = homeDrillState.statusTab || 'upcoming';
             const targetFormat = homeDrillState.formatFilter || 'all';
 
-            const filtered = currentTournaments.filter(t => {
-                if (mode && !doesTournamentBelongToMode(t, mode)) return false;
-                const temporalStatus = getTournamentTemporalStatus(t);
-                if (temporalStatus !== targetStatus) return false;
-                if (targetFormat !== 'all' && normalizeTournamentCategory(t.category) !== targetFormat) return false;
-                if (temporalStatus !== 'results' && t.isActive === false) return false;
-                return true;
-            });
+            const filtered = sortTournamentsByTimeRemaining(
+                currentTournaments.filter(t => {
+                    if (mode && !doesTournamentBelongToMode(t, mode)) return false;
+                    const temporalStatus = getTournamentTemporalStatus(t);
+                    if (temporalStatus !== targetStatus) return false;
+                    if (targetFormat !== 'all' && normalizeTournamentCategory(t.category) !== targetFormat) return false;
+                    if (temporalStatus !== 'results' && t.isActive === false) return false;
+                    return true;
+                })
+            );
 
             container.innerHTML = '';
             if (!filtered.length) {
@@ -8688,9 +8828,34 @@
             if (temporalStatus === 'results') {
                 countdownBadgeHTML = `<span class="pro-countdown-badge"><i class="fas fa-flag-checkered"></i> COMPLETED</span>`;
             } else if (temporalStatus === 'live') {
-                countdownBadgeHTML = `<span class="pro-countdown-badge live" id="pro-countdown-${tournament.id}"><span class="pulse-dot red"></span> LIVE NOW</span>`;
+                countdownBadgeHTML = `<span class="pro-countdown-badge live" id="pro-countdown-${tournament.id}" data-pro-countdown="${tournament.id}"><span class="pulse-dot red"></span> LIVE NOW</span>`;
             } else {
-                countdownBadgeHTML = `<span class="pro-countdown-badge" id="pro-countdown-${tournament.id}"><i class="far fa-clock"></i> Upcoming</span>`;
+                countdownBadgeHTML = `<span class="pro-countdown-badge" id="pro-countdown-${tournament.id}" data-pro-countdown="${tournament.id}"><i class="far fa-clock"></i> Upcoming</span>`;
+            }
+
+            // Live Countdown Timer Box
+            let liveTimerBoxHTML = '';
+            if (tournament.conductingDate && tournament.conductingTime && temporalStatus !== 'results') {
+                const startDt = getTournamentStartDateTime(tournament);
+                let initialTimerText = '<i class="fas fa-hourglass-start"></i> Starts in: --hr --min --s';
+                let timerStartedClass = '';
+                if (startDt) {
+                    const diffMs = startDt.getTime() - Date.now();
+                    if (diffMs > 0) {
+                        const hrs = Math.floor(diffMs / (1000 * 60 * 60));
+                        const mins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                        const secs = Math.floor((diffMs % (1000 * 60)) / 1000);
+                        initialTimerText = `<i class="fas fa-hourglass-start"></i> Starts in: ${String(hrs).padStart(2, '0')}hr ${String(mins).padStart(2, '0')}min ${String(secs).padStart(2, '0')}s`;
+                    } else {
+                        initialTimerText = '<i class="fas fa-play-circle"></i> Tournament Started!';
+                        timerStartedClass = 'started';
+                    }
+                }
+                liveTimerBoxHTML = `
+                    <div class="tournament-timer ${timerStartedClass}" id="tournament-timer-${tournament.id}" data-tournament-timer="${tournament.id}" style="margin: 0 12px 10px 12px;">
+                        ${initialTimerText}
+                    </div>
+                `;
             }
 
             // Join / Action Button HTML
@@ -8733,9 +8898,11 @@
                 `;
             }
 
+            const safeTournamentImg = resolveSafeImageUrl(tournament.imageUrl, getTournamentArtworkByCategory(tournament.category));
+
             card.innerHTML = `
                 <div class="pro-match-header">
-                    <img src="${tournament.imageUrl || ''}" alt="${(tournament.title || 'Tournament').replace(/"/g, '&quot;')}" class="progressive-img" loading="lazy" decoding="async" onload="this.classList.add('loaded')">
+                    <img src="${safeTournamentImg}" alt="${(tournament.title || 'Tournament').replace(/"/g, '&quot;')}" class="progressive-img" loading="lazy" decoding="async" onload="guardImageAgainstUnavailablePlaceholder(this, '${(tournament.category || 'default').replace(/'/g, '')}'); this.classList.add('loaded')">
                     <div class="pro-match-header-overlay">
                         <div class="pro-match-top-row">
                             <div class="pro-match-badges-left">
@@ -8776,6 +8943,8 @@
                     <span class="pro-meta-pill"><i class="fas fa-eye" style="color:#0D5C9E;"></i> ${perspective}</span>
                 </div>
 
+                ${liveTimerBoxHTML}
+
                 <!-- Footer Action Bar: Live progress bar + DETAILS, PLAYERS, JOIN -->
                 <div class="pro-match-footer">
                     <div class="pro-slots-progress-wrap">
@@ -8805,7 +8974,7 @@
                 if (!tournament.imageUrl) setTournamentImageFallback(bannerImage, tournament.category);
             }
 
-            if (tournament.conductingDate && tournament.conductingTime && !tournamentStarted) {
+            if (tournament.conductingDate && tournament.conductingTime && temporalStatus !== 'results') {
                 setTimeout(() => startTournamentStartTimer(tournament), 60);
             }
 
@@ -8891,9 +9060,10 @@
                 }
             }
 
+            const safeDetailsImg = resolveSafeImageUrl(t.imageUrl, getTournamentArtworkByCategory(t.category));
             document.getElementById('details-page-body').innerHTML = `
                         <div style="text-align:center;margin-bottom:16px;">
-                            <img src="${t.imageUrl || 'https://via.placeholder.com/400x200?text=Tournament+Banner'}" alt="${t.title}" style="width:100%;border-radius:var(--radius-sm);max-height:220px;object-fit:cover;">
+                            <img src="${safeDetailsImg}" alt="${(t.title || 'Tournament').replace(/"/g, '&quot;')}" onload="guardImageAgainstUnavailablePlaceholder(this, '${(t.category || 'default').replace(/'/g, '')}')" onerror="setTournamentImageFallback(this, '${(t.category || 'default').replace(/'/g, '')}')" style="width:100%;border-radius:var(--radius-sm);max-height:220px;object-fit:cover;">
                         </div>
                         ${startTimerHTML}
                         <div class="content-block">
