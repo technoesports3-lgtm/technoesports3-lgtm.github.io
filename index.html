@@ -8017,38 +8017,69 @@
         }
 
         function getActiveModesListForGame(game) {
-            return esportsModes.filter(m => m.isActive !== false && (!game || !m.gameId || m.gameId === game.id));
+            const activeModes = esportsModes.filter(m => m.isActive !== false);
+            if (!game) return activeModes;
+            const gName = String(game.name || '').trim().toLowerCase();
+            const direct = activeModes.filter(m => {
+                if (!m.gameId && !m.gameName) return true;
+                if (m.gameId && m.gameId === game.id) return true;
+                if (m.gameName && gName && String(m.gameName).trim().toLowerCase() === gName) return true;
+                return false;
+            });
+            return direct.length > 0 ? direct : activeModes;
         }
 
         // ─── SMART IMAGE SANITIZER & ANTI-IMGBB PLACEHOLDER ENGINE ───
+        function getTournamentArtworkByCategory(categoryOrKey = 'solo') {
+            const val = String(categoryOrKey || 'solo').trim();
+            if (val.startsWith('data:') || val.startsWith('http') || val.startsWith('blob:')) {
+                return val;
+            }
+            const key = val.toLowerCase();
+            if (key === 'squad') return ESPORTS_ARTWORK.matchSquad;
+            if (key === 'duo') return ESPORTS_ARTWORK.matchDuo;
+            if (key === 'promodefault' || key === 'promo' || key === 'banner') return ESPORTS_ARTWORK.bannerChampionship;
+            if (key === 'game') return ESPORTS_ARTWORK.gameFreeFireMax;
+            if (key === 'mode') return ESPORTS_ARTWORK.modeAll;
+            return ESPORTS_ARTWORK.matchSolo;
+        }
+
         function resolveSafeImageUrl(url, fallbackUrl) {
-            if (!url || typeof url !== 'string' || !url.trim()) return fallbackUrl;
+            const resolvedFallback = getTournamentArtworkByCategory(fallbackUrl);
+            if (!url || typeof url !== 'string' || !url.trim()) return resolvedFallback;
             const trimmed = url.trim();
-            if (/imgbb\.com|via\.placeholder\.com/i.test(trimmed)) return fallbackUrl;
+            if (/imgbb\.com|via\.placeholder\.com/i.test(trimmed)) return resolvedFallback;
             return trimmed;
         }
 
         function guardImageAgainstUnavailablePlaceholder(imgEl, fallbackUrl) {
-            if (!imgEl || !fallbackUrl) return;
+            if (!imgEl) return;
+            const resolvedFallback = getTournamentArtworkByCategory(fallbackUrl);
             imgEl.onerror = function() {
                 imgEl.onerror = null;
-                imgEl.src = fallbackUrl;
+                imgEl.src = resolvedFallback;
                 imgEl.classList.add('loaded');
             };
-            // Also detect if ImgBB served its 180x180 or small "imgbb.com service unavailable" 200 OK placeholder banner
-            imgEl.addEventListener('load', function onImgLoad() {
+            const checkPlaceholder = function() {
                 imgEl.classList.add('loaded');
                 const src = String(imgEl.currentSrc || imgEl.src || '');
                 if (src.includes('ibb.co')) {
                     const nw = imgEl.naturalWidth || 0;
                     const nh = imgEl.naturalHeight || 0;
                     // ImgBB's "service unavailable" placeholder image is a square 180x180 or 200x200 blue graphic
-                    if ((nw > 0 && nw <= 220 && nh > 0 && nh <= 220 && nw === nh)) {
-                        imgEl.removeEventListener('load', onImgLoad);
-                        imgEl.src = fallbackUrl;
+                    if (nw > 0 && nw <= 220 && nh > 0 && nh <= 220 && nw === nh) {
+                        imgEl.src = resolvedFallback;
                     }
                 }
-            });
+            };
+            if (imgEl.complete && imgEl.naturalWidth > 0) {
+                checkPlaceholder();
+            } else {
+                imgEl.addEventListener('load', function onImgLoad() {
+                    imgEl.removeEventListener('load', onImgLoad);
+                    checkPlaceholder();
+                });
+            }
         }
 
         function setTournamentImageFallback(image, category = 'solo') {
@@ -8161,41 +8192,63 @@
         // ─── TOURNAMENT STATUS & SMART CLASSIFICATION HELPERS ───
         function getTournamentTemporalStatus(t) {
             if (!t) return 'upcoming';
-            const rawStatus = String(t.status || '').toLowerCase();
+            const rawStatus = String(t.status || '').trim().toLowerCase();
             if (rawStatus === 'completed') return 'results';
             if (rawStatus === 'ongoing' || rawStatus === 'live') return 'live';
-            if (t.conductingDate && t.conductingTime) {
-                const d = new Date(t.conductingDate);
-                const parts = String(t.conductingTime).split(':');
-                if (parts.length >= 2) {
-                    d.setHours(parseInt(parts[0]) || 0, parseInt(parts[1]) || 0, 0, 0);
-                    const now = new Date();
-                    if (d <= now) {
-                        return 'live';
-                    }
-                }
+            const startDt = getTournamentStartDateTime(t);
+            if (startDt && startDt <= new Date()) {
+                return 'live';
             }
             return 'upcoming';
         }
 
         function doesTournamentBelongToGame(t, game) {
             if (!t || !game) return false;
-            if (t.gameId && t.gameId === game.id) return true;
-            if (t.gameName && game.name && t.gameName.toLowerCase() === game.name.toLowerCase()) return true;
-            if (!t.gameId && !t.gameName) {
-                const activeGames = getActiveGamesList();
-                if (activeGames.length > 0 && activeGames[0].id === game.id) return true;
+            if (game.matchAll) return true;
+            const tGameId = String(t.gameId || '').trim();
+            const tGameName = String(t.gameName || '').trim().toLowerCase();
+            const gName = String(game.name || '').trim().toLowerCase();
+
+            if (tGameId && tGameId === game.id) return true;
+            if (tGameName && gName && tGameName === gName) return true;
+
+            // If tournament has no gameId/gameName OR its gameId/gameName doesn't match any active game, attach to first active game so it's never orphaned
+            const activeGames = getActiveGamesList();
+            if (activeGames.length === 1 && activeGames[0].id === game.id) return true;
+            const matchesAnyActiveGame = activeGames.some(g =>
+                (tGameId && g.id === tGameId) ||
+                (tGameName && String(g.name || '').trim().toLowerCase() === tGameName)
+            );
+            if (!matchesAnyActiveGame && activeGames.length > 0 && activeGames[0].id === game.id) {
+                return true;
             }
             return false;
         }
 
         function doesTournamentBelongToMode(t, mode) {
             if (!t || !mode) return false;
-            if (t.modeId && t.modeId === mode.id) return true;
-            if (t.modeName && mode.name && t.modeName.toLowerCase() === mode.name.toLowerCase()) return true;
-            if (!t.modeId && !t.modeName) {
-                const gameModes = esportsModes.filter(m => m.isActive !== false && (!mode.gameId || m.gameId === mode.gameId));
-                if (gameModes.length > 0 && gameModes[0].id === mode.id) return true;
+            if (mode.matchAll) return true;
+            const tModeId = String(t.modeId || '').trim();
+            const tModeName = String(t.modeName || '').trim().toLowerCase();
+            const tMapName = String(t.mapName || '').trim().toLowerCase();
+            const mName = String(mode.name || '').trim().toLowerCase();
+            const mDefaultMap = String(mode.defaultMap || '').trim().toLowerCase();
+
+            if (tModeId && tModeId === mode.id) return true;
+            if (tModeName && mName && tModeName === mName) return true;
+            if (!tModeId && !tModeName && tMapName && (tMapName === mName || (mDefaultMap && tMapName === mDefaultMap))) {
+                return true;
+            }
+
+            // If tournament's modeId/modeName doesn't match ANY active mode in this game, route it to the first active mode so Staff-created matches are never hidden
+            const gameModes = esportsModes.filter(m => m.isActive !== false && (!mode.gameId || !m.gameId || m.gameId === mode.gameId));
+            if (gameModes.length === 1 && gameModes[0].id === mode.id) return true;
+            const matchesAnyMode = gameModes.some(m =>
+                (tModeId && m.id === tModeId) ||
+                (tModeName && String(m.name || '').trim().toLowerCase() === tModeName)
+            );
+            if (!matchesAnyMode && gameModes.length > 0 && gameModes[0].id === mode.id) {
+                return true;
             }
             return false;
         }
@@ -8480,8 +8533,8 @@
                 <div class="esports-games-grid">
                     ${activeGames.map((game, idx) => {
                         const gameModes = getActiveModesListForGame(game);
-                        const gameTournaments = currentTournaments.filter(t => t.isActive !== false && doesTournamentBelongToGame(t, game));
-                        const openMatchesCount = gameTournaments.filter(t => getTournamentTemporalStatus(t) === 'upcoming' && (t.participants || 0) < (t.maxParticipants || 999)).length;
+                        const gameTournaments = currentTournaments.filter(t => t.isActive !== false && String(t.status || '').trim().toLowerCase() !== 'inactive' && doesTournamentBelongToGame(t, game));
+                        const openMatchesCount = gameTournaments.filter(t => String(t.status || '').trim().toLowerCase() !== 'completed' && (t.participants || 0) < (t.maxParticipants || 999)).length;
                         const liveMatchesCount = gameTournaments.filter(t => getTournamentTemporalStatus(t) === 'live').length;
                         const fallbackArt = idx % 2 === 0 ? ESPORTS_ARTWORK.gameFreeFireMax : ESPORTS_ARTWORK.gameClashSquad;
                         const safeGameImg = resolveSafeImageUrl(game.imageUrl, fallbackArt);
@@ -8669,9 +8722,9 @@
             ];
 
             container.innerHTML = modesForGame.map((mode, idx) => {
-                const modeMatches = currentTournaments.filter(t => t.isActive !== false && doesTournamentBelongToMode(t, mode));
-                const upcomingCount = modeMatches.filter(t => getTournamentTemporalStatus(t) === 'upcoming').length;
-                const openCount = modeMatches.filter(t => getTournamentTemporalStatus(t) === 'upcoming' && (t.participants || 0) < (t.maxParticipants || 999)).length;
+                const modeMatches = currentTournaments.filter(t => t.isActive !== false && String(t.status || '').trim().toLowerCase() !== 'inactive' && doesTournamentBelongToMode(t, mode));
+                const upcomingCount = modeMatches.filter(t => String(t.status || '').trim().toLowerCase() !== 'completed').length;
+                const openCount = modeMatches.filter(t => String(t.status || '').trim().toLowerCase() !== 'completed' && (t.participants || 0) < (t.maxParticipants || 999)).length;
                 const fallbackThumb = fallbackThumbs[idx % fallbackThumbs.length];
                 const thumbSrc = resolveSafeImageUrl(mode.thumbnailUrl || mode.imageUrl, fallbackThumb);
 
@@ -8724,10 +8777,13 @@
                 currentTournaments.filter(t => {
                     if (mode && !doesTournamentBelongToMode(t, mode)) return false;
                     const temporalStatus = getTournamentTemporalStatus(t);
-                    if (temporalStatus !== targetStatus) return false;
+                    const rawStatus = String(t.status || '').trim().toLowerCase();
+                    if (rawStatus === 'inactive' || (temporalStatus !== 'results' && t.isActive === false)) return false;
                     if (targetFormat !== 'all' && normalizeTournamentCategory(t.category) !== targetFormat) return false;
-                    if (temporalStatus !== 'results' && t.isActive === false) return false;
-                    return true;
+                    if (targetStatus === 'upcoming') {
+                        return temporalStatus === 'upcoming' || (temporalStatus === 'live' && (rawStatus === 'upcoming' || rawStatus === 'active' || !rawStatus));
+                    }
+                    return temporalStatus === targetStatus;
                 })
             );
 
