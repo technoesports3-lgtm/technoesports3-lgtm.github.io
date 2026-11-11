@@ -5577,17 +5577,6 @@
                         </div>
                         <div id="user-esports-games-container"></div>
 
-                        <!-- Starting Soon Tournaments (Sorted by Shortest Remaining Time) -->
-                        <div id="home-starting-soon-wrapper" style="display:none; margin-top: 8px; margin-bottom: 14px;">
-                            <div class="home-section-header">
-                                <div class="home-section-title">
-                                    <i class="fas fa-bolt" style="color:#F59E0B;"></i> Starting Soon Tournaments
-                                </div>
-                                <div class="home-section-sub" id="home-starting-soon-count-label"></div>
-                            </div>
-                            <div id="user-starting-soon-container"></div>
-                        </div>
-
                         <!-- My Upcoming Matches Widget -->
                         <div class="home-section-header" style="margin-top: 8px;">
                             <div class="home-section-title">
@@ -8577,36 +8566,6 @@
             });
         }
 
-        function renderStartingSoonTournaments() {
-            const wrapper = document.getElementById('home-starting-soon-wrapper');
-            const container = document.getElementById('user-starting-soon-container');
-            const countLabel = document.getElementById('home-starting-soon-count-label');
-            if (!wrapper || !container) return;
-
-            const upcomingOrLive = currentTournaments.filter(t => {
-                if (t.isActive === false) return false;
-                const st = getTournamentTemporalStatus(t);
-                return st === 'upcoming' || st === 'live';
-            });
-
-            // Sort so the tournament with the shortest remaining time before start comes FIRST!
-            const sorted = sortTournamentsByTimeRemaining(upcomingOrLive);
-
-            if (!sorted.length) {
-                wrapper.style.display = 'none';
-                container.innerHTML = '';
-                return;
-            }
-
-            wrapper.style.display = 'block';
-            if (countLabel) {
-                countLabel.textContent = `${sorted.length} ${sorted.length === 1 ? 'Match' : 'Matches'} • Shortest Time First`;
-            }
-
-            container.innerHTML = '';
-            sorted.forEach(t => container.appendChild(createProTournamentCard(t)));
-        }
-
         function renderMyUpcomingMatches() {
             const container = document.getElementById('user-my-upcoming-container');
             const countLabel = document.getElementById('my-upcoming-count-label');
@@ -8682,7 +8641,6 @@
             renderLiveNoticeBar();
             renderPromoSlider();
             renderEsportsGamesGrid();
-            renderStartingSoonTournaments();
             renderMyUpcomingMatches();
         }
 
