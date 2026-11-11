@@ -7068,7 +7068,7 @@
         function getCurrentUserId() { return auth.currentUser ? auth.currentUser.uid : null; }
 
         function updateWalletUI() {
-            const bal = Math.floor(Number(walletBalance || 0));
+            const bal = Math.max(0, Math.floor(Number(walletBalance || 0)));
             ['wallet-balance-display'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.textContent = bal;
@@ -7078,29 +7078,100 @@
             const headerEl = document.getElementById('header-wallet-balance');
             if (headerEl) headerEl.textContent = bal;
 
-            const wb = Math.floor(Number(withdrawableBalance || 0));
+            const wb = Math.max(0, Math.floor(Number(withdrawableBalance || 0)));
             const wbDisplay = document.getElementById('withdrawable-balance-display');
             if (wbDisplay) wbDisplay.textContent = wb;
             const wbInfo = document.getElementById('withdrawable-info-amount');
             if (wbInfo) wbInfo.textContent = wb;
         }
 
+        // Auto-heal any negative Play Balance (e.g. -244 caused by old withdrawal logic subtracting from both balances)
+        async function ensureAndHealSeparateWalletBalances(uid, userData) {
+            if (!uid) return { playBalance: 0, withdrawable: 0 };
+            let rawPlay = Number(userData?.walletBalance ?? walletBalance ?? 0);
+            let rawWithdrawable = Number(userData?.withdrawableBalance ?? withdrawableBalance ?? 0);
+            let needsFirestoreFix = false;
+
+            if (!Number.isFinite(rawPlay)) {
+                rawPlay = 0;
+                needsFirestoreFix = true;
+            }
+            if (!Number.isFinite(rawWithdrawable) || rawWithdrawable < 0) {
+                rawWithdrawable = Math.max(0, Number.isFinite(rawWithdrawable) ? rawWithdrawable : 0);
+                needsFirestoreFix = true;
+            }
+
+            if (rawPlay < 0) {
+                needsFirestoreFix = true;
+                try {
+                    const txSnap = await db.collection("wallet_transactions")
+                        .where("userId", "==", uid)
+                        .get();
+                    let wronglySubtractedWithdrawals = 0;
+                    txSnap.forEach(doc => {
+                        const tx = doc.data() || {};
+                        const isDebit = String(tx.type || '').toLowerCase() === 'debit';
+                        const desc = String(tx.description || '').toLowerCase();
+                        if (isDebit && desc.startsWith('withdrawal') && tx.walletBucket !== 'withdrawable_only') {
+                            wronglySubtractedWithdrawals += Number(tx.amount || 0);
+                        }
+                    });
+                    rawPlay = Math.max(0, rawPlay + wronglySubtractedWithdrawals);
+                } catch (err) {
+                    rawPlay = 0;
+                }
+            }
+
+            if (needsFirestoreFix) {
+                try {
+                    await db.collection("users").doc(uid).update({
+                        walletBalance: rawPlay,
+                        withdrawableBalance: rawWithdrawable
+                    });
+                } catch (err) {
+                    console.warn('Wallet balance heal update warning:', err);
+                }
+            }
+
+            return {
+                playBalance: Math.max(0, rawPlay),
+                withdrawable: Math.max(0, rawWithdrawable)
+            };
+        }
+
         async function fetchWalletBalance() {
             const uid = getCurrentUserId();
             if (!uid) return;
             try {
-                const r = await fetch(`${BACKEND_BASE_URL}/api/wallet/balance/${uid}`);
-                const d = await r.json();
-                if (!r.ok) throw new Error(d.message || 'Failed');
-                walletBalance = Number(d.balance || 0);
                 const userDoc = await db.collection("users").doc(uid).get();
+                let firestoreData = {};
                 if (userDoc.exists) {
-                    const data = userDoc.data() || {};
-                    withdrawableBalance = Number(data.withdrawableBalance || 0);
-                    // also capture FF details for display
-                    currentUserData.freeFireName = data.freeFireName || '';
-                    currentUserData.freeFireUID = data.freeFireUID || '';
+                    firestoreData = userDoc.data() || {};
+                    currentUserData.freeFireName = firestoreData.freeFireName || '';
+                    currentUserData.freeFireUID = firestoreData.freeFireUID || '';
                 }
+
+                const healed = await ensureAndHealSeparateWalletBalances(uid, firestoreData);
+                walletBalance = healed.playBalance;
+                withdrawableBalance = healed.withdrawable;
+
+                try {
+                    const r = await fetch(`${BACKEND_BASE_URL}/api/wallet/balance/${uid}`);
+                    if (r.ok) {
+                        const d = await r.json();
+                        const apiPlay = Number(d.balance ?? d.walletBalance ?? walletBalance);
+                        const apiWin = Number(d.withdrawableBalance ?? withdrawableBalance);
+                        if (Number.isFinite(apiPlay) && apiPlay >= 0) {
+                            walletBalance = apiPlay;
+                        }
+                        if (Number.isFinite(apiWin) && apiWin >= 0) {
+                            withdrawableBalance = apiWin;
+                        }
+                    }
+                } catch (apiErr) {
+                    console.warn('Backend wallet balance fetch fallback to Firestore:', apiErr);
+                }
+
                 updateWalletUI();
                 updateProfileFFDetails();
             } catch (e) { console.error('Wallet balance error:', e);
@@ -7194,7 +7265,9 @@
                 if (earnEl) earnEl.textContent = String(data.referralEarnings || (data.referralCount || 0) * 10 || 0);
                 const profCode = document.getElementById('profile-referral-code');
                 if (profCode) profCode.textContent = code || '-';
-                withdrawableBalance = Number(data.withdrawableBalance || 0);
+                const healed = await ensureAndHealSeparateWalletBalances(uid, data);
+                walletBalance = healed.playBalance;
+                withdrawableBalance = healed.withdrawable;
                 updateWalletUI();
                 updateProfileFFDetails();
             } catch (e) {
@@ -7312,7 +7385,9 @@
                 document.getElementById('profile-tournaments-count').textContent = String(data.tournamentsParticipated ||
                     0);
                 document.getElementById('profile-referral-code').textContent = data.referralCode || '-';
-                withdrawableBalance = Number(data.withdrawableBalance || 0);
+                const healed = await ensureAndHealSeparateWalletBalances(uid, data);
+                walletBalance = healed.playBalance;
+                withdrawableBalance = healed.withdrawable;
                 updateWalletUI();
                 updateProfileFFDetails();
                 checkAdStatus();
@@ -7538,7 +7613,7 @@
             document.getElementById('qr-full-page').style.display = 'none';
         }
 
-        // ─── WITHDRAW ───
+        // ─── WITHDRAW (STRICTLY FROM WITHDRAWABLE WINNINGS ONLY — NEVER DEDUCTS PLAY BALANCE) ───
         async function requestWithdrawal() {
             const uid = getCurrentUserId();
             const amount = Number(document.getElementById('withdraw-amount').value);
@@ -7555,8 +7630,11 @@
 
             try {
                 await fetchWalletBalance();
-                if (withdrawableBalance < amount) {
-                    showToast(`Insufficient withdrawable balance. Available: ${withdrawableBalance}`, 'error');
+                const playBalanceBeforeWithdraw = Math.max(0, Number(walletBalance || 0));
+                const withdrawableBeforeWithdraw = Math.max(0, Number(withdrawableBalance || 0));
+
+                if (withdrawableBeforeWithdraw < amount) {
+                    showToast(`Insufficient withdrawable winnings. Available: ${withdrawableBeforeWithdraw} Coins`, 'error');
                     return;
                 }
 
@@ -7574,6 +7652,29 @@
                 });
                 const d = await r.json();
                 if (!r.ok) throw new Error(d.message || 'Withdrawal failed');
+
+                // Enforce strict separation in Firestore: withdrawing winnings must ONLY reduce withdrawableBalance, NEVER walletBalance (Play Balance)!
+                const expectedWithdrawableAfter = Math.max(0, withdrawableBeforeWithdraw - amount);
+                try {
+                    const postSnap = await db.collection("users").doc(uid).get();
+                    if (postSnap.exists) {
+                        const postData = postSnap.data() || {};
+                        const postPlay = Number(postData.walletBalance ?? playBalanceBeforeWithdraw);
+                        const postWin = Number(postData.withdrawableBalance ?? expectedWithdrawableAfter);
+                        if (postPlay < playBalanceBeforeWithdraw || postWin < 0) {
+                            await db.collection("users").doc(uid).update({
+                                walletBalance: playBalanceBeforeWithdraw,
+                                withdrawableBalance: expectedWithdrawableAfter
+                            });
+                        }
+                    }
+                } catch (guardErr) {
+                    console.warn('Post-withdrawal separation guard warning:', guardErr);
+                }
+
+                walletBalance = playBalanceBeforeWithdraw;
+                withdrawableBalance = expectedWithdrawableAfter;
+                updateWalletUI();
 
                 showWithdrawSuccessPopup();
 
@@ -9639,16 +9740,47 @@
             }
         }
 
-        // ─── PAY TOURNAMENT ENTRY ───
+        // ─── PAY TOURNAMENT ENTRY (STRICTLY FROM PLAY BALANCE ONLY — NEVER TOUCHES WITHDRAWABLE WINNINGS) ───
         async function payTournamentEntry(tournamentId, amount) {
             const uid = getCurrentUserId();
+            const entryFee = Math.max(0, Number(amount || 0));
+            await fetchWalletBalance();
+            const playBalBefore = Math.max(0, Number(walletBalance || 0));
+            const winBalBefore = Math.max(0, Number(withdrawableBalance || 0));
+
+            if (playBalBefore < entryFee) {
+                throw new Error(`Insufficient Play Balance! Available: ${playBalBefore} Coins, Required: ${entryFee} Coins.`);
+            }
+
             const r = await fetch(`${BACKEND_BASE_URL}/api/payment/pay-tournament`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId: uid, tournamentId, amount })
+                body: JSON.stringify({ userId: uid, tournamentId, amount: entryFee })
             });
             const d = await r.json();
             if (!r.ok) throw new Error(d.message || 'Tournament payment failed.');
+
+            const expectedPlayAfter = Math.max(0, playBalBefore - entryFee);
+            try {
+                const postSnap = await db.collection("users").doc(uid).get();
+                if (postSnap.exists) {
+                    const postData = postSnap.data() || {};
+                    const postPlay = Number(postData.walletBalance ?? expectedPlayAfter);
+                    const postWin = Number(postData.withdrawableBalance ?? winBalBefore);
+                    if (postPlay < 0 || postWin !== winBalBefore) {
+                        await db.collection("users").doc(uid).update({
+                            walletBalance: Math.max(0, postPlay),
+                            withdrawableBalance: winBalBefore
+                        });
+                    }
+                }
+            } catch (guardErr) {
+                console.warn('Post-entry-fee separation guard warning:', guardErr);
+            }
+
+            walletBalance = expectedPlayAfter;
+            withdrawableBalance = winBalBefore;
+            updateWalletUI();
             return d;
         }
         // ─── SHOW TOURNAMENT CREDENTIALS (WITH COPY FEATURE) ───
