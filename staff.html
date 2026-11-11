@@ -6674,17 +6674,29 @@
                             <i class="fas fa-ban"></i> Block
                            </button>`;
 
+                const safePlayBal = Math.max(0, Number(user.walletBalance || 0));
+                const safeWinBal = Math.max(0, Number(user.withdrawableBalance || 0));
+                if (Number(user.walletBalance || 0) < 0 || Number(user.withdrawableBalance || 0) < 0) {
+                    db.collection("users").doc(user.id).update({
+                        walletBalance: safePlayBal,
+                        withdrawableBalance: safeWinBal
+                    }).catch(() => {});
+                }
+
                 row.innerHTML = `
                         <td>${user.username || 'N/A'}</td>
                         <td>${user.phone || 'N/A'}</td>
                         <td>${user.email}</td>
                         <td>${user.tournamentsParticipated || 0}</td>
-                        <td>₹${Number(user.walletBalance || 0).toFixed(2)}</td>
+                        <td>
+                            <div style="font-weight:700; color:#fff;">Play: ₹${safePlayBal.toFixed(2)}</div>
+                            <div style="font-size:0.8em; color:#26a269; font-weight:600;">Win: ₹${safeWinBal.toFixed(2)}</div>
+                        </td>
                         <td>${statusBadge}</td>
                         <td>
                             ${blockButton}
                             <button onclick="addWalletCredit('${user.id}')" style="background:#26a269; padding:6px 12px; font-size:0.8em; margin-left:6px;">
-                                <i class="fas fa-plus-circle"></i> Add ₹
+                                <i class="fas fa-plus-circle"></i> Add Play ₹
                             </button>
                         </td>
                     `;
@@ -6696,7 +6708,7 @@
                 showToast("You don't have permission to manage users.", 'error');
                 return;
             }
-            const amountInput = prompt("Enter amount to add to wallet (₹):");
+            const amountInput = prompt("Enter amount to add to Play Wallet (₹ for tournament registration):");
             if (amountInput === null) return;
             const amount = Number(amountInput);
             if (!Number.isFinite(amount) || amount <= 0) {
@@ -6706,11 +6718,14 @@
 
             try {
                 const userRef = db.collection("users").doc(userId);
+                const userSnap = await userRef.get();
+                const currentPlay = Math.max(0, Number(userSnap.exists ? (userSnap.data()?.walletBalance || 0) : 0));
+                const newPlay = currentPlay + amount;
                 await userRef.update({
-                    walletBalance: FieldValue.increment(amount),
+                    walletBalance: newPlay,
                     updatedAt: FieldValue.serverTimestamp()
                 });
-                showToast(`₹${amount.toFixed(2)} added to wallet.`, 'success');
+                showToast(`₹${amount.toFixed(2)} added to Play Wallet.`, 'success');
                 logStaffAction('manual_wallet_credit', `Added ₹${amount.toFixed(2)} to user ${userId}`, amount);
                 await updateStaffPerformance(0, 1, 0);
             } catch (error) {
@@ -7329,6 +7344,21 @@
                             }
                         }
 
+                        // Snapshot each winner's pre-distribution Play Balance and Winning Balance so Play Balance is NEVER inflated by tournament winnings
+                        const preWinnerBalances = new Map();
+                        await Promise.all(winners.map(async (w) => {
+                            try {
+                                const uDoc = await db.collection("users").doc(w.userId).get();
+                                if (uDoc.exists) {
+                                    const uData = uDoc.data() || {};
+                                    preWinnerBalances.set(w.userId, {
+                                        playBalance: Math.max(0, Number(uData.walletBalance || 0)),
+                                        withdrawableBalance: Math.max(0, Number(uData.withdrawableBalance || 0))
+                                    });
+                                }
+                            } catch (e) {}
+                        }));
+
                         // Prepare payload for backend
                         const payload = {
                             tournamentId: selectedPrizeTournament.id,
@@ -7345,6 +7375,29 @@
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify(payload)
                         });
+
+                        // Enforce strict separation in Firestore: tournament winnings must ONLY go into withdrawableBalance, NEVER into walletBalance (Play Balance)!
+                        await Promise.all(winners.map(async (w) => {
+                            const pre = preWinnerBalances.get(w.userId);
+                            if (!pre) return;
+                            const expectedWithdrawable = pre.withdrawableBalance + Number(w.amount || 0);
+                            try {
+                                const postDoc = await db.collection("users").doc(w.userId).get();
+                                if (postDoc.exists) {
+                                    const postData = postDoc.data() || {};
+                                    const postPlay = Number(postData.walletBalance ?? pre.playBalance);
+                                    const postWin = Number(postData.withdrawableBalance ?? expectedWithdrawable);
+                                    if (postPlay !== pre.playBalance || postWin !== expectedWithdrawable) {
+                                        await db.collection("users").doc(w.userId).update({
+                                            walletBalance: pre.playBalance,
+                                            withdrawableBalance: expectedWithdrawable
+                                        });
+                                    }
+                                }
+                            } catch (e) {
+                                console.warn('Post-prize separation guard warning:', e);
+                            }
+                        }));
 
                         // Mark tournament as completed
                         await db.collection("tournaments").doc(selectedPrizeTournament.id).update({
