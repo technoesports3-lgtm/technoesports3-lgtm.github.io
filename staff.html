@@ -7377,18 +7377,24 @@
                         });
 
                         // Enforce strict separation in Firestore: tournament winnings must ONLY go into withdrawableBalance, NEVER into walletBalance (Play Balance)!
-                        await Promise.all(winners.map(async (w) => {
-                            const pre = preWinnerBalances.get(w.userId);
+                        // Aggregate total prize per userId (e.g., when a Duo Team Leader booked both Slot 1 & Slot 2 of a winning team)
+                        const totalWonByUser = new Map();
+                        winners.forEach(w => {
+                            if (!w.userId) return;
+                            totalWonByUser.set(w.userId, (totalWonByUser.get(w.userId) || 0) + Number(w.amount || 0));
+                        });
+                        await Promise.all(Array.from(totalWonByUser.entries()).map(async ([winnerUserId, totalWonAmt]) => {
+                            const pre = preWinnerBalances.get(winnerUserId);
                             if (!pre) return;
-                            const expectedWithdrawable = pre.withdrawableBalance + Number(w.amount || 0);
+                            const expectedWithdrawable = pre.withdrawableBalance + totalWonAmt;
                             try {
-                                const postDoc = await db.collection("users").doc(w.userId).get();
+                                const postDoc = await db.collection("users").doc(winnerUserId).get();
                                 if (postDoc.exists) {
                                     const postData = postDoc.data() || {};
                                     const postPlay = Number(postData.walletBalance ?? pre.playBalance);
                                     const postWin = Number(postData.withdrawableBalance ?? expectedWithdrawable);
                                     if (postPlay !== pre.playBalance || postWin !== expectedWithdrawable) {
-                                        await db.collection("users").doc(w.userId).update({
+                                        await db.collection("users").doc(winnerUserId).update({
                                             walletBalance: pre.playBalance,
                                             withdrawableBalance: expectedWithdrawable
                                         });
