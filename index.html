@@ -1815,9 +1815,10 @@
         }
 
         .registration-form {
-            max-height: 70vh;
+            max-height: 66vh;
             overflow-y: auto;
-            padding-right: 6px;
+            padding-right: 4px;
+            padding-bottom: 12px;
         }
 
         .registration-form::-webkit-scrollbar {
@@ -1915,6 +1916,259 @@
             transform: scale(1.04);
         }
 
+        /* ─── PRO DUO TEAM SLOT BOOKING UI ─── */
+        .duo-stats-strip {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin: 4px 0 12px;
+        }
+
+        .duo-stat-chip {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 8px 6px;
+            text-align: center;
+        }
+
+        .duo-stat-chip .chip-val {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: #0f172a;
+            line-height: 1.1;
+        }
+
+        .duo-stat-chip.available .chip-val {
+            color: #0D5C9E;
+        }
+
+        .duo-stat-chip.booked .chip-val {
+            color: #dc2626;
+        }
+
+        .duo-stat-chip.fee .chip-val {
+            color: #16a34a;
+        }
+
+        .duo-stat-chip .chip-lbl {
+            font-size: 0.62rem;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-top: 2px;
+        }
+
+        .duo-team-card {
+            background: #ffffff;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 12px;
+            margin-bottom: 10px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+        }
+
+        .duo-team-card.available:hover {
+            border-color: #0D5C9E;
+            box-shadow: 0 6px 18px rgba(13, 92, 158, 0.10);
+        }
+
+        .duo-team-card.selected {
+            border: 2px solid #16a34a;
+            background: linear-gradient(180deg, rgba(22, 163, 74, 0.04) 0%, #ffffff 100%);
+            box-shadow: 0 8px 24px rgba(22, 163, 74, 0.14);
+        }
+
+        .duo-team-card.taken {
+            background: #f8fafc;
+            border-color: #fecdd3;
+            opacity: 0.82;
+        }
+
+        .duo-team-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .duo-team-title-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .duo-team-num-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #0D5C9E, #1a6fb5);
+            color: #fff;
+            font-weight: 800;
+            font-size: 0.78rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 6px rgba(13, 92, 158, 0.22);
+        }
+
+        .duo-team-card.selected .duo-team-num-icon {
+            background: linear-gradient(135deg, #16a34a, #15803d);
+        }
+
+        .duo-team-card.taken .duo-team-num-icon {
+            background: #94a3b8;
+            box-shadow: none;
+        }
+
+        .duo-team-name {
+            font-weight: 800;
+            font-size: 0.92rem;
+            color: #0f172a;
+            letter-spacing: 0.2px;
+        }
+
+        .duo-team-badge-pill {
+            font-size: 0.65rem;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 999px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .duo-team-badge-pill.available {
+            background: rgba(13, 92, 158, 0.10);
+            color: #0D5C9E;
+            border: 1px solid rgba(13, 92, 158, 0.20);
+        }
+
+        .duo-team-badge-pill.selected {
+            background: #16a34a;
+            color: #ffffff;
+        }
+
+        .duo-team-badge-pill.taken {
+            background: rgba(220, 38, 38, 0.10);
+            color: #dc2626;
+            border: 1px solid rgba(220, 38, 38, 0.20);
+        }
+
+        .duo-slots-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .duo-slot-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 10px;
+            border-radius: 10px;
+            border: 1.5px dashed #cbd5e1;
+            background: #f8fafc;
+            transition: all 0.2s ease;
+            min-width: 0;
+        }
+
+        .duo-slot-box.available {
+            border-style: solid;
+            border-color: rgba(13, 92, 158, 0.28);
+            background: rgba(13, 92, 158, 0.03);
+            cursor: pointer;
+        }
+
+        .duo-slot-box.available:hover {
+            border-color: #0D5C9E;
+            background: rgba(13, 92, 158, 0.08);
+        }
+
+        .duo-slot-box.selected {
+            border-style: solid;
+            border-color: #16a34a;
+            background: rgba(22, 163, 74, 0.08);
+        }
+
+        .duo-slot-box.taken {
+            border-style: solid;
+            border-color: rgba(220, 38, 38, 0.22);
+            background: rgba(220, 38, 38, 0.04);
+            cursor: not-allowed;
+        }
+
+        .duo-slot-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.80rem;
+            flex-shrink: 0;
+        }
+
+        .duo-slot-box.available .duo-slot-icon.leader {
+            background: rgba(245, 158, 11, 0.15);
+            color: #d97706;
+        }
+
+        .duo-slot-box.available .duo-slot-icon.member {
+            background: rgba(13, 92, 158, 0.12);
+            color: #0D5C9E;
+        }
+
+        .duo-slot-box.selected .duo-slot-icon {
+            background: #16a34a !important;
+            color: #fff !important;
+        }
+
+        .duo-slot-box.taken .duo-slot-icon {
+            background: rgba(220, 38, 38, 0.12);
+            color: #dc2626;
+        }
+
+        .duo-slot-meta {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .duo-slot-role {
+            font-size: 0.62rem;
+            font-weight: 800;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            line-height: 1.1;
+        }
+
+        .duo-slot-state {
+            font-size: 0.76rem;
+            font-weight: 700;
+            color: #0f172a;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-top: 2px;
+        }
+
+        .duo-slot-box.available .duo-slot-state {
+            color: #0D5C9E;
+        }
+
+        .duo-slot-box.selected .duo-slot-state {
+            color: #15803d;
+        }
+
+        .duo-slot-box.taken .duo-slot-state {
+            color: #dc2626;
+        }
+
         .team-group {
             margin: 10px 0 14px;
             padding: 12px 14px;
@@ -1930,6 +2184,7 @@
             margin-bottom: 8px;
             display: flex;
             align-items: center;
+            justify-content: space-between;
             gap: 8px;
         }
 
@@ -1958,17 +2213,18 @@
         }
 
         .slot-booking-form {
-            background: #f5f7fa;
-            border-radius: var(--radius-sm);
-            padding: 16px;
-            margin-top: 12px;
-            border: 1px solid var(--border);
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 14px;
+            margin-top: 10px;
+            border: 2px solid #0D5C9E;
+            box-shadow: 0 8px 24px rgba(13, 92, 158, 0.12);
             display: none;
         }
 
         .slot-booking-form.visible {
             display: block;
-            animation: fadeUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            animation: fadeUp 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .slot-booking-form .form-row {
@@ -1980,20 +2236,29 @@
         .slot-booking-form .form-row .form-group {
             flex: 1;
             min-width: 140px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .slot-booking-form .form-row .form-group label {
             display: block;
             color: var(--text-secondary);
-            font-size: 0.70rem;
-            font-weight: 600;
-            margin-bottom: 2px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            margin-bottom: 4px;
         }
 
         .slot-booking-form .form-row .form-group input {
             padding: 10px 12px;
-            font-size: 0.85rem;
+            font-size: 0.86rem;
+            border-radius: 8px;
+            border: 1.5px solid #cbd5e1;
+            background: #fff;
+        }
+
+        .slot-booking-form .form-row .form-group input:focus {
+            border-color: #0D5C9E;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(13, 92, 158, 0.12);
         }
 
         .slot-booking-info {
@@ -9497,10 +9762,17 @@
             const formContainer = document.getElementById('registration-form-container');
 
             details.innerHTML = `
-                        <div style="background:rgba(26,111,181,0.04);padding:12px;border-radius:var(--radius-sm);margin-bottom:14px;border:1px solid rgba(26,111,181,0.08);">
-                            <div style="font-weight:700;color:var(--primary);margin-bottom:4px;font-size:0.95rem;">${t.title}</div>
-                            <div style="color:var(--text-muted);font-size:0.80rem;">${t.category.toUpperCase()} • <i class="fas fa-coins"></i> ${t.entryFee || 0} Entry Fee</div>
-                            <div style="color:var(--text-muted);font-size:0.75rem;margin-top:4px;">${t.category === 'duo' ? `Max Teams: <strong>${t.maxParticipants} Teams</strong> (2 Slots per Team)` : `Max Participants: ${t.maxParticipants}`}</div>
+                        <div style="background:linear-gradient(135deg, rgba(13,92,158,0.08), rgba(26,111,181,0.03));padding:12px 14px;border-radius:12px;margin-bottom:10px;border:1px solid rgba(13,92,158,0.16);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+                            <div>
+                                <div style="font-weight:800;color:#0f172a;font-size:0.98rem;line-height:1.2;">${t.title}</div>
+                                <div style="color:#475569;font-size:0.75rem;font-weight:600;margin-top:3px;">
+                                    ${t.category === 'duo' ? `<i class="fas fa-user-friends" style="color:#0D5C9E;"></i> Max Teams: <strong>${t.maxParticipants} Teams</strong> (2 Slots / Team)` : `<i class="fas fa-users" style="color:#0D5C9E;"></i> Max Participants: <strong>${t.maxParticipants}</strong>`}
+                                </div>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:6px;">
+                                <span style="background:#0D5C9E;color:#fff;font-size:0.65rem;font-weight:800;padding:4px 9px;border-radius:999px;letter-spacing:0.5px;">${t.category.toUpperCase()}</span>
+                                <span style="background:rgba(22,163,74,0.12);color:#15803d;border:1px solid rgba(22,163,74,0.25);font-size:0.75rem;font-weight:800;padding:4px 10px;border-radius:999px;"><i class="fas fa-coins"></i> ${t.entryFee || 0}</span>
+                            </div>
                         </div>
                     `;
 
@@ -9510,7 +9782,7 @@
             await buildSlotUI(t);
         }
 
-        // ─── BUILD SLOT UI (UPDATED: Duo 10 Teams x 2 Slots + Auto-Fill Leader & Member FF Details) ───
+        // ─── BUILD SLOT UI (UPDATED: Pro Duo Team Cards + Inline Accordion Booking Form + Auto-Fill) ───
         async function buildSlotUI(tournament) {
             const formContainer = document.getElementById('registration-form-container');
             const t = tournament;
@@ -9526,7 +9798,7 @@
                 let takenSlots = {};
                 const slotsPerTeam = t.category === 'duo' ? 2 : t.category === 'squad' ? 4 : 1;
                 const maxParticipants = Number(t.maxParticipants || 0);
-                // IMPORTANT: For Duo, Staff enters "Max Teams" (e.g. 10), so numberOfTeams = maxParticipants (10 Teams, each with 2 Slots)!
+                // IMPORTANT: For Duo, Staff enters "Max Teams" (e.g. 10 or 20), so numberOfTeams = maxParticipants!
                 const numberOfTeams = t.category === 'solo' ? 1 : t.category === 'duo' ? maxParticipants : Math.ceil(maxParticipants / slotsPerTeam);
 
                 if (t.category === 'solo') {
@@ -9566,7 +9838,6 @@
                     registrations.forEach(reg => {
                         let teamNum = Number(reg.teamNumber || 0);
                         if (!teamNum || teamNum < 1 || teamNum > numberOfTeams) {
-                            // Find first empty team for legacy registration
                             for (let candidate = 1; candidate <= numberOfTeams; candidate++) {
                                 if (!takenSlots[candidate] || Object.keys(takenSlots[candidate]).length === 0) {
                                     teamNum = candidate;
@@ -9660,16 +9931,61 @@
                     availableCount = Math.max(0, maxParticipants - takenCount);
                 }
 
-                html += `
-                            <div class="slot-booking-info">
-                                <span><i class="fas fa-users"></i> <span class="info-highlight">${availableCount}</span> ${t.category === 'duo' ? 'Teams available' : 'slots available'}</span>
-                                <span><i class="fas fa-check-circle"></i> <span class="info-highlight taken-count">${takenCount}</span> ${t.category === 'duo' ? 'Teams booked' : 'taken'}</span>
-                                <span><i class="fas fa-coins"></i> Fee: <span class="info-highlight">${t.entryFee || 0}</span></span>
+                // ─── AUTO-FILL FF DETAILS FROM currentUserData / localStorage ───
+                const uid = currentUser ? currentUser.uid : '';
+                const savedName = currentUserData.freeFireName || (uid ? localStorage.getItem(`ff_name_${uid}`) : '') || '';
+                const savedUid = currentUserData.freeFireUID || (uid ? localStorage.getItem(`ff_uid_${uid}`) : '') || '';
+                const savedPartnerName = currentUserData.duoPartnerName || (uid ? localStorage.getItem(`ff_duo_partner_name_${uid}`) : '') || '';
+                const savedPartnerUid = currentUserData.duoPartnerUID || (uid ? localStorage.getItem(`ff_duo_partner_uid_${uid}`) : '') || '';
+
+                const hasSelection = slotBookingState.selectedSlot !== null && slotBookingState.selectedSlot !== undefined;
+                const formVisibleClass = hasSelection ? 'visible' : '';
+
+                let selectionDisplay = '';
+                if (hasSelection) {
+                    if (t.category === 'solo') {
+                        selectionDisplay = `Slot ${slotBookingState.selectedSlot}`;
+                    } else if (t.category === 'duo') {
+                        selectionDisplay = `Team ${slotBookingState.selectedTeam} (Slot 1 & Slot 2)`;
+                    } else {
+                        selectionDisplay =
+                            `Team ${slotBookingState.selectedTeam} • Slot ${slotBookingState.selectedSlot}`;
+                    }
+                }
+
+                if (t.category === 'duo') {
+                    html += `
+                        <div class="duo-stats-strip">
+                            <div class="duo-stat-chip available">
+                                <div class="chip-val">${availableCount}</div>
+                                <div class="chip-lbl">Available Teams</div>
                             </div>
-                            <div style="color:var(--text-muted);font-size:0.75rem;margin-bottom:8px;text-align:center;">
-                                <i class="fas fa-info-circle"></i> ${t.category === 'duo' ? 'Select an available Team below (Team Leader enters both Slot 1 &amp; Slot 2 details)' : 'Click an available slot below to register'}
+                            <div class="duo-stat-chip booked">
+                                <div class="chip-val">${takenCount}</div>
+                                <div class="chip-lbl">Booked Teams</div>
                             </div>
-                        `;
+                            <div class="duo-stat-chip fee">
+                                <div class="chip-val"><i class="fas fa-coins" style="font-size:0.8rem;"></i> ${t.entryFee || 0}</div>
+                                <div class="chip-lbl">Entry Fee</div>
+                            </div>
+                        </div>
+                        <div style="background:rgba(13,92,158,0.06);border:1px solid rgba(13,92,158,0.14);border-radius:10px;padding:8px 12px;margin-bottom:10px;color:#0f172a;font-size:0.74rem;font-weight:600;display:flex;align-items:center;gap:8px;">
+                            <i class="fas fa-hand-pointer" style="color:#0D5C9E;font-size:0.9rem;"></i>
+                            <span>Tap any available <strong>Team</strong> below to book both <strong>Slot 1 (Leader)</strong> &amp; <strong>Slot 2 (Member)</strong></span>
+                        </div>
+                    `;
+                } else {
+                    html += `
+                        <div class="slot-booking-info">
+                            <span><i class="fas fa-users"></i> <span class="info-highlight">${availableCount}</span> slots available</span>
+                            <span><i class="fas fa-check-circle"></i> <span class="info-highlight taken-count">${takenCount}</span> taken</span>
+                            <span><i class="fas fa-coins"></i> Fee: <span class="info-highlight">${t.entryFee || 0}</span></span>
+                        </div>
+                        <div style="color:var(--text-muted);font-size:0.75rem;margin-bottom:8px;text-align:center;">
+                            <i class="fas fa-info-circle"></i> Click an available slot below to register
+                        </div>
+                    `;
+                }
 
                 if (t.category === 'solo') {
                     html += `<div class="slot-grid">`;
@@ -9691,42 +10007,117 @@
                     }
                     html += `</div>`;
                 } else if (t.category === 'duo') {
-                    const numTeams = numberOfTeams; // e.g., 10 Teams when Staff enters Max Teams = 10
+                    const numTeams = numberOfTeams;
 
                     for (let team = 1; team <= numTeams; team++) {
                         const teamSlots = takenSlots[team] || {};
                         const isTeamTaken = Object.keys(teamSlots).length > 0;
                         const isTeamSelected = (slotBookingState.selectedTeam === team);
+                        const cardStateClass = isTeamTaken ? 'taken' : isTeamSelected ? 'selected' : 'available';
+
+                        const p1 = teamSlots[1];
+                        const p2 = teamSlots[2];
+
+                        const badgeHTML = isTeamTaken
+                            ? `<span class="duo-team-badge-pill taken"><i class="fas fa-lock"></i> Booked (2/2)</span>`
+                            : isTeamSelected
+                                ? `<span class="duo-team-badge-pill selected"><i class="fas fa-check-circle"></i> Selected</span>`
+                                : `<span class="duo-team-badge-pill available"><i class="fas fa-plus-circle"></i> Select Team</span>`;
 
                         html += `
-                                    <div class="team-group" style="${isTeamSelected ? 'border-color:var(--primary);background:rgba(13,92,158,0.04);' : ''}">
-                                        <div class="team-header">
-                                            <span>Team ${team}</span>
-                                            <span class="team-badge">${isTeamTaken ? 'Booked (2/2)' : isTeamSelected ? 'Selected (2 Slots)' : 'Available (0/2)'}</span>
-                                        </div>
-                                        <div class="slot-grid" style="grid-template-columns: repeat(2, 1fr);">
-                                        `;
-
-                        for (let slot = 1; slot <= 2; slot++) {
-                            const taken = teamSlots[slot];
-                            const isTaken = isTeamTaken || !!taken;
-                            const roleLabel = slot === 1 ? 'Slot 1 (Leader)' : 'Slot 2 (Member)';
-                            html += `
-                                        <div class="slot-item ${isTaken ? 'taken' : 'available'} ${isTeamSelected ? 'selected' : ''}"
-                                             onclick="${isTaken ? '' : `selectSlotForRegistration(${team}, 1)`}"
-                                             style="${isTaken ? '' : 'cursor:pointer;'}"
-                                             title="${isTaken ? `Taken by: ${taken?.name || 'Booked'}` : `Click to book Team ${team} (Slot 1 & Slot 2)`}">
-                                            <div class="slot-number" style="font-size:0.82rem;">${roleLabel}</div>
-                                            <div class="slot-label">${isTaken ? 'Booked' : isTeamSelected ? 'Selected' : 'Available'}</div>
-                                            ${taken ? `<div class="slot-occupant">${taken?.name?.substring(0, 12) || ''}</div>` : ''}
-                                        </div>
-                                    `;
-                        }
-
-                        html += `
+                            <div class="duo-team-card ${cardStateClass}" id="duo-team-card-${team}">
+                                <div class="duo-team-card-header" onclick="${isTeamTaken ? '' : `selectSlotForRegistration(${team}, 1)`}" style="${isTeamTaken ? 'cursor:not-allowed;' : 'cursor:pointer;'}">
+                                    <div class="duo-team-title-wrap">
+                                        <div class="duo-team-num-icon">#${team}</div>
+                                        <div>
+                                            <div class="duo-team-name">Team ${team}</div>
+                                            <div style="font-size:0.65rem;color:#64748b;font-weight:600;">${isTeamTaken ? 'Both Duo slots occupied' : '2 Slots • Leader + Member'}</div>
                                         </div>
                                     </div>
-                                `;
+                                    ${badgeHTML}
+                                </div>
+
+                                <div class="duo-slots-row" onclick="${isTeamTaken ? '' : `selectSlotForRegistration(${team}, 1)`}">
+                                    <div class="duo-slot-box ${cardStateClass}">
+                                        <div class="duo-slot-icon leader">
+                                            <i class="fas ${isTeamTaken ? 'fa-user-lock' : 'fa-crown'}"></i>
+                                        </div>
+                                        <div class="duo-slot-meta">
+                                            <div class="duo-slot-role">Slot 1 • Leader</div>
+                                            <div class="duo-slot-state">${isTeamTaken ? (p1?.name || 'Booked') : isTeamSelected ? 'Ready to Enter' : 'Available'}</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="duo-slot-box ${cardStateClass}">
+                                        <div class="duo-slot-icon member">
+                                            <i class="fas ${isTeamTaken ? 'fa-user-lock' : 'fa-user-friends'}"></i>
+                                        </div>
+                                        <div class="duo-slot-meta">
+                                            <div class="duo-slot-role">Slot 2 • Member</div>
+                                            <div class="duo-slot-state">${isTeamTaken ? (p2?.name || 'Booked') : isTeamSelected ? 'Ready to Enter' : 'Available'}</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                ${isTeamSelected ? `
+                                    <div class="slot-booking-form visible" id="slot-booking-form" style="margin-top:12px;border-color:#16a34a;background:#f8fafc;">
+                                        <div style="font-weight:800;color:#0f172a;margin-bottom:10px;font-size:0.90rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;">
+                                            <div>
+                                                <i class="fas fa-user-check" style="color:#16a34a;"></i> Book <span id="slot-selection-display" style="color:#16a34a;">${selectionDisplay}</span>
+                                            </div>
+                                            ${(savedName || savedPartnerName) ? `<span style="font-size:0.62rem;background:rgba(22,163,74,0.12);color:#15803d;padding:3px 9px;border-radius:999px;border:1px solid rgba(22,163,74,0.25);font-weight:700;"><i class="fas fa-magic"></i> Auto-Filled</span>` : ''}
+                                        </div>
+
+                                        <!-- SLOT 1: TEAM LEADER -->
+                                        <div style="background:#ffffff;padding:10px 12px;border-radius:10px;border:1.5px solid rgba(13,92,158,0.22);margin-bottom:8px;">
+                                            <div style="font-size:0.72rem;font-weight:800;color:#0D5C9E;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.4px;display:flex;align-items:center;gap:6px;">
+                                                <i class="fas fa-crown" style="color:#d97706;"></i> Slot 1 — Team Leader (You)
+                                            </div>
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label><i class="fas fa-user"></i> Leader In-Game Name</label>
+                                                    <input type="text" id="slot-player-name" placeholder="Enter Leader FF Name" required value="${savedName}">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label><i class="fas fa-id-card"></i> Leader Free Fire UID</label>
+                                                    <input type="text" id="slot-player-uid" placeholder="Enter Leader FF UID" required pattern="[0-9]*" title="Enter numbers only" value="${savedUid}">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- SLOT 2: TEAM MEMBER (PARTNER) -->
+                                        <div style="background:#ffffff;padding:10px 12px;border-radius:10px;border:1.5px solid rgba(22,163,74,0.25);margin-bottom:8px;">
+                                            <div style="font-size:0.72rem;font-weight:800;color:#15803d;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.4px;display:flex;align-items:center;gap:6px;">
+                                                <i class="fas fa-user-friends"></i> Slot 2 — Team Member (Partner)
+                                            </div>
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label><i class="fas fa-user"></i> Member In-Game Name</label>
+                                                    <input type="text" id="slot-partner-name" placeholder="Enter Member FF Name" required value="${savedPartnerName}">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label><i class="fas fa-id-card"></i> Member Free Fire UID</label>
+                                                    <input type="text" id="slot-partner-uid" placeholder="Enter Member FF UID" required pattern="[0-9]*" title="Enter numbers only" value="${savedPartnerUid}">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div style="font-size:0.68rem;color:#64748b;margin:0 0 8px;text-align:center;font-weight:600;">
+                                            <i class="fas fa-save" style="color:#0D5C9E;"></i> Leader &amp; Member details are auto-saved for future matches. You can edit anytime!
+                                        </div>
+
+                                        <div style="display:grid;grid-template-columns:2fr 1fr;gap:8px;">
+                                            <button class="btn-primary" onclick="processSlotBooking()" id="slot-pay-btn" style="width:100%;margin:0;padding:11px 12px;font-size:0.86rem;border-radius:10px;">
+                                                <i class="fas fa-bolt"></i> Pay &amp; Book (<i class="fas fa-coins"></i> ${t.entryFee || 0})
+                                            </button>
+                                            <button class="btn-secondary" onclick="cancelSlotSelection()" style="width:100%;margin:0;padding:11px 10px;font-size:0.82rem;border-radius:10px;">
+                                                Cancel
+                                            </button>
+                                        </div>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `;
                     }
                 } else {
                     const slotsPerTeam = 4;
@@ -9779,85 +10170,7 @@
                             `;
                 }
 
-                const hasSelection = slotBookingState.selectedSlot !== null && slotBookingState.selectedSlot !== undefined;
-                const formVisibleClass = hasSelection ? 'visible' : '';
-
-                let selectionDisplay = '';
-                if (hasSelection) {
-                    if (t.category === 'solo') {
-                        selectionDisplay = `Slot ${slotBookingState.selectedSlot}`;
-                    } else if (t.category === 'duo') {
-                        selectionDisplay = `Team ${slotBookingState.selectedTeam} (Slot 1 & Slot 2)`;
-                    } else {
-                        selectionDisplay =
-                            `Team ${slotBookingState.selectedTeam} • Slot ${slotBookingState.selectedSlot}`;
-                    }
-                }
-
-                // ─── AUTO-FILL FF DETAILS FROM currentUserData / localStorage ───
-                const uid = currentUser ? currentUser.uid : '';
-                const savedName = currentUserData.freeFireName || (uid ? localStorage.getItem(`ff_name_${uid}`) : '') || '';
-                const savedUid = currentUserData.freeFireUID || (uid ? localStorage.getItem(`ff_uid_${uid}`) : '') || '';
-                const savedPartnerName = currentUserData.duoPartnerName || (uid ? localStorage.getItem(`ff_duo_partner_name_${uid}`) : '') || '';
-                const savedPartnerUid = currentUserData.duoPartnerUID || (uid ? localStorage.getItem(`ff_duo_partner_uid_${uid}`) : '') || '';
-
-                if (t.category === 'duo') {
-                    html += `
-                            <div class="slot-booking-form ${formVisibleClass}" id="slot-booking-form">
-                                <div style="font-weight:700;color:var(--text-primary);margin-bottom:10px;font-size:0.95rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;">
-                                    <div>
-                                        <i class="fas fa-users" style="color:var(--primary);"></i> Book Duo Team
-                                        <span id="slot-selection-display" style="color:var(--primary);font-weight:800;margin-left:6px;">${selectionDisplay}</span>
-                                    </div>
-                                    ${(savedName || savedPartnerName) ? `<span style="font-size:0.62rem;background:rgba(30,142,74,0.10);color:#1e8e4a;padding:3px 10px;border-radius:10px;border:1px solid rgba(30,142,74,0.18);"><i class="fas fa-check-circle"></i> Auto-Filled (Editable)</span>` : ''}
-                                </div>
-
-                                <!-- SLOT 1: TEAM LEADER -->
-                                <div style="background:#f8fafc;padding:10px 12px;border-radius:10px;border:1px solid #cbd5e1;margin-bottom:10px;">
-                                    <div style="font-size:0.76rem;font-weight:800;color:#0D5C9E;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.4px;">
-                                        <i class="fas fa-crown"></i> Slot 1 — Team Leader (You)
-                                    </div>
-                                    <div class="form-row">
-                                        <div class="form-group">
-                                            <label><i class="fas fa-user"></i> Leader In-Game Name</label>
-                                            <input type="text" id="slot-player-name" placeholder="Team Leader FF Name" required value="${savedName}">
-                                        </div>
-                                        <div class="form-group">
-                                            <label><i class="fas fa-id-card"></i> Leader Free Fire UID</label>
-                                            <input type="text" id="slot-player-uid" placeholder="Team Leader FF UID" required pattern="[0-9]*" title="Enter numbers only" value="${savedUid}">
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- SLOT 2: TEAM MEMBER (PARTNER) -->
-                                <div style="background:#f8fafc;padding:10px 12px;border-radius:10px;border:1px solid #cbd5e1;margin-bottom:10px;">
-                                    <div style="font-size:0.76rem;font-weight:800;color:#1e8e4a;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.4px;">
-                                        <i class="fas fa-user-friends"></i> Slot 2 — Team Member (Duo Partner)
-                                    </div>
-                                    <div class="form-row">
-                                        <div class="form-group">
-                                            <label><i class="fas fa-user"></i> Member In-Game Name</label>
-                                            <input type="text" id="slot-partner-name" placeholder="Team Member FF Name" required value="${savedPartnerName}">
-                                        </div>
-                                        <div class="form-group">
-                                            <label><i class="fas fa-id-card"></i> Member Free Fire UID</label>
-                                            <input type="text" id="slot-partner-uid" placeholder="Team Member FF UID" required pattern="[0-9]*" title="Enter numbers only" value="${savedPartnerUid}">
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div style="font-size:0.70rem;color:var(--text-muted);margin:0 0 8px;text-align:right;">
-                                    <i class="fas fa-save"></i> Both Team Leader &amp; Team Member details are auto-saved for next time. Edit anytime!
-                                </div>
-                                <button class="btn-primary" onclick="processSlotBooking()" id="slot-pay-btn" style="width:100%;margin-top:4px;">
-                                    <i class="fas fa-arrow-right"></i> Pay &amp; Book Team (<i class="fas fa-coins"></i> ${t.entryFee || 0})
-                                </button>
-                                <button class="btn-secondary" onclick="cancelSlotSelection()" style="width:100%;margin-top:6px;padding:8px;">
-                                    <i class="fas fa-times"></i> Cancel
-                                </button>
-                            </div>
-                        `;
-                } else {
+                if (t.category !== 'duo') {
                     html += `
                             <div class="slot-booking-form ${formVisibleClass}" id="slot-booking-form">
                                 <div style="font-weight:700;color:var(--text-primary);margin-bottom:8px;font-size:0.95rem;">
