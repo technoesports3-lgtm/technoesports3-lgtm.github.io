@@ -6327,6 +6327,14 @@
             </div>
         </div>
 
+        <!-- Duo Prize Pool Breakdown Popup Modal -->
+        <div id="duo-prize-pool-modal" class="modal">
+            <div class="modal-content" style="max-width:400px;">
+                <button class="close-button" onclick="closeModal('duo-prize-pool-modal')">&times;</button>
+                <div id="duo-prize-pool-modal-body"></div>
+            </div>
+        </div>
+
         <!-- Success -->
         <div id="success-modal" class="modal">
             <div class="modal-content" style="text-align:center;">
@@ -7147,8 +7155,10 @@
                 let firestoreData = {};
                 if (userDoc.exists) {
                     firestoreData = userDoc.data() || {};
-                    currentUserData.freeFireName = firestoreData.freeFireName || '';
-                    currentUserData.freeFireUID = firestoreData.freeFireUID || '';
+                    currentUserData.freeFireName = firestoreData.freeFireName || currentUserData.freeFireName || '';
+                    currentUserData.freeFireUID = firestoreData.freeFireUID || currentUserData.freeFireUID || '';
+                    currentUserData.duoPartnerName = firestoreData.duoPartnerName || currentUserData.duoPartnerName || '';
+                    currentUserData.duoPartnerUID = firestoreData.duoPartnerUID || currentUserData.duoPartnerUID || '';
                 }
 
                 const healed = await ensureAndHealSeparateWalletBalances(uid, firestoreData);
@@ -7251,12 +7261,14 @@
                     await db.collection("users").doc(uid).update({ referralCode: code });
                     data.referralCode = code;
                 }
-                // merge FF details if present
+                // merge FF details (Team Leader + Duo Partner) if present
                 currentUserData = {
                     ...currentUserData,
                     ...data,
                     freeFireName: data.freeFireName || currentUserData.freeFireName || '',
-                    freeFireUID: data.freeFireUID || currentUserData.freeFireUID || ''
+                    freeFireUID: data.freeFireUID || currentUserData.freeFireUID || '',
+                    duoPartnerName: data.duoPartnerName || currentUserData.duoPartnerName || '',
+                    duoPartnerUID: data.duoPartnerUID || currentUserData.duoPartnerUID || ''
                 };
                 if (display) display.textContent = code;
                 const countEl = document.getElementById('referral-count-display');
@@ -7294,20 +7306,36 @@
             }
         }
 
-        // ─── SAVE FF DETAILS TO USER DOC ───
-        async function saveFreeFireDetailsToUser(ffName, ffUid) {
+        // ─── SAVE FF DETAILS TO USER DOC (TEAM LEADER + OPTIONAL DUO PARTNER) ───
+        async function saveFreeFireDetailsToUser(ffName, ffUid, partnerName = null, partnerUid = null) {
             const uid = getCurrentUserId();
             if (!uid) return;
             try {
-                await db.collection("users").doc(uid).update({
+                const updatePayload = {
                     freeFireName: ffName,
                     freeFireUID: ffUid,
                     freeFireSavedAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
+                };
+                if (partnerName !== null && partnerName !== undefined) {
+                    updatePayload.duoPartnerName = partnerName;
+                    currentUserData.duoPartnerName = partnerName;
+                    try { localStorage.setItem('techno_duo_partner_name_' + uid, partnerName); } catch (e) {}
+                }
+                if (partnerUid !== null && partnerUid !== undefined) {
+                    updatePayload.duoPartnerUID = partnerUid;
+                    currentUserData.duoPartnerUID = partnerUid;
+                    try { localStorage.setItem('techno_duo_partner_uid_' + uid, partnerUid); } catch (e) {}
+                }
+                try {
+                    localStorage.setItem('techno_ff_name_' + uid, ffName);
+                    localStorage.setItem('techno_ff_uid_' + uid, ffUid);
+                } catch (e) {}
+
+                await db.collection("users").doc(uid).update(updatePayload);
                 currentUserData.freeFireName = ffName;
                 currentUserData.freeFireUID = ffUid;
                 updateProfileFFDetails();
-                console.log('✅ Free Fire details saved to user profile.');
+                console.log('✅ Free Fire & Duo partner details saved to user profile.');
             } catch (e) {
                 console.warn('Failed to save FF details:', e);
             }
@@ -8922,15 +8950,36 @@
             }
 
             // Prize Pool, Per Kill, Entry Fee
+            const isDuoCard = normalizeTournamentCategory(tournament.category) === 'duo';
             let prizePoolDisplay = tournament.prizePool || '';
             if (!prizePoolDisplay) {
                 if (tournament.prizes && tournament.prizes.trim()) {
-                    prizePoolDisplay = tournament.prizes.trim().split('\n')[0].slice(0, 18);
+                    if (isDuoCard) {
+                        // Try to sum numeric prize values if multiple lines exist, or show first prize / View Prizes
+                        const lines = tournament.prizes.trim().split('\n').map(l => l.trim()).filter(Boolean);
+                        let sumPrizes = 0;
+                        let foundAmounts = 0;
+                        lines.forEach(line => {
+                            const afterColon = line.includes(':') ? line.split(':').slice(1).join(':') : line.replace(/^\d+(st|nd|rd|th)\s*(prize|place|rank)?/i, '');
+                            const m = afterColon.match(/(?:₹|rs\.?|inr|coins?)?\s*(\d+(?:\.\d+)?)/i);
+                            if (m && m[1]) {
+                                sumPrizes += parseFloat(m[1]);
+                                foundAmounts++;
+                            }
+                        });
+                        if (foundAmounts > 1 && sumPrizes > 0) {
+                            prizePoolDisplay = `₹${Math.round(sumPrizes)}`;
+                        } else {
+                            prizePoolDisplay = lines[0].slice(0, 18);
+                        }
+                    } else {
+                        prizePoolDisplay = tournament.prizes.trim().split('\n')[0].slice(0, 18);
+                    }
                 } else if (tournament.perKill && maxP) {
                     const numericKill = parseFloat(String(tournament.perKill).replace(/[^0-9.]/g, ''));
                     prizePoolDisplay = !isNaN(numericKill) && numericKill > 0 ? `₹${Math.round(numericKill * maxP)}` : String(tournament.perKill);
                 } else {
-                    prizePoolDisplay = 'TBA';
+                    prizePoolDisplay = isDuoCard ? 'View Prizes' : 'TBA';
                 }
             }
             const perKillDisplay = tournament.perKill ? String(tournament.perKill) : '0';
@@ -9015,6 +9064,45 @@
 
             const safeTournamentImg = resolveSafeImageUrl(tournament.imageUrl, getTournamentArtworkByCategory(tournament.category));
 
+            const prizeMetricBoxHTML = isDuoCard
+                ? `
+                    <div class="pro-metric-box prize-highlight pressable" onclick="showDuoPrizePoolPopup('${tournament.id}')" style="cursor:pointer; position:relative;" title="Click to view 1st, 2nd &amp; Prize Breakdown">
+                        <div class="pro-metric-label"><i class="fas fa-trophy"></i> Prize Pool</div>
+                        <div class="pro-metric-val" style="display:flex;align-items:center;justify-content:center;gap:4px;">${prizePoolDisplay} <i class="fas fa-info-circle" style="font-size:0.68rem;color:#0D5C9E;"></i></div>
+                        <div style="font-size:0.54rem;color:#0D5C9E;font-weight:700;margin-top:1px;"><i class="fas fa-hand-pointer"></i> Tap for Prizes</div>
+                    </div>
+                `
+                : `
+                    <div class="pro-metric-box prize-highlight">
+                        <div class="pro-metric-label"><i class="fas fa-trophy"></i> Prize Pool</div>
+                        <div class="pro-metric-val">${prizePoolDisplay}</div>
+                    </div>
+                `;
+
+            const middleMetricBoxHTML = isDuoCard
+                ? `
+                    <div class="pro-metric-box">
+                        <div class="pro-metric-label"><i class="fas fa-users"></i> Max Teams</div>
+                        <div class="pro-metric-val">${maxP} Teams</div>
+                    </div>
+                `
+                : `
+                    <div class="pro-metric-box">
+                        <div class="pro-metric-label"><i class="fas fa-crosshairs"></i> Per Kill</div>
+                        <div class="pro-metric-val">${perKillDisplay}</div>
+                    </div>
+                `;
+
+            const footerSlotsLabelsHTML = isDuoCard
+                ? `
+                    <span class="joined-text">${currentP}/${maxP} Teams joined</span>
+                    <span class="left-text ${spotsLeft <= 3 ? 'urgent' : ''}">${spotsLeft === 0 ? 'No teams left' : `${spotsLeft} Teams left (2 Slots/Team)`}</span>
+                `
+                : `
+                    <span class="joined-text">${currentP}/${maxP} joined</span>
+                    <span class="left-text ${spotsLeft <= 5 ? 'urgent' : ''}">${spotsLeft === 0 ? 'No spots left' : `${spotsLeft} spots left`}</span>
+                `;
+
             card.innerHTML = `
                 <div class="pro-match-header">
                     <img src="${safeTournamentImg}" alt="${(tournament.title || 'Tournament').replace(/"/g, '&quot;')}" class="progressive-img" loading="lazy" decoding="async" onload="guardImageAgainstUnavailablePlaceholder(this, '${(tournament.category || 'default').replace(/'/g, '')}'); this.classList.add('loaded')">
@@ -9035,16 +9123,10 @@
                     </div>
                 </div>
 
-                <!-- 3-Box Metric Row: PRIZE POOL, PER KILL, ENTRY -->
+                <!-- 3-Box Metric Row -->
                 <div class="pro-metrics-grid">
-                    <div class="pro-metric-box prize-highlight">
-                        <div class="pro-metric-label"><i class="fas fa-trophy"></i> Prize Pool</div>
-                        <div class="pro-metric-val">${prizePoolDisplay}</div>
-                    </div>
-                    <div class="pro-metric-box">
-                        <div class="pro-metric-label"><i class="fas fa-crosshairs"></i> Per Kill</div>
-                        <div class="pro-metric-val">${perKillDisplay}</div>
-                    </div>
+                    ${prizeMetricBoxHTML}
+                    ${middleMetricBoxHTML}
                     <div class="pro-metric-box entry-highlight">
                         <div class="pro-metric-label">Entry</div>
                         <div class="pro-metric-val">${get3DCoinSVG(15)} ${entryFee}</div>
@@ -9064,8 +9146,7 @@
                 <div class="pro-match-footer">
                     <div class="pro-slots-progress-wrap">
                         <div class="pro-slots-labels">
-                            <span class="joined-text">${currentP}/${maxP} joined</span>
-                            <span class="left-text ${spotsLeft <= 5 ? 'urgent' : ''}">${spotsLeft === 0 ? 'No spots left' : `${spotsLeft} spots left`}</span>
+                            ${footerSlotsLabelsHTML}
                         </div>
                         <div class="pro-slots-track">
                             <div class="pro-slots-fill" style="width: ${fillPct}%;"></div>
@@ -9094,6 +9175,91 @@
             }
 
             return card;
+        }
+
+        // ─── DUO PRIZE POOL POPUP MODAL ───
+        function showDuoPrizePoolPopup(tournamentId) {
+            const t = currentTournaments.find(item => item.id === tournamentId);
+            if (!t) return;
+            const modal = document.getElementById('duo-prize-pool-modal');
+            const body = document.getElementById('duo-prize-pool-modal-body');
+            if (!modal || !body) return;
+
+            const rawPrizes = (t.prizes || '').trim();
+            const lines = rawPrizes ? rawPrizes.split('\n').map(l => l.trim()).filter(Boolean) : [];
+
+            let prizesListHTML = '';
+            if (lines.length > 0) {
+                lines.forEach((line, idx) => {
+                    let badgeIcon = 'fa-award';
+                    let badgeBg = 'rgba(13,92,158,0.10)';
+                    let badgeColor = '#0D5C9E';
+                    let borderColor = 'rgba(13,92,158,0.18)';
+
+                    if (idx === 0 || /1st|first|winner/i.test(line)) {
+                        badgeIcon = 'fa-trophy';
+                        badgeBg = 'rgba(245,158,11,0.15)';
+                        badgeColor = '#d97706';
+                        borderColor = 'rgba(245,158,11,0.35)';
+                    } else if (idx === 1 || /2nd|second|runner/i.test(line)) {
+                        badgeIcon = 'fa-medal';
+                        badgeBg = 'rgba(100,116,139,0.14)';
+                        badgeColor = '#475569';
+                        borderColor = 'rgba(100,116,139,0.30)';
+                    } else if (idx === 2 || /3rd|third/i.test(line)) {
+                        badgeIcon = 'fa-medal';
+                        badgeBg = 'rgba(180,83,9,0.12)';
+                        badgeColor = '#b45309';
+                        borderColor = 'rgba(180,83,9,0.28)';
+                    }
+
+                    let labelPart = `Prize #${idx + 1}`;
+                    let valuePart = line;
+                    if (line.includes(':')) {
+                        const parts = line.split(':');
+                        labelPart = parts[0].trim();
+                        valuePart = parts.slice(1).join(':').trim();
+                    } else if (line.includes('-')) {
+                        const parts = line.split('-');
+                        labelPart = parts[0].trim();
+                        valuePart = parts.slice(1).join('-').trim();
+                    }
+
+                    prizesListHTML += `
+                        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;margin-bottom:8px;border-radius:12px;background:#f8fafc;border:1.5px solid ${borderColor};">
+                            <div style="display:flex;align-items:center;gap:10px;">
+                                <div style="width:34px;height:34px;border-radius:10px;background:${badgeBg};color:${badgeColor};display:flex;align-items:center;justify-content:center;font-size:1rem;">
+                                    <i class="fas ${badgeIcon}"></i>
+                                </div>
+                                <div style="font-weight:700;color:#0f172a;font-size:0.9rem;">${labelPart}</div>
+                            </div>
+                            <div style="font-weight:800;color:${badgeColor};font-size:1rem;">${valuePart}</div>
+                        </div>
+                    `;
+                });
+            } else {
+                prizesListHTML = `
+                    <div style="text-align:center;padding:18px;background:#f8fafc;border-radius:12px;border:1px dashed #cbd5e1;color:#64748b;font-size:0.88rem;">
+                        ${t.prizePool ? `<div style="font-size:1.2rem;font-weight:800;color:#d97706;margin-bottom:4px;">${t.prizePool}</div>` : ''}
+                        Prize distribution details will be announced by Admin.
+                    </div>
+                `;
+            }
+
+            body.innerHTML = `
+                <div style="text-align:center;margin-bottom:14px;padding:12px;border-radius:12px;background:linear-gradient(135deg, rgba(245,158,11,0.12), rgba(13,92,158,0.08));border:1px solid rgba(245,158,11,0.25);">
+                    <div style="font-size:0.72rem;font-weight:800;color:#b45309;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:2px;">Duo Tournament</div>
+                    <div style="font-size:1.02rem;font-weight:800;color:#0f172a;">${t.title || 'Duo Match'}</div>
+                    <div style="font-size:0.78rem;color:#475569;margin-top:4px;">Max Teams: <strong>${t.maxParticipants || 0} Teams</strong> (2 Players / Team) • Entry: <strong>₹${t.entryFee || 0}</strong></div>
+                </div>
+                <div style="margin-bottom:12px;">
+                    ${prizesListHTML}
+                </div>
+                <button type="button" class="btn-primary" onclick="closeModal('duo-prize-pool-modal')" style="width:100%;padding:10px;border-radius:10px;font-weight:700;">
+                    <i class="fas fa-check"></i> Got It
+                </button>
+            `;
+            modal.style.display = 'block';
         }
 
         // ─── TOURNAMENT LOAD / RENDER (UNIFIED WITH 3-STEP FLOW) ───
@@ -9264,7 +9430,29 @@
                             div.innerHTML = `
                                         <div style="display:flex;justify-content:space-between;align-items:center;">
                                             <div><div style="font-weight:700;color:var(--text-primary);font-size:0.90rem;">${reg.playerDetails?.[0]?.name || 'Player'}</div><div style="color:var(--text-muted);font-size:0.80rem;">FF ID: ${reg.playerDetails?.[0]?.freeFireId || 'N/A'}</div></div>
-                                            <div style="color:var(--primary);font-weight:700;font-size:0.90rem;">#${i + 1}</div>
+                                            <div style="color:var(--primary);font-weight:700;font-size:0.90rem;">#${reg.slotNumber || (i + 1)}</div>
+                                        </div>
+                                    `;
+                        } else if (selectedTournament.category === 'duo') {
+                            const players = Array.isArray(reg.playerDetails) ? reg.playerDetails : [];
+                            const p1 = players[0] || {};
+                            const p2 = players[1] || {};
+                            div.innerHTML = `
+                                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                                            <div style="font-weight:800;color:var(--primary);font-size:0.90rem;"><i class="fas fa-users"></i> ${reg.teamName || `Team ${reg.teamNumber || (i + 1)}`}</div>
+                                            <div style="font-size:0.74rem;color:var(--text-muted);font-weight:600;">2 Slots Booked</div>
+                                        </div>
+                                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                                            <div style="background:#fff;padding:6px 8px;border-radius:6px;border:1px solid #e2e8f0;">
+                                                <div style="font-size:0.68rem;color:#0D5C9E;font-weight:700;">Slot 1 (Leader)</div>
+                                                <div style="font-weight:700;color:var(--text-primary);font-size:0.82rem;">${p1.name || p1.inGameName || 'Player 1'}</div>
+                                                <div style="color:var(--text-muted);font-size:0.72rem;">UID: ${p1.freeFireId || p1.uid || 'N/A'}</div>
+                                            </div>
+                                            <div style="background:#fff;padding:6px 8px;border-radius:6px;border:1px solid #e2e8f0;">
+                                                <div style="font-size:0.68rem;color:#1e8e4a;font-weight:700;">Slot 2 (Member)</div>
+                                                <div style="font-weight:700;color:var(--text-primary);font-size:0.82rem;">${p2.name || p2.inGameName || 'Player 2'}</div>
+                                                <div style="color:var(--text-muted);font-size:0.72rem;">UID: ${p2.freeFireId || p2.uid || 'N/A'}</div>
+                                            </div>
                                         </div>
                                     `;
                         } else {
@@ -9312,7 +9500,7 @@
                         <div style="background:rgba(26,111,181,0.04);padding:12px;border-radius:var(--radius-sm);margin-bottom:14px;border:1px solid rgba(26,111,181,0.08);">
                             <div style="font-weight:700;color:var(--primary);margin-bottom:4px;font-size:0.95rem;">${t.title}</div>
                             <div style="color:var(--text-muted);font-size:0.80rem;">${t.category.toUpperCase()} • <i class="fas fa-coins"></i> ${t.entryFee || 0} Entry Fee</div>
-                            <div style="color:var(--text-muted);font-size:0.75rem;margin-top:4px;">Max Participants: ${t.maxParticipants}</div>
+                            <div style="color:var(--text-muted);font-size:0.75rem;margin-top:4px;">${t.category === 'duo' ? `Max Teams: <strong>${t.maxParticipants} Teams</strong> (2 Slots per Team)` : `Max Participants: ${t.maxParticipants}`}</div>
                         </div>
                     `;
 
@@ -9322,7 +9510,7 @@
             await buildSlotUI(t);
         }
 
-        // ─── BUILD SLOT UI (UPDATED: auto-fill FF details) ───
+        // ─── BUILD SLOT UI (UPDATED: Duo 10 Teams x 2 Slots + Auto-Fill Leader & Member FF Details) ───
         async function buildSlotUI(tournament) {
             const formContainer = document.getElementById('registration-form-container');
             const t = tournament;
@@ -9337,8 +9525,9 @@
 
                 let takenSlots = {};
                 const slotsPerTeam = t.category === 'duo' ? 2 : t.category === 'squad' ? 4 : 1;
-                const maxParticipants = t.maxParticipants || 0;
-                const numberOfTeams = t.category === 'solo' ? 1 : Math.ceil(maxParticipants / slotsPerTeam);
+                const maxParticipants = Number(t.maxParticipants || 0);
+                // IMPORTANT: For Duo, Staff enters "Max Teams" (e.g. 10), so numberOfTeams = maxParticipants (10 Teams, each with 2 Slots)!
+                const numberOfTeams = t.category === 'solo' ? 1 : t.category === 'duo' ? maxParticipants : Math.ceil(maxParticipants / slotsPerTeam);
 
                 if (t.category === 'solo') {
                     takenSlots = {};
@@ -9365,6 +9554,46 @@
                                 uid: player.freeFireId || 'N/A',
                                 legacy: true
                             };
+                        }
+                    });
+
+                } else if (t.category === 'duo') {
+                    takenSlots = {};
+                    for (let team = 1; team <= numberOfTeams; team++) {
+                        takenSlots[team] = {};
+                    }
+
+                    registrations.forEach(reg => {
+                        let teamNum = Number(reg.teamNumber || 0);
+                        if (!teamNum || teamNum < 1 || teamNum > numberOfTeams) {
+                            // Find first empty team for legacy registration
+                            for (let candidate = 1; candidate <= numberOfTeams; candidate++) {
+                                if (!takenSlots[candidate] || Object.keys(takenSlots[candidate]).length === 0) {
+                                    teamNum = candidate;
+                                    break;
+                                }
+                            }
+                        }
+                        if (teamNum >= 1 && teamNum <= numberOfTeams) {
+                            if (!takenSlots[teamNum]) takenSlots[teamNum] = {};
+                            const players = Array.isArray(reg.playerDetails) ? reg.playerDetails : [];
+                            if (players.length >= 2) {
+                                takenSlots[teamNum][1] = {
+                                    name: players[0]?.name || players[0]?.inGameName || 'Team Leader',
+                                    uid: players[0]?.freeFireId || players[0]?.uid || 'N/A'
+                                };
+                                takenSlots[teamNum][2] = {
+                                    name: players[1]?.name || players[1]?.inGameName || 'Team Member',
+                                    uid: players[1]?.freeFireId || players[1]?.uid || 'N/A'
+                                };
+                            } else {
+                                const slotNum = Number(reg.slotNumber || 1);
+                                const p = players[0] || {};
+                                takenSlots[teamNum][slotNum] = {
+                                    name: p.name || p.inGameName || 'Player',
+                                    uid: p.freeFireId || p.uid || 'N/A'
+                                };
+                            }
                         }
                     });
 
@@ -9412,25 +9641,33 @@
 
                 let html = '';
 
-                const totalSlots = t.category === 'solo' ? maxParticipants : maxParticipants;
                 let takenCount = 0;
+                let availableCount = 0;
                 if (t.category === 'solo') {
                     takenCount = Object.keys(takenSlots).length;
+                    availableCount = Math.max(0, maxParticipants - takenCount);
+                } else if (t.category === 'duo') {
+                    for (let team = 1; team <= numberOfTeams; team++) {
+                        if (takenSlots[team] && Object.keys(takenSlots[team]).length > 0) {
+                            takenCount++;
+                        }
+                    }
+                    availableCount = Math.max(0, numberOfTeams - takenCount);
                 } else {
                     for (let team in takenSlots) {
                         takenCount += Object.keys(takenSlots[team]).length;
                     }
+                    availableCount = Math.max(0, maxParticipants - takenCount);
                 }
-                const availableCount = totalSlots - takenCount;
 
                 html += `
                             <div class="slot-booking-info">
-                                <span><i class="fas fa-users"></i> <span class="info-highlight">${availableCount}</span> slots available</span>
-                                <span><i class="fas fa-check-circle"></i> <span class="info-highlight taken-count">${takenCount}</span> taken</span>
+                                <span><i class="fas fa-users"></i> <span class="info-highlight">${availableCount}</span> ${t.category === 'duo' ? 'Teams available' : 'slots available'}</span>
+                                <span><i class="fas fa-check-circle"></i> <span class="info-highlight taken-count">${takenCount}</span> ${t.category === 'duo' ? 'Teams booked' : 'taken'}</span>
                                 <span><i class="fas fa-coins"></i> Fee: <span class="info-highlight">${t.entryFee || 0}</span></span>
                             </div>
                             <div style="color:var(--text-muted);font-size:0.75rem;margin-bottom:8px;text-align:center;">
-                                <i class="fas fa-info-circle"></i> Click an available slot below to register
+                                <i class="fas fa-info-circle"></i> ${t.category === 'duo' ? 'Select an available Team below (Team Leader enters both Slot 1 &amp; Slot 2 details)' : 'Click an available slot below to register'}
                             </div>
                         `;
 
@@ -9453,8 +9690,46 @@
                                 `;
                     }
                     html += `</div>`;
+                } else if (t.category === 'duo') {
+                    const numTeams = numberOfTeams; // e.g., 10 Teams when Staff enters Max Teams = 10
+
+                    for (let team = 1; team <= numTeams; team++) {
+                        const teamSlots = takenSlots[team] || {};
+                        const isTeamTaken = Object.keys(teamSlots).length > 0;
+                        const isTeamSelected = (slotBookingState.selectedTeam === team);
+
+                        html += `
+                                    <div class="team-group" style="${isTeamSelected ? 'border-color:var(--primary);background:rgba(13,92,158,0.04);' : ''}">
+                                        <div class="team-header">
+                                            <span>Team ${team}</span>
+                                            <span class="team-badge">${isTeamTaken ? 'Booked (2/2)' : isTeamSelected ? 'Selected (2 Slots)' : 'Available (0/2)'}</span>
+                                        </div>
+                                        <div class="slot-grid" style="grid-template-columns: repeat(2, 1fr);">
+                                        `;
+
+                        for (let slot = 1; slot <= 2; slot++) {
+                            const taken = teamSlots[slot];
+                            const isTaken = isTeamTaken || !!taken;
+                            const roleLabel = slot === 1 ? 'Slot 1 (Leader)' : 'Slot 2 (Member)';
+                            html += `
+                                        <div class="slot-item ${isTaken ? 'taken' : 'available'} ${isTeamSelected ? 'selected' : ''}"
+                                             onclick="${isTaken ? '' : `selectSlotForRegistration(${team}, 1)`}"
+                                             style="${isTaken ? '' : 'cursor:pointer;'}"
+                                             title="${isTaken ? `Taken by: ${taken?.name || 'Booked'}` : `Click to book Team ${team} (Slot 1 & Slot 2)`}">
+                                            <div class="slot-number" style="font-size:0.82rem;">${roleLabel}</div>
+                                            <div class="slot-label">${isTaken ? 'Booked' : isTeamSelected ? 'Selected' : 'Available'}</div>
+                                            ${taken ? `<div class="slot-occupant">${taken?.name?.substring(0, 12) || ''}</div>` : ''}
+                                        </div>
+                                    `;
+                        }
+
+                        html += `
+                                        </div>
+                                    </div>
+                                `;
+                    }
                 } else {
-                    const slotsPerTeam = t.category === 'duo' ? 2 : 4;
+                    const slotsPerTeam = 4;
                     const numTeams = Math.ceil(maxParticipants / slotsPerTeam);
 
                     for (let team = 1; team <= numTeams; team++) {
@@ -9499,7 +9774,7 @@
                     html += `
                                 <div style="text-align:center;padding:16px;background:rgba(215,38,56,0.04);border-radius:var(--radius-sm);border:1px solid rgba(215,38,56,0.08);margin-top:12px;">
                                     <i class="fas fa-exclamation-circle" style="color:#d72638;font-size:1.4rem;"></i>
-                                    <p style="color:var(--text-secondary);font-weight:600;margin:4px 0 0;">All slots are full!</p>
+                                    <p style="color:var(--text-secondary);font-weight:600;margin:4px 0 0;">All ${t.category === 'duo' ? 'teams' : 'slots'} are full!</p>
                                 </div>
                             `;
                 }
@@ -9511,17 +9786,79 @@
                 if (hasSelection) {
                     if (t.category === 'solo') {
                         selectionDisplay = `Slot ${slotBookingState.selectedSlot}`;
+                    } else if (t.category === 'duo') {
+                        selectionDisplay = `Team ${slotBookingState.selectedTeam} (Slot 1 & Slot 2)`;
                     } else {
                         selectionDisplay =
                             `Team ${slotBookingState.selectedTeam} • Slot ${slotBookingState.selectedSlot}`;
                     }
                 }
 
-                // ─── AUTO-FILL FF DETAILS FROM currentUserData ───
-                const savedName = currentUserData.freeFireName || '';
-                const savedUid = currentUserData.freeFireUID || '';
+                // ─── AUTO-FILL FF DETAILS FROM currentUserData / localStorage ───
+                const uid = currentUser ? currentUser.uid : '';
+                const savedName = currentUserData.freeFireName || (uid ? localStorage.getItem(`ff_name_${uid}`) : '') || '';
+                const savedUid = currentUserData.freeFireUID || (uid ? localStorage.getItem(`ff_uid_${uid}`) : '') || '';
+                const savedPartnerName = currentUserData.duoPartnerName || (uid ? localStorage.getItem(`ff_duo_partner_name_${uid}`) : '') || '';
+                const savedPartnerUid = currentUserData.duoPartnerUID || (uid ? localStorage.getItem(`ff_duo_partner_uid_${uid}`) : '') || '';
 
-                html += `
+                if (t.category === 'duo') {
+                    html += `
+                            <div class="slot-booking-form ${formVisibleClass}" id="slot-booking-form">
+                                <div style="font-weight:700;color:var(--text-primary);margin-bottom:10px;font-size:0.95rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;">
+                                    <div>
+                                        <i class="fas fa-users" style="color:var(--primary);"></i> Book Duo Team
+                                        <span id="slot-selection-display" style="color:var(--primary);font-weight:800;margin-left:6px;">${selectionDisplay}</span>
+                                    </div>
+                                    ${(savedName || savedPartnerName) ? `<span style="font-size:0.62rem;background:rgba(30,142,74,0.10);color:#1e8e4a;padding:3px 10px;border-radius:10px;border:1px solid rgba(30,142,74,0.18);"><i class="fas fa-check-circle"></i> Auto-Filled (Editable)</span>` : ''}
+                                </div>
+
+                                <!-- SLOT 1: TEAM LEADER -->
+                                <div style="background:#f8fafc;padding:10px 12px;border-radius:10px;border:1px solid #cbd5e1;margin-bottom:10px;">
+                                    <div style="font-size:0.76rem;font-weight:800;color:#0D5C9E;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.4px;">
+                                        <i class="fas fa-crown"></i> Slot 1 — Team Leader (You)
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label><i class="fas fa-user"></i> Leader In-Game Name</label>
+                                            <input type="text" id="slot-player-name" placeholder="Team Leader FF Name" required value="${savedName}">
+                                        </div>
+                                        <div class="form-group">
+                                            <label><i class="fas fa-id-card"></i> Leader Free Fire UID</label>
+                                            <input type="text" id="slot-player-uid" placeholder="Team Leader FF UID" required pattern="[0-9]*" title="Enter numbers only" value="${savedUid}">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- SLOT 2: TEAM MEMBER (PARTNER) -->
+                                <div style="background:#f8fafc;padding:10px 12px;border-radius:10px;border:1px solid #cbd5e1;margin-bottom:10px;">
+                                    <div style="font-size:0.76rem;font-weight:800;color:#1e8e4a;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.4px;">
+                                        <i class="fas fa-user-friends"></i> Slot 2 — Team Member (Duo Partner)
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label><i class="fas fa-user"></i> Member In-Game Name</label>
+                                            <input type="text" id="slot-partner-name" placeholder="Team Member FF Name" required value="${savedPartnerName}">
+                                        </div>
+                                        <div class="form-group">
+                                            <label><i class="fas fa-id-card"></i> Member Free Fire UID</label>
+                                            <input type="text" id="slot-partner-uid" placeholder="Team Member FF UID" required pattern="[0-9]*" title="Enter numbers only" value="${savedPartnerUid}">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div style="font-size:0.70rem;color:var(--text-muted);margin:0 0 8px;text-align:right;">
+                                    <i class="fas fa-save"></i> Both Team Leader &amp; Team Member details are auto-saved for next time. Edit anytime!
+                                </div>
+                                <button class="btn-primary" onclick="processSlotBooking()" id="slot-pay-btn" style="width:100%;margin-top:4px;">
+                                    <i class="fas fa-arrow-right"></i> Pay &amp; Book Team (<i class="fas fa-coins"></i> ${t.entryFee || 0})
+                                </button>
+                                <button class="btn-secondary" onclick="cancelSlotSelection()" style="width:100%;margin-top:6px;padding:8px;">
+                                    <i class="fas fa-times"></i> Cancel
+                                </button>
+                            </div>
+                        `;
+                } else {
+                    html += `
                             <div class="slot-booking-form ${formVisibleClass}" id="slot-booking-form">
                                 <div style="font-weight:700;color:var(--text-primary);margin-bottom:8px;font-size:0.95rem;">
                                     <i class="fas fa-pen"></i> Book Slot
@@ -9547,6 +9884,7 @@
                                 </button>
                             </div>
                         `;
+                }
 
                 formContainer.innerHTML = html;
 
@@ -9580,22 +9918,24 @@
             let isTaken = false;
             if (t.category === 'solo') {
                 isTaken = !!takenSlots[slotNumber];
+            } else if (t.category === 'duo') {
+                isTaken = !!(takenSlots[teamNumber] && Object.keys(takenSlots[teamNumber]).length > 0);
             } else {
                 isTaken = !!(takenSlots[teamNumber] && takenSlots[teamNumber][slotNumber]);
             }
             if (isTaken) {
-                showToast('This slot is already taken!', 'error');
+                showToast(t.category === 'duo' ? 'This team is already booked!' : 'This slot is already taken!', 'error');
                 return;
             }
 
             await fetchWalletBalance();
             if (walletBalance < (t.entryFee || 0)) {
-                showToast('Insufficient wallet balance. Please add coins.', 'error');
+                showToast('Insufficient Play Balance. Please add coins.', 'error');
                 return;
             }
 
             slotBookingState.selectedTeam = teamNumber;
-            slotBookingState.selectedSlot = slotNumber;
+            slotBookingState.selectedSlot = t.category === 'duo' ? 1 : slotNumber;
 
             await buildSlotUI(t);
 
@@ -9625,7 +9965,7 @@
             }
         }
 
-        // ─── PROCESS SLOT BOOKING (UPDATED: save FF details) ───
+        // ─── PROCESS SLOT BOOKING (UPDATED: save both Leader & Duo Member FF details) ───
         async function processSlotBooking() {
             const t = selectedTournament;
             if (!t) return showToast('No tournament selected.', 'error');
@@ -9633,19 +9973,31 @@
             const team = slotBookingState.selectedTeam;
             const slot = slotBookingState.selectedSlot;
             if (slot === null || slot === undefined) {
-                showToast('Please select a slot first.', 'error');
+                showToast(t.category === 'duo' ? 'Please select a Duo Team first.' : 'Please select a slot first.', 'error');
                 return;
             }
 
             const playerName = document.getElementById('slot-player-name').value.trim();
             const playerUid = document.getElementById('slot-player-uid').value.trim();
-            if (!playerName) return showToast('Please enter your Free Fire In-Game Name.', 'error');
-            if (!playerUid || !/^\d+$/.test(playerUid)) return showToast('Please enter a valid numeric Free Fire UID.',
+            if (!playerName) return showToast(t.category === 'duo' ? 'Please enter Slot 1 (Team Leader) In-Game Name.' : 'Please enter your Free Fire In-Game Name.', 'error');
+            if (!playerUid || !/^\d+$/.test(playerUid)) return showToast(t.category === 'duo' ? 'Please enter a valid numeric Free Fire UID for Slot 1 (Team Leader).' : 'Please enter a valid numeric Free Fire UID.',
                 'error');
+
+            let partnerName = '';
+            let partnerUid = '';
+            if (t.category === 'duo') {
+                const partnerNameEl = document.getElementById('slot-partner-name');
+                const partnerUidEl = document.getElementById('slot-partner-uid');
+                partnerName = partnerNameEl ? partnerNameEl.value.trim() : '';
+                partnerUid = partnerUidEl ? partnerUidEl.value.trim() : '';
+                if (!partnerName) return showToast('Please enter Slot 2 (Team Member) In-Game Name.', 'error');
+                if (!partnerUid || !/^\d+$/.test(partnerUid)) return showToast('Please enter a valid numeric Free Fire UID for Slot 2 (Team Member).', 'error');
+                if (partnerUid === playerUid) return showToast('Team Leader and Team Member must have different Free Fire UIDs.', 'error');
+            }
 
             await fetchWalletBalance();
             if (walletBalance < (t.entryFee || 0)) {
-                showToast('Insufficient wallet balance. Please add coins.', 'error');
+                showToast('Insufficient Play Balance. Please add coins.', 'error');
                 return;
             }
 
@@ -9658,12 +10010,14 @@
             let slotTaken = false;
             if (t.category === 'solo') {
                 slotTaken = regs.some(r => r.slotNumber === slot && r.status !== 'rejected');
+            } else if (t.category === 'duo') {
+                slotTaken = regs.some(r => Number(r.teamNumber) === Number(team) && r.status !== 'rejected');
             } else {
                 slotTaken = regs.some(r => r.teamNumber === team && r.slotNumber === slot && r.status !== 'rejected');
             }
 
             if (slotTaken) {
-                showToast('This slot was just taken by someone else! Please pick another.', 'error');
+                showToast(t.category === 'duo' ? 'This Team was just booked by someone else! Please pick another Team.' : 'This slot was just taken by someone else! Please pick another.', 'error');
                 await buildSlotUI(t);
                 return;
             }
@@ -9678,7 +10032,13 @@
                     throw new Error(payResult?.message || 'Payment failed.');
                 }
 
-                const playerDetails = [{ name: playerName, freeFireId: playerUid, level: 0 }];
+                const playerDetails = t.category === 'duo'
+                    ? [
+                        { slotNumber: 1, role: 'leader', name: playerName, inGameName: playerName, freeFireId: playerUid, uid: playerUid, level: 0 },
+                        { slotNumber: 2, role: 'member', name: partnerName, inGameName: partnerName, freeFireId: partnerUid, uid: partnerUid, level: 0 }
+                    ]
+                    : [{ slotNumber: slot, name: playerName, inGameName: playerName, freeFireId: playerUid, uid: playerUid, level: 0 }];
+
                 const regData = {
                     userId: currentUser.uid,
                     tournamentId: t.id,
@@ -9692,7 +10052,7 @@
                     paymentScreenshotUrl: null,
                     status: 'approved',
                     paymentMethod: 'wallet',
-                    slotNumber: slot,
+                    slotNumber: t.category === 'duo' ? 1 : slot,
                     teamNumber: team,
                     registeredAt: firebase.firestore.FieldValue.serverTimestamp()
                 };
@@ -9703,8 +10063,12 @@
                     participants: firebase.firestore.FieldValue.increment(1)
                 });
 
-                // ─── SAVE FF DETAILS TO USER PROFILE ───
-                await saveFreeFireDetailsToUser(playerName, playerUid);
+                // ─── SAVE FF DETAILS (BOTH LEADER & DUO PARTNER) TO USER PROFILE ───
+                if (t.category === 'duo') {
+                    await saveFreeFireDetailsToUser(playerName, playerUid, partnerName, partnerUid);
+                } else {
+                    await saveFreeFireDetailsToUser(playerName, playerUid);
+                }
 
                 try {
                     if (typeof OneSignal !== 'undefined') {
@@ -9718,7 +10082,7 @@
                     console.warn('OneSignal tagging failed:', e);
                 }
 
-                showToast('Successfully joined tournament!', 'success');
+                showToast(t.category === 'duo' ? `Successfully booked Team ${team} (Slot 1 & Slot 2)!` : 'Successfully joined tournament!', 'success');
 
                 closeModal('registration-modal');
                 document.getElementById('success-modal').style.display = 'block';
@@ -9736,7 +10100,7 @@
             } finally {
                 btn.disabled = false;
                 btn.innerHTML =
-                `<i class="fas fa-arrow-right"></i> Pay &amp; Join (<i class="fas fa-coins"></i> ${t.entryFee || 0})`;
+                `<i class="fas fa-arrow-right"></i> ${t.category === 'duo' ? 'Pay &amp; Book Team' : 'Pay &amp; Join'} (<i class="fas fa-coins"></i> ${t.entryFee || 0})`;
             }
         }
 
