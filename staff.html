@@ -2699,32 +2699,52 @@
                 <section id="manage-users-section" class="section">
                     <div class="content-card">
                         <div class="content-header">
-                            <h3>Manage Users</h3>
+                            <h3><i class="fas fa-users-cog"></i> Manage Users &amp; Personal Notifications</h3>
                         </div>
                         <div class="content-body">
                             <div
                                 style="color: #00a8ff; background: rgba(25, 118, 210, 0.08); border: 1px solid rgba(25, 118, 210, 0.2); padding: 10px 14px; border-radius: 10px; margin-bottom: 15px;">
-                                <i class="fas fa-exclamation-triangle"></i> You can block/unblock users based on your
-                                permissions.
+                                <i class="fas fa-info-circle"></i> Search users by Username, Email, Phone, or Free Fire UID/Name. You can send personal notifications, add Play Wallet balance, or block/unblock users.
                             </div>
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Username</th>
-                                        <th>Phone</th>
-                                        <th>Email</th>
-                                        <th>Tournaments</th>
-                                        <th>Wallet Balance</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="users-table-body">
-                                    <tr>
-                                        <td colspan="7">Loading users...</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+
+                            <!-- User Search Bar -->
+                            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:16px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.12); padding:12px 14px; border-radius:12px;">
+                                <div style="position:relative; flex:1; min-width:240px;">
+                                    <i class="fas fa-search" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#00a8ff;"></i>
+                                    <input type="text" id="manage-users-search"
+                                        placeholder="Search by Username, Email, Phone, Free Fire IGN, UID, or User ID..."
+                                        oninput="renderUsersTable()"
+                                        style="width:100%; padding:10px 38px 10px 38px; margin:0; border-radius:8px; border:1px solid rgba(0,168,255,0.35); background:rgba(0,0,0,0.35); color:#fff; font-size:0.92em;">
+                                    <button type="button" onclick="clearManageUsersSearch()" title="Clear Search"
+                                        style="position:absolute; right:8px; top:50%; transform:translateY(-50%); background:transparent; border:none; color:#aaa; padding:4px 8px; cursor:pointer; box-shadow:none;">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <div id="manage-users-count-badge" class="pill-count-blue" style="padding:8px 14px; font-size:0.85em; white-space:nowrap;">
+                                    Showing 0 users
+                                </div>
+                            </div>
+
+                            <div style="overflow-x:auto;">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Username / FF Info</th>
+                                            <th>Phone</th>
+                                            <th>Email</th>
+                                            <th>Tournaments</th>
+                                            <th>Wallet Balance</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="users-table-body">
+                                        <tr>
+                                            <td colspan="7">Loading users...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -2946,6 +2966,22 @@
                                             </label>
                                         </div>
 
+                                        <!-- Bot Host vs Manual Host Toggle -->
+                                        <div class="auto-repeat-toggle" style="margin-top:12px; background:rgba(0, 168, 255, 0.08); border:1px solid rgba(0, 168, 255, 0.35); border-radius:10px; padding:12px 14px;">
+                                            <div>
+                                                <span class="toggle-label" style="color:#00a8ff; font-weight:800;">
+                                                    <i class="fas fa-robot"></i> Host Tournament with Bot (DEVA 0.4 Auto-Host)
+                                                </span>
+                                                <div id="solo-bot-hosted-hint" style="font-size:0.78em; color:#aaa; margin-top:4px;">
+                                                    👤 OFF: Human Staff will manually host &amp; enter Room ID/Password. Turn ON for automatic Bot room creation &amp; hosting.
+                                                </div>
+                                            </div>
+                                            <label class="toggle-switch">
+                                                <input type="checkbox" id="solo-bot-hosted" onchange="onBotHostToggleChange('solo', this.checked)">
+                                                <span class="toggle-slider"></span>
+                                            </label>
+                                        </div>
+
                                         <button type="button" onclick="createTournament('solo')"
                                             style="width: 100%; margin-top: 20px;">
                                             <i class="fas fa-plus-circle"></i> CREATE SOLO TOURNAMENT
@@ -3106,6 +3142,22 @@
                                             </label>
                                         </div>
 
+                                        <!-- Bot Host vs Manual Host Toggle -->
+                                        <div class="auto-repeat-toggle" style="margin-top:12px; background:rgba(0, 168, 255, 0.08); border:1px solid rgba(0, 168, 255, 0.35); border-radius:10px; padding:12px 14px;">
+                                            <div>
+                                                <span class="toggle-label" style="color:#00a8ff; font-weight:800;">
+                                                    <i class="fas fa-robot"></i> Host Tournament with Bot (DEVA 0.4 Auto-Host)
+                                                </span>
+                                                <div id="duo-bot-hosted-hint" style="font-size:0.78em; color:#aaa; margin-top:4px;">
+                                                    👤 OFF: Human Staff will manually host &amp; enter Room ID/Password. Turn ON for automatic Bot room creation &amp; hosting.
+                                                </div>
+                                            </div>
+                                            <label class="toggle-switch">
+                                                <input type="checkbox" id="duo-bot-hosted" onchange="onBotHostToggleChange('duo', this.checked)">
+                                                <span class="toggle-slider"></span>
+                                            </label>
+                                        </div>
+
                                         <button type="button" onclick="createTournament('duo')"
                                             style="width: 100%; margin-top: 20px;">
                                             <i class="fas fa-plus-circle"></i> CREATE DUO TOURNAMENT
@@ -3262,6 +3314,22 @@
                                             </span>
                                             <label class="toggle-switch">
                                                 <input type="checkbox" id="squad-auto-repeat">
+                                                <span class="toggle-slider"></span>
+                                            </label>
+                                        </div>
+
+                                        <!-- Bot Host vs Manual Host Toggle -->
+                                        <div class="auto-repeat-toggle" style="margin-top:12px; background:rgba(0, 168, 255, 0.08); border:1px solid rgba(0, 168, 255, 0.35); border-radius:10px; padding:12px 14px;">
+                                            <div>
+                                                <span class="toggle-label" style="color:#00a8ff; font-weight:800;">
+                                                    <i class="fas fa-robot"></i> Host Tournament with Bot (DEVA 0.4 Auto-Host)
+                                                </span>
+                                                <div id="squad-bot-hosted-hint" style="font-size:0.78em; color:#aaa; margin-top:4px;">
+                                                    👤 OFF: Human Staff will manually host &amp; enter Room ID/Password. Turn ON for automatic Bot room creation &amp; hosting.
+                                                </div>
+                                            </div>
+                                            <label class="toggle-switch">
+                                                <input type="checkbox" id="squad-bot-hosted" onchange="onBotHostToggleChange('squad', this.checked)">
                                                 <span class="toggle-slider"></span>
                                             </label>
                                         </div>
@@ -3584,6 +3652,244 @@
                     </button>
                     <button onclick="saveCredentialsVisibility()" id="save-credentials-btn">
                         <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal for Full Tournament Editing (Edit Any Option Anytime After Creation) -->
+        <div id="edit-tournament-modal" class="modal">
+            <div class="modal-content" style="max-width: 680px; max-height: 90vh; overflow-y: auto;">
+                <span class="close-button" onclick="closeModal('edit-tournament-modal')">&times;</span>
+                <h3 style="font-size: 1.25em; color: #00a8ff; margin-bottom: 14px;">
+                    <i class="fas fa-pen-to-square"></i> Edit Tournament (All Options)
+                </h3>
+                <input type="hidden" id="edit-tour-doc-id" value="">
+
+                <div class="tournament-form-grid">
+                    <div class="form-group">
+                        <label>GAME</label>
+                        <select id="edit-tour-game" onchange="populateModeDropdownForGame(this.value, 'edit-tour-mode')" style="margin:0;">
+                            <option value="">-- Select Game --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>GAME MODE</label>
+                        <select id="edit-tour-mode" style="margin:0;">
+                            <option value="">-- Select Mode --</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="tournament-form-grid">
+                    <div class="form-group">
+                        <label>TOURNAMENT TITLE</label>
+                        <input type="text" id="edit-tour-title" placeholder="Tournament Title">
+                    </div>
+                    <div class="form-group">
+                        <label>CATEGORY / FORMAT</label>
+                        <select id="edit-tour-category" style="margin:0;">
+                            <option value="solo">SOLO</option>
+                            <option value="duo">DUO</option>
+                            <option value="squad">SQUAD</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>TOURNAMENT BANNER IMAGE (UPLOAD NEW OR PASTE URL)</label>
+                    <div class="file-upload-container" onclick="triggerFileInput('edit-tour')">
+                        <div class="file-upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                        <div class="file-upload-text">
+                            Click to upload a new tournament image<br>
+                            <small>Supported: JPG, PNG, WebP (Max: 5MB)</small>
+                        </div>
+                        <img id="edit-tour-image-preview" class="uploaded-image-preview" alt="Preview">
+                        <input type="file" id="edit-tour-image-file" class="file-input-hidden" accept="image/*"
+                            onchange="handleImageUpload('edit-tour', this.files[0])">
+                        <div class="upload-progress" id="edit-tour-upload-progress">
+                            <div class="upload-progress-bar" id="edit-tour-upload-progress-bar"></div>
+                        </div>
+                    </div>
+                    <input type="text" id="edit-tour-image-url" placeholder="Or paste Image URL here"
+                        oninput="const p=document.getElementById('edit-tour-image-preview'); if(p){p.src=this.value.trim(); p.style.display=this.value.trim()?'block':'none';}"
+                        style="margin-top:8px;">
+                </div>
+
+                <div class="tournament-form-grid">
+                    <div class="form-group">
+                        <label>CONDUCTED DATE</label>
+                        <input type="date" id="edit-tour-date">
+                    </div>
+                    <div class="form-group">
+                        <label>CONDUCTED TIME</label>
+                        <input type="time" id="edit-tour-time">
+                    </div>
+                </div>
+
+                <div class="tournament-form-grid">
+                    <div class="form-group">
+                        <label>MAP NAME</label>
+                        <input type="text" id="edit-tour-map" placeholder="e.g., Bermuda">
+                    </div>
+                    <div class="form-group">
+                        <label>PERSPECTIVE</label>
+                        <select id="edit-tour-perspective" style="margin:0;">
+                            <option value="TPP">TPP</option>
+                            <option value="FPP">FPP</option>
+                            <option value="CS">CS</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="tournament-form-grid">
+                    <div class="form-group">
+                        <label>MAX SLOTS / TEAMS</label>
+                        <input type="number" id="edit-tour-max" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label>ENTRY FEE (₹)</label>
+                        <input type="number" id="edit-tour-entry-fee" min="0">
+                    </div>
+                </div>
+
+                <div class="tournament-form-grid">
+                    <div class="form-group">
+                        <label>PER KILL PRIZE (₹)</label>
+                        <input type="text" id="edit-tour-per-kill" placeholder="e.g., 10">
+                    </div>
+                    <div class="form-group">
+                        <label>TOTAL PRIZE POOL (₹)</label>
+                        <input type="text" id="edit-tour-prize-pool" placeholder="e.g., 500">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>PRIZES BREAKDOWN</label>
+                    <textarea id="edit-tour-prizes" rows="2" placeholder="1st: ₹100, 2nd: ₹60, 3rd: ₹40"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>TOURNAMENT RULES &amp; DETAILS</label>
+                    <textarea id="edit-tour-details" rows="3" placeholder="Enter tournament rules, format, and other details..."></textarea>
+                </div>
+
+                <div class="tournament-form-grid">
+                    <div class="form-group">
+                        <label>TOURNAMENT / ROOM ID</label>
+                        <input type="text" id="edit-tour-room-id" placeholder="Room ID">
+                    </div>
+                    <div class="form-group">
+                        <label>TOURNAMENT PASSWORD</label>
+                        <input type="text" id="edit-tour-room-pass" placeholder="Room Password">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>TOURNAMENT STATUS</label>
+                    <select id="edit-tour-status" style="margin:0;">
+                        <option value="active">Active</option>
+                        <option value="upcoming">Upcoming</option>
+                        <option value="inactive">Inactive</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+
+                <div class="show-credentials-toggle" style="margin-top:10px;">
+                    <span>SHOW CREDENTIALS TO USERS</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="edit-tour-show-credentials">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <div class="auto-repeat-toggle" style="margin-top:10px;">
+                    <span class="toggle-label"><i class="fas fa-sync-alt"></i> Enable Daily Auto-Repeat</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="edit-tour-auto-repeat">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <div class="auto-repeat-toggle" style="margin-top:10px; background:rgba(0, 168, 255, 0.08); border:1px solid rgba(0, 168, 255, 0.35); border-radius:10px; padding:12px 14px;">
+                    <div>
+                        <span class="toggle-label" style="color:#00a8ff; font-weight:800;">
+                            <i class="fas fa-robot"></i> Host Tournament with Bot (DEVA 0.4 Auto-Host)
+                        </span>
+                        <div style="font-size:0.78em; color:#aaa; margin-top:3px;">
+                            ON = Bot hosts automatically | OFF = Human Staff hosts manually
+                        </div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="edit-tour-bot-hosted">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="back-button" onclick="closeModal('edit-tournament-modal')" style="flex:1;">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button onclick="saveEditedTournament()" id="save-edit-tournament-btn" style="flex:2;">
+                        <i class="fas fa-save"></i> Save All Tournament Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal for Sending Personal Notification to a Specific User -->
+        <div id="personal-notify-modal" class="modal">
+            <div class="modal-content" style="max-width: 520px;">
+                <span class="close-button" onclick="closeModal('personal-notify-modal')">&times;</span>
+                <h3 style="font-size: 1.2em; color: #00a8ff; margin-bottom: 10px;">
+                    <i class="fas fa-bell"></i> Send Personal Notification
+                </h3>
+                <input type="hidden" id="personal-notify-user-id" value="">
+
+                <div id="personal-notify-user-summary"
+                    style="background:rgba(0,168,255,0.08); border:1px solid rgba(0,168,255,0.28); border-radius:10px; padding:10px 12px; margin-bottom:14px; font-size:0.88em; color:#ddd;">
+                </div>
+
+                <div style="margin-bottom:12px;">
+                    <div style="font-size:0.76em; color:#aaa; font-weight:700; margin-bottom:6px; text-transform:uppercase;">
+                        Quick Preset Templates:
+                    </div>
+                    <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                        <button type="button" class="btn-outline-sm" style="font-size:0.75em; padding:5px 9px;"
+                            onclick="applyPersonalNotifyPreset('🎮 Join Custom Room Now!', 'Your tournament room is ready! Please open the app, check Room ID & Password, and join your slot immediately.')">
+                            🎮 Join Room
+                        </button>
+                        <button type="button" class="btn-outline-sm" style="font-size:0.75em; padding:5px 9px;"
+                            onclick="applyPersonalNotifyPreset('⚠️ Verify Your Free Fire UID', 'Your registered Free Fire UID or In-Game Name did not match in the custom room. Please update your correct FF UID in the app.')">
+                            ⚠️ Verify UID
+                        </button>
+                        <button type="button" class="btn-outline-sm" style="font-size:0.75em; padding:5px 9px;"
+                            onclick="applyPersonalNotifyPreset('💰 Wallet / Prize Update', 'Your wallet balance has been updated by Techno E-Sports Staff. Open the Wallet section to check your balance!')">
+                            💰 Wallet Update
+                        </button>
+                        <button type="button" class="btn-outline-sm" style="font-size:0.75em; padding:5px 9px;"
+                            onclick="applyPersonalNotifyPreset('📢 Message from Techno E-Sports Staff', 'Hello Player, please check your tournament status in the Techno E-Sports app.')">
+                            📢 Staff Message
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>NOTIFICATION TITLE</label>
+                    <input type="text" id="personal-notify-title" placeholder="e.g., Important Update from Staff" value="📢 Message from Techno E-Sports">
+                </div>
+
+                <div class="form-group">
+                    <label>PERSONAL MESSAGE</label>
+                    <textarea id="personal-notify-message" rows="4" placeholder="Type your personal message to this user..."></textarea>
+                </div>
+
+                <div style="display: flex; gap: 10px; margin-top: 16px;">
+                    <button class="back-button" onclick="closeModal('personal-notify-modal')" style="flex:1;">
+                        Cancel
+                    </button>
+                    <button onclick="sendPersonalNotificationToUser()" id="send-personal-notify-btn" style="flex:2; background:linear-gradient(135deg, #00a8ff 0%, #0077cc 100%);">
+                        <i class="fas fa-paper-plane"></i> Send Personal Notification
                     </button>
                 </div>
             </div>
@@ -4982,7 +5288,27 @@
                 };
                 if (editId) {
                     await db.collection("esports_games").doc(editId).update(payload);
-                    showToast(`Game "${name}" updated!`, 'success');
+                    // Propagate updated Game Name to linked modes & tournaments so changes reflect everywhere
+                    try {
+                        const batch = db.batch();
+                        let ops = 0;
+                        esportsModes.filter(m => m.gameId === editId).forEach(m => {
+                            if (ops < 400) {
+                                batch.update(db.collection("esports_modes").doc(m.id), { gameName: name });
+                                ops++;
+                            }
+                        });
+                        tournaments.filter(t => t.gameId === editId).forEach(t => {
+                            if (ops < 400) {
+                                batch.update(db.collection("tournaments").doc(t.id), { gameName: name });
+                                ops++;
+                            }
+                        });
+                        if (ops > 0) await batch.commit();
+                    } catch (syncErr) {
+                        console.warn('Game name propagation warning:', syncErr);
+                    }
+                    showToast(`Game "${name}" updated across all modes & matches!`, 'success');
                 } else {
                     payload.createdAt = FieldValue.serverTimestamp();
                     payload.createdBy = currentStaff?.uid || '';
@@ -5017,7 +5343,13 @@
                 preview.style.display = 'block';
             }
             const btn = document.getElementById('save-game-btn');
-            if (btn) btn.innerHTML = '<i class="fas fa-save"></i> UPDATE GAME';
+            if (btn) btn.innerHTML = `<i class="fas fa-save"></i> UPDATE GAME (${g.name})`;
+            const nameInput = document.getElementById('game-name-input');
+            if (nameInput) {
+                nameInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                setTimeout(() => nameInput.focus(), 250);
+            }
+            showToast(`Editing Game: "${g.name}" — change image, title or status and click UPDATE GAME.`, 'info');
         }
 
         function clearUserPanelEcosystemCache() {
@@ -5170,7 +5502,31 @@
                     updatedAt: FieldValue.serverTimestamp()
                 };
                 if (editId) {
+                    const prevMode = esportsModes.find(m => m.id === editId);
+                    const oldThumb = prevMode ? (prevMode.thumbnailUrl || prevMode.imageUrl || '') : '';
                     await db.collection("esports_modes").doc(editId).update(payload);
+                    // Propagate updated Mode Name / Map / Perspective / Thumbnail to linked tournaments
+                    try {
+                        const batch = db.batch();
+                        let ops = 0;
+                        tournaments.filter(t => t.modeId === editId).forEach(t => {
+                            if (ops < 400) {
+                                const tUpdates = {
+                                    modeName: name,
+                                    gameId: gameId,
+                                    gameName: gameObj ? gameObj.name : (t.gameName || '')
+                                };
+                                if (!t.imageUrl || (oldThumb && t.imageUrl === oldThumb)) {
+                                    tUpdates.imageUrl = thumbnailUrl;
+                                }
+                                batch.update(db.collection("tournaments").doc(t.id), tUpdates);
+                                ops++;
+                            }
+                        });
+                        if (ops > 0) await batch.commit();
+                    } catch (syncErr) {
+                        console.warn('Mode propagation warning:', syncErr);
+                    }
                     showToast(`Mode "${name}" updated!`, 'success');
                 } else {
                     payload.createdAt = FieldValue.serverTimestamp();
@@ -5208,7 +5564,13 @@
                 preview.style.display = 'block';
             }
             const btn = document.getElementById('save-mode-btn');
-            if (btn) btn.innerHTML = '<i class="fas fa-save"></i> UPDATE MODE';
+            if (btn) btn.innerHTML = `<i class="fas fa-save"></i> UPDATE MODE (${m.name})`;
+            const nameInput = document.getElementById('mode-name-input');
+            if (nameInput) {
+                nameInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                setTimeout(() => nameInput.focus(), 250);
+            }
+            showToast(`Editing Mode: "${m.name}" — upload a new image or edit any field and click UPDATE MODE.`, 'info');
         }
 
         async function toggleEsportsModeStatus(modeId, currentState) {
@@ -5598,7 +5960,34 @@
             refreshTemplates(category);
         }
 
-        // ===== UPDATED: saveTemplate includes imageUrl, solo-prizes, and Game/Mode classification =====
+        function onBotHostToggleChange(category, isChecked) {
+            const hint = document.getElementById(`${category}-bot-hosted-hint`);
+            const idInput = document.getElementById(`${category}-tournament-id`);
+            const passInput = document.getElementById(`${category}-tournament-password`);
+            const showCreds = document.getElementById(`${category}-show-credentials`);
+            if (isChecked) {
+                if (hint) {
+                    hint.innerHTML = `<span style="color:#10B981; font-weight:700;">🤖 ON: DEVA 0.4 Bot will automatically create the room, fill Room ID &amp; Password, verify players &amp; distribute prizes!</span> (Room ID &amp; Password optional now)`;
+                }
+                if (idInput && !idInput.value.trim()) {
+                    idInput.placeholder = "Optional (Auto-filled by DEVA Bot)";
+                }
+                if (passInput && !passInput.value.trim()) {
+                    passInput.placeholder = "Optional (Auto-generated by DEVA Bot)";
+                }
+                if (showCreds) {
+                    showCreds.checked = false;
+                }
+            } else {
+                if (hint) {
+                    hint.innerHTML = `👤 OFF: Human Staff will manually host &amp; enter Room ID/Password. Turn ON for automatic Bot room creation &amp; hosting.`;
+                }
+                if (idInput) idInput.placeholder = `e.g., ${category.toUpperCase()}0123`;
+                if (passInput) passInput.placeholder = "Password for tournament";
+            }
+        }
+
+        // ===== UPDATED: saveTemplate includes imageUrl, solo-prizes, botHosted, and Game/Mode classification =====
         async function saveTemplate(category) {
             if (!hasPermissions.manageTournaments) {
                 showToast("You don't have permission to save templates.", 'error');
@@ -5609,6 +5998,7 @@
             const selectedModeId = document.getElementById('match-mode-select')?.value || '';
             const selectedGameObj = esportsGames.find(g => g.id === selectedGameId);
             const selectedModeObj = esportsModes.find(m => m.id === selectedModeId);
+            const isBotHosted = document.getElementById(`${category}-bot-hosted`)?.checked ? true : false;
 
             let templateData = {
                 category: category,
@@ -5619,6 +6009,8 @@
                 mapName: document.getElementById('match-map-input')?.value?.trim() || 'Bermuda',
                 perspective: document.getElementById('match-perspective-select')?.value || 'TPP',
                 prizePool: document.getElementById('match-prize-pool-input')?.value?.trim() || '',
+                botHosted: isBotHosted,
+                hostType: isBotHosted ? 'bot' : 'manual',
                 createdBy: currentStaff.uid,
                 createdByName: staffData.name,
                 createdAt: FieldValue.serverTimestamp()
@@ -5827,6 +6219,14 @@
                 document.getElementById('squad-prizes').value = data.prizes || '';
                 document.getElementById('squad-show-credentials').checked = data.showCredentials !== false;
                 document.getElementById('squad-tournament-status').value = data.status || 'active';
+            }
+
+            // Bot Hosted toggle
+            const botToggleEl = document.getElementById(`${category}-bot-hosted`);
+            if (botToggleEl) {
+                const isBot = data.botHosted === true || String(data.hostType || '').toLowerCase() === 'bot';
+                botToggleEl.checked = isBot;
+                onBotHostToggleChange(category, isBot);
             }
 
             // Image: update URL, preview, file-upload-text
@@ -6099,6 +6499,7 @@
             }
 
             const isAutoRepeat = document.getElementById(`${category}-auto-repeat`).checked;
+            const isBotHosted = document.getElementById(`${category}-bot-hosted`)?.checked ? true : false;
 
             if (category === 'solo') {
                 formData = {
@@ -6123,6 +6524,8 @@
                     mapName: mapName,
                     perspective: perspective,
                     prizePool: prizePoolInput,
+                    botHosted: isBotHosted,
+                    hostType: isBotHosted ? 'bot' : 'manual',
                     participants: 0,
                     createdBy: currentStaff.uid,
                     createdByName: staffData.name,
@@ -6154,6 +6557,8 @@
                     mapName: mapName,
                     perspective: perspective,
                     prizePool: prizePoolInput,
+                    botHosted: isBotHosted,
+                    hostType: isBotHosted ? 'bot' : 'manual',
                     participants: 0,
                     createdBy: currentStaff.uid,
                     createdByName: staffData.name,
@@ -6185,6 +6590,8 @@
                     mapName: mapName,
                     perspective: perspective,
                     prizePool: prizePoolInput,
+                    botHosted: isBotHosted,
+                    hostType: isBotHosted ? 'bot' : 'manual',
                     participants: 0,
                     createdBy: currentStaff.uid,
                     createdByName: staffData.name,
@@ -6194,6 +6601,19 @@
                     visibleToUsers: true,
                     isAutoRepeat: isAutoRepeat
                 };
+            }
+
+            // If Bot Hosted is ON and Staff left Room ID or Password blank, auto-fill temporary bot placeholders
+            if (isBotHosted) {
+                if (!formData.tournamentId) {
+                    formData.tournamentId = `BOT-${Math.floor(100000 + Math.random() * 900000)}`;
+                }
+                if (!formData.tournamentPassword) {
+                    formData.tournamentPassword = 'TBA';
+                }
+                if (formData.tournamentId.toUpperCase().startsWith('BOT-')) {
+                    formData.showCredentials = false;
+                }
             }
 
             const requiredFields = ['title', 'conductingDate', 'conductingTime', 'details', 'maxParticipants', 'entryFee'];
@@ -6276,6 +6696,11 @@
                     <small>Supported: JPG, PNG, WebP (Max: 5MB)</small>`;
 
             document.getElementById(`${category}-auto-repeat`).checked = false;
+            const botToggleEl = document.getElementById(`${category}-bot-hosted`);
+            if (botToggleEl) {
+                botToggleEl.checked = false;
+                onBotHostToggleChange(category, false);
+            }
         }
 
         function normalizeTournamentCategory(category) {
@@ -6369,6 +6794,11 @@
             const gameBadge = tournament.gameName ? `<span class="pill-count-blue"><i class="fas fa-gamepad"></i> ${tournament.gameName}</span>` : '';
             const modeBadge = tournament.modeName ? `<span class="pill-count-green"><i class="fas fa-layer-group"></i> ${tournament.modeName}</span>` : `<span style="font-size:0.75rem; color:#F59E0B; font-weight:700;">Unassigned Mode</span>`;
 
+            const isBotHosted = tournament.botHosted === true || String(tournament.hostType || '').toLowerCase() === 'bot';
+            const hostBadgeHtml = isBotHosted
+                ? `<span onclick="toggleTournamentBotHost('${tournament.id}')" title="Click to switch to Manual Human Host" style="cursor:pointer; background:rgba(16,185,129,0.18); border:1px solid #10B981; color:#10B981; font-size:0.75rem; font-weight:800; padding:3px 9px; border-radius:999px; display:inline-flex; align-items:center; gap:5px;"><i class="fas fa-robot"></i> Bot Host ON</span>`
+                : `<span onclick="toggleTournamentBotHost('${tournament.id}')" title="Click to switch to DEVA Bot Auto-Host" style="cursor:pointer; background:rgba(245,158,11,0.15); border:1px solid #F59E0B; color:#F59E0B; font-size:0.75rem; font-weight:800; padding:3px 9px; border-radius:999px; display:inline-flex; align-items:center; gap:5px;"><i class="fas fa-user-shield"></i> Manual Host</span>`;
+
             card.innerHTML = `
                     <div class="tournament-header">
                         <div style="font-weight: 800; color: #00a8ff;">${tournament.title}</div>
@@ -6376,10 +6806,11 @@
                     </div>
 
                     <div style="padding: 15px;">
-                        <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;">
+                        <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; align-items:center;">
                             ${gameBadge}
                             ${modeBadge}
                             <span class="pill-count-blue">${tournament.mapName || 'Bermuda'} • ${tournament.perspective || 'TPP'}</span>
+                            ${hostBadgeHtml}
                         </div>
                         <div style="text-align: center; margin-bottom: 15px;">
                             <img src="${tournament.imageUrl || ''}" alt="${tournament.title}" loading="lazy" decoding="async" style="max-width: 100%; max-height: 150px; border-radius: 10px; border: 1px solid #333; object-fit:cover;">
@@ -6418,14 +6849,17 @@
                             </div>
                         </div>
 
-                        <div class="tournament-actions">
-                            <button onclick="showCredentialsModal('${tournament.id}')" class="btn-outline-sm" style="flex: 1;">
+                        <div class="tournament-actions" style="flex-wrap:wrap; gap:6px;">
+                            <button onclick="openEditTournamentModal('${tournament.id}')" style="flex: 1; min-width:95px; background:linear-gradient(135deg,#00a8ff,#0077cc);">
+                                <i class="fas fa-pen"></i> Edit All
+                            </button>
+                            <button onclick="showCredentialsModal('${tournament.id}')" class="btn-outline-sm" style="flex: 1; min-width:95px;">
                                 <i class="fas fa-key"></i> Credentials
                             </button>
-                            <button onclick="toggleTournamentStatus('${tournament.id}', '${tournament.status}')" style="flex: 1;">
-                                <i class="fas fa-edit"></i> Status
+                            <button onclick="toggleTournamentStatus('${tournament.id}', '${tournament.status}')" style="flex: 1; min-width:85px;">
+                                <i class="fas fa-sync-alt"></i> Status
                             </button>
-                            <button onclick="deleteTournament('${tournament.id}')" class="btn-danger-sm" style="flex: 1;">
+                            <button onclick="deleteTournament('${tournament.id}')" class="btn-danger-sm" style="flex: 1; min-width:85px;">
                                 <i class="fas fa-trash"></i> Delete
                             </button>
                         </div>
@@ -6645,32 +7079,252 @@
             );
         }
 
-        // --- User Management ---
+        // --- Full Edit Tournament Modal & Bot Host Quick Toggle ---
+        async function toggleTournamentBotHost(tournamentId) {
+            if (!hasPermissions.manageTournaments) {
+                showToast("You don't have permission to manage tournaments.", 'error');
+                return;
+            }
+            const t = tournaments.find(x => x.id === tournamentId);
+            if (!t) return;
+            const currentBot = t.botHosted === true || String(t.hostType || '').toLowerCase() === 'bot';
+            const nextBot = !currentBot;
+            try {
+                await db.collection("tournaments").doc(tournamentId).update({
+                    botHosted: nextBot,
+                    hostType: nextBot ? 'bot' : 'manual',
+                    updatedAt: FieldValue.serverTimestamp()
+                });
+                await logStaffAction('toggled_bot_host', `Tournament: ${t.title} -> ${nextBot ? 'BOT HOST' : 'MANUAL HOST'}`, 0);
+                showToast(nextBot ? `🤖 "${t.title}" switched to DEVA Bot Auto-Host!` : `👤 "${t.title}" switched to Manual Human Host!`, 'success');
+            } catch (err) {
+                console.error("Error toggling bot host:", err);
+                showToast("Failed to update Bot Host setting.", 'error');
+            }
+        }
+
+        function openEditTournamentModal(tournamentId) {
+            if (!hasPermissions.manageTournaments) {
+                showToast("You don't have permission to edit tournaments.", 'error');
+                return;
+            }
+            const t = tournaments.find(x => x.id === tournamentId);
+            if (!t) {
+                showToast("Tournament not found.", 'error');
+                return;
+            }
+
+            document.getElementById('edit-tour-doc-id').value = t.id;
+
+            // Populate Game & Mode dropdowns inside the Edit Modal
+            const gameSel = document.getElementById('edit-tour-game');
+            if (gameSel) {
+                gameSel.innerHTML = '<option value="">-- Select Game --</option>';
+                esportsGames.forEach(g => {
+                    const opt = document.createElement('option');
+                    opt.value = g.id;
+                    opt.textContent = g.name;
+                    gameSel.appendChild(opt);
+                });
+                if (t.gameId && esportsGames.some(g => g.id === t.gameId)) {
+                    gameSel.value = t.gameId;
+                } else if (esportsGames.length > 0) {
+                    gameSel.value = esportsGames[0].id;
+                }
+                populateModeDropdownForGame(gameSel.value, 'edit-tour-mode');
+            }
+            const modeSel = document.getElementById('edit-tour-mode');
+            if (modeSel && t.modeId) {
+                modeSel.value = t.modeId;
+            }
+
+            document.getElementById('edit-tour-title').value = t.title || '';
+            document.getElementById('edit-tour-category').value = normalizeTournamentCategory(t.category) || 'solo';
+            document.getElementById('edit-tour-image-url').value = t.imageUrl || '';
+            const preview = document.getElementById('edit-tour-image-preview');
+            if (preview) {
+                if (t.imageUrl) {
+                    preview.src = t.imageUrl;
+                    preview.style.display = 'block';
+                } else {
+                    preview.src = '';
+                    preview.style.display = 'none';
+                }
+            }
+            document.getElementById('edit-tour-date').value = t.conductingDate || '';
+            document.getElementById('edit-tour-time').value = t.conductingTime || '';
+            document.getElementById('edit-tour-map').value = t.mapName || 'Bermuda';
+            document.getElementById('edit-tour-perspective').value = t.perspective || 'TPP';
+            document.getElementById('edit-tour-max').value = Number(t.maxParticipants || 0);
+            document.getElementById('edit-tour-entry-fee').value = Number(t.entryFee || 0);
+            document.getElementById('edit-tour-per-kill').value = t.perKill !== undefined ? String(t.perKill) : '0';
+            document.getElementById('edit-tour-prize-pool').value = t.prizePool !== undefined ? String(t.prizePool) : '';
+            document.getElementById('edit-tour-prizes').value = Array.isArray(t.prizes) ? t.prizes.join(', ') : (t.prizes || '');
+            document.getElementById('edit-tour-details').value = t.details || '';
+            document.getElementById('edit-tour-room-id').value = t.tournamentId || '';
+            document.getElementById('edit-tour-room-pass').value = t.tournamentPassword || '';
+            document.getElementById('edit-tour-status').value = t.status || 'active';
+            document.getElementById('edit-tour-show-credentials').checked = t.showCredentials !== false;
+            document.getElementById('edit-tour-auto-repeat').checked = !!t.isAutoRepeat;
+            document.getElementById('edit-tour-bot-hosted').checked = (t.botHosted === true || String(t.hostType || '').toLowerCase() === 'bot');
+
+            document.getElementById('edit-tournament-modal').style.display = 'block';
+        }
+
+        async function saveEditedTournament() {
+            if (!hasPermissions.manageTournaments) {
+                showToast("You don't have permission to edit tournaments.", 'error');
+                return;
+            }
+            const docId = document.getElementById('edit-tour-doc-id').value.trim();
+            if (!docId) return;
+
+            const title = document.getElementById('edit-tour-title').value.trim();
+            const category = document.getElementById('edit-tour-category').value || 'solo';
+            const gameId = document.getElementById('edit-tour-game').value || '';
+            const modeId = document.getElementById('edit-tour-mode').value || '';
+            const gameObj = esportsGames.find(g => g.id === gameId);
+            const modeObj = esportsModes.find(m => m.id === modeId);
+            const imageUrl = document.getElementById('edit-tour-image-url').value.trim() || modeObj?.thumbnailUrl || gameObj?.imageUrl || '';
+            const conductingDate = document.getElementById('edit-tour-date').value;
+            const conductingTime = document.getElementById('edit-tour-time').value;
+            const mapName = document.getElementById('edit-tour-map').value.trim() || 'Bermuda';
+            const perspective = document.getElementById('edit-tour-perspective').value || 'TPP';
+            const maxParticipants = parseInt(document.getElementById('edit-tour-max').value) || 0;
+            const entryFee = parseInt(document.getElementById('edit-tour-entry-fee').value) || 0;
+            const perKill = document.getElementById('edit-tour-per-kill').value.trim() || '0';
+            const prizePool = document.getElementById('edit-tour-prize-pool').value.trim() || '';
+            const prizes = document.getElementById('edit-tour-prizes').value.trim();
+            const details = document.getElementById('edit-tour-details').value.trim();
+            const isBotHosted = document.getElementById('edit-tour-bot-hosted').checked;
+            let tournamentId = document.getElementById('edit-tour-room-id').value.trim();
+            let tournamentPassword = document.getElementById('edit-tour-room-pass').value.trim();
+            const status = document.getElementById('edit-tour-status').value || 'active';
+            const showCredentials = document.getElementById('edit-tour-show-credentials').checked;
+            const isAutoRepeat = document.getElementById('edit-tour-auto-repeat').checked;
+
+            if (!title) {
+                showToast("Tournament Title cannot be empty.", 'error');
+                return;
+            }
+            if (isBotHosted) {
+                if (!tournamentId) tournamentId = `BOT-${Math.floor(100000 + Math.random() * 900000)}`;
+                if (!tournamentPassword) tournamentPassword = 'TBA';
+            }
+
+            const btn = document.getElementById('save-edit-tournament-btn');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<span class="loading-spinner"></span> Saving...';
+            }
+
+            try {
+                const updatePayload = {
+                    title,
+                    category,
+                    gameId,
+                    gameName: gameObj ? gameObj.name : '',
+                    modeId,
+                    modeName: modeObj ? modeObj.name : '',
+                    imageUrl,
+                    conductingDate,
+                    conductingTime,
+                    mapName,
+                    perspective,
+                    maxParticipants,
+                    entryFee,
+                    perKill,
+                    prizePool,
+                    prizes,
+                    details,
+                    tournamentId,
+                    tournamentPassword,
+                    status,
+                    isActive: status === 'active' || status === 'upcoming',
+                    visibleToUsers: status === 'active' || status === 'upcoming',
+                    showCredentials,
+                    isAutoRepeat,
+                    botHosted: isBotHosted,
+                    hostType: isBotHosted ? 'bot' : 'manual',
+                    updatedAt: FieldValue.serverTimestamp()
+                };
+
+                await db.collection("tournaments").doc(docId).update(updatePayload);
+                clearUserPanelEcosystemCache();
+                await logStaffAction('edited_tournament', `Updated tournament: ${title} (${category.toUpperCase()})`, 0);
+                showToast(`✅ Tournament "${title}" updated successfully!`, 'success');
+                closeModal('edit-tournament-modal');
+                renderTournaments();
+            } catch (err) {
+                console.error("Error updating tournament:", err);
+                showToast("Failed to save tournament changes.", 'error');
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-save"></i> Save All Tournament Changes';
+                }
+            }
+        }
+
+        // --- User Management (With Real-Time Search & Personal Notifications) ---
+        function clearManageUsersSearch() {
+            const input = document.getElementById('manage-users-search');
+            if (input) {
+                input.value = '';
+                renderUsersTable();
+                input.focus();
+            }
+        }
+
         function renderUsersTable() {
             if (!hasPermissions.manageUsers) return;
 
             const tbody = document.getElementById('users-table-body');
+            if (!tbody) return;
             tbody.innerHTML = '';
 
-            if (allUsers.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7">No users found.</td></tr>';
+            const searchInput = document.getElementById('manage-users-search');
+            const query = (searchInput ? searchInput.value : '').trim().toLowerCase();
+
+            const filteredUsers = !query ? allUsers : allUsers.filter(user => {
+                const fields = [
+                    user.username,
+                    user.email,
+                    user.phone,
+                    user.freeFireName,
+                    user.freeFireUID,
+                    user.duoPartnerName,
+                    user.duoPartnerUID,
+                    user.referralCode,
+                    user.id
+                ];
+                return fields.some(val => val && String(val).toLowerCase().includes(query));
+            });
+
+            const countBadge = document.getElementById('manage-users-count-badge');
+            if (countBadge) {
+                countBadge.textContent = query
+                    ? `Found ${filteredUsers.length} of ${allUsers.length} users`
+                    : `Showing ${allUsers.length} users`;
+            }
+
+            if (filteredUsers.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:20px; color:#aaa;">${query ? `No users matching "${query}"` : 'No users found.'}</td></tr>`;
                 return;
             }
 
-            allUsers.forEach(user => {
+            filteredUsers.forEach(user => {
                 const row = tbody.insertRow();
 
-                const regDate = user.registeredAt ? new Date(user.registeredAt.toDate()).toLocaleDateString() :
-                    'N/A';
                 const statusBadge = user.isBlocked ?
                     '<span class="status-badge status-blocked">Blocked</span>' :
                     '<span class="status-badge status-active">Active</span>';
 
                 const blockButton = user.isBlocked ?
-                    `<button onclick="toggleUserBlock('${user.id}', ${user.isBlocked})" style="background: #26a269; padding: 6px 12px; font-size: 0.8em;">
+                    `<button onclick="toggleUserBlock('${user.id}', ${user.isBlocked})" style="background: #26a269; padding: 6px 10px; font-size: 0.78em;">
                             <i class="fas fa-unlock"></i> Unblock
                            </button>` :
-                    `<button onclick="toggleUserBlock('${user.id}', ${user.isBlocked})" style="background: #d72638; padding: 6px 12px; font-size: 0.8em;">
+                    `<button onclick="toggleUserBlock('${user.id}', ${user.isBlocked})" style="background: #d72638; padding: 6px 10px; font-size: 0.78em;">
                             <i class="fas fa-ban"></i> Block
                            </button>`;
 
@@ -6683,10 +7337,17 @@
                     }).catch(() => {});
                 }
 
+                const ffInfoHtml = (user.freeFireName || user.freeFireUID)
+                    ? `<div style="font-size:0.75em; color:#00a8ff; margin-top:2px;">🎮 ${user.freeFireName || '-'} (${user.freeFireUID || 'No UID'})</div>`
+                    : '';
+
                 row.innerHTML = `
-                        <td>${user.username || 'N/A'}</td>
+                        <td>
+                            <div style="font-weight:700; color:#fff;">${user.username || 'N/A'}</div>
+                            ${ffInfoHtml}
+                        </td>
                         <td>${user.phone || 'N/A'}</td>
-                        <td>${user.email}</td>
+                        <td>${user.email || 'N/A'}</td>
                         <td>${user.tournamentsParticipated || 0}</td>
                         <td>
                             <div style="font-weight:700; color:#fff;">Play: ₹${safePlayBal.toFixed(2)}</div>
@@ -6694,13 +7355,134 @@
                         </td>
                         <td>${statusBadge}</td>
                         <td>
-                            ${blockButton}
-                            <button onclick="addWalletCredit('${user.id}')" style="background:#26a269; padding:6px 12px; font-size:0.8em; margin-left:6px;">
-                                <i class="fas fa-plus-circle"></i> Add Play ₹
-                            </button>
+                            <div style="display:flex; gap:5px; flex-wrap:wrap;">
+                                <button onclick="openPersonalNotifyModal('${user.id}')" style="background:linear-gradient(135deg,#00a8ff,#0077cc); padding:6px 10px; font-size:0.78em;" title="Send Personal Notification to ${user.username || 'User'}">
+                                    <i class="fas fa-bell"></i> Notify
+                                </button>
+                                <button onclick="addWalletCredit('${user.id}')" style="background:#26a269; padding:6px 10px; font-size:0.78em;">
+                                    <i class="fas fa-plus-circle"></i> +Play ₹
+                                </button>
+                                ${blockButton}
+                            </div>
                         </td>
                     `;
             });
+        }
+
+        function openPersonalNotifyModal(userId) {
+            if (!hasPermissions.manageUsers) {
+                showToast("You don't have permission to message users.", 'error');
+                return;
+            }
+            const user = allUsers.find(u => u.id === userId);
+            if (!user) {
+                showToast("User not found.", 'error');
+                return;
+            }
+            document.getElementById('personal-notify-user-id').value = user.id;
+            const summaryEl = document.getElementById('personal-notify-user-summary');
+            if (summaryEl) {
+                summaryEl.innerHTML = `
+                    <div><strong>To User:</strong> <span style="color:#00a8ff; font-weight:800;">${user.username || 'Player'}</span> (${user.email || 'No email'})</div>
+                    ${user.freeFireName || user.freeFireUID ? `<div style="margin-top:3px; font-size:0.9em; color:#aaa;">Free Fire: <strong>${user.freeFireName || '-'}</strong> | UID: <strong>${user.freeFireUID || '-'}</strong></div>` : ''}
+                `;
+            }
+            document.getElementById('personal-notify-title').value = `📢 Message for ${user.username || 'Player'}`;
+            document.getElementById('personal-notify-message').value = '';
+            document.getElementById('personal-notify-modal').style.display = 'block';
+            setTimeout(() => document.getElementById('personal-notify-message')?.focus(), 150);
+        }
+
+        function applyPersonalNotifyPreset(title, message) {
+            const titleInput = document.getElementById('personal-notify-title');
+            const msgInput = document.getElementById('personal-notify-message');
+            if (titleInput) titleInput.value = title;
+            if (msgInput) msgInput.value = message;
+        }
+
+        async function sendPersonalNotificationToUser() {
+            if (!hasPermissions.manageUsers) {
+                showToast("You don't have permission to send notifications.", 'error');
+                return;
+            }
+            const userId = document.getElementById('personal-notify-user-id').value.trim();
+            const title = document.getElementById('personal-notify-title').value.trim();
+            const message = document.getElementById('personal-notify-message').value.trim();
+
+            if (!userId) return;
+            if (!title || !message) {
+                showToast("Please enter both a Notification Title and Message.", 'error');
+                return;
+            }
+
+            const user = allUsers.find(u => u.id === userId);
+            const btn = document.getElementById('send-personal-notify-btn');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<span class="loading-spinner"></span> Sending...';
+            }
+
+            try {
+                const notifPayload = {
+                    userId: userId,
+                    uid: userId,
+                    username: user?.username || '',
+                    title: title,
+                    message: message,
+                    body: message,
+                    type: 'personal_staff_message',
+                    sentByStaffId: currentStaff?.uid || '',
+                    sentByStaffName: staffData?.name || 'Techno E-Sports Staff',
+                    read: false,
+                    createdAt: FieldValue.serverTimestamp(),
+                    timestamp: FieldValue.serverTimestamp()
+                };
+
+                // 1. Write to Firestore root 'notifications' collection AND 'users/{userId}/notifications' subcollection
+                await Promise.all([
+                    db.collection("notifications").add(notifPayload),
+                    db.collection("users").doc(userId).collection("notifications").add(notifPayload)
+                ]);
+
+                // 2. Collect any OneSignal Player IDs stored on the user's document
+                const playerIds = [];
+                if (user) {
+                    ['oneSignalPlayerId', 'oneSignalId', 'onesignalId', 'playerId', 'pushToken'].forEach(k => {
+                        if (user[k] && typeof user[k] === 'string' && !playerIds.includes(user[k].trim())) {
+                            playerIds.push(user[k].trim());
+                        }
+                    });
+                    if (Array.isArray(user.oneSignalIds)) {
+                        user.oneSignalIds.forEach(id => {
+                            if (id && typeof id === 'string' && !playerIds.includes(id.trim())) playerIds.push(id.trim());
+                        });
+                    }
+                }
+
+                if (playerIds.length > 0) {
+                    try {
+                        await staffApiRequest('/api/staff/notifications', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ title, message, playerIds })
+                        });
+                    } catch (pushErr) {
+                        console.warn("OneSignal backend push warning (in-app notification already delivered):", pushErr);
+                    }
+                }
+
+                await logStaffAction('sent_personal_notification', `To ${user?.username || userId}: ${title}`, 0);
+                showToast(`✅ Personal notification sent to ${user?.username || 'User'}!`, 'success');
+                closeModal('personal-notify-modal');
+            } catch (err) {
+                console.error("Error sending personal notification:", err);
+                showToast("Failed to send personal notification.", 'error');
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Personal Notification';
+                }
+            }
         }
 
         async function addWalletCredit(userId) {
