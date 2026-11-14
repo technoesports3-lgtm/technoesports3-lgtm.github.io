@@ -5795,11 +5795,35 @@
                         </svg>
                         <span id="header-wallet-balance">0</span>
                     </div>
+                    <div class="refresh-button" onclick="openUserNotificationsModal()" title="My Notifications" style="position:relative;">
+                        <i class="fas fa-bell"></i>
+                        <span id="user-notif-unread-badge" style="display:none; position:absolute; top:-4px; right:-4px; min-width:17px; height:17px; padding:0 4px; border-radius:999px; background:#EF4444; color:#fff; font-size:0.62rem; font-weight:800; align-items:center; justify-content:center; border:2px solid #fff;">0</span>
+                    </div>
                     <div class="refresh-button" onclick="refreshPage()" title="Refresh">
                         <i class="fas fa-redo-alt"></i>
                     </div>
                 </div>
             </header>
+
+            <!-- PERSONAL NOTIFICATIONS INBOX MODAL -->
+            <div id="user-notifications-modal" class="modal" style="display:none; z-index:10050;">
+                <div class="modal-content" style="max-width:440px; border-radius:20px; padding:20px; max-height:82vh; display:flex; flex-direction:column;">
+                    <span class="close-button" onclick="closeModal('user-notifications-modal')">&times;</span>
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; padding-right:24px;">
+                        <h3 style="margin:0; font-size:1.1rem; color:#0F172A; display:flex; align-items:center; gap:8px;">
+                            <i class="fas fa-bell" style="color:#0D5C9E;"></i> My Notifications
+                        </h3>
+                        <button type="button" onclick="markAllUserNotificationsRead()" style="background:#EFF6FF; color:#0D5C9E; border:1px solid #BFDBFE; border-radius:8px; padding:4px 10px; font-size:0.72rem; font-weight:700; cursor:pointer;">
+                            Mark all read
+                        </button>
+                    </div>
+                    <div id="user-notifications-list" style="overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:10px; padding-right:2px;">
+                        <div style="text-align:center; color:#64748B; padding:24px 12px; font-size:0.88rem;">
+                            No notifications yet.
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <!-- CONTENT AREA -->
             <div id="content-area">
@@ -10784,6 +10808,107 @@ function copyAllCredentials(id, pass) {
                     });
                     renderTournaments();
                 }, e => console.warn('registration listener error:', e));
+
+            setupPersonalNotificationsListener();
+        }
+
+        let personalNotificationsListener = null;
+        let userPersonalNotifications = [];
+        let seenNotificationIds = new Set();
+        let initialNotifSnapshotDone = false;
+
+        function setupPersonalNotificationsListener() {
+            if (!currentUser) return;
+            if (personalNotificationsListener) {
+                try { personalNotificationsListener(); } catch (e) {}
+                personalNotificationsListener = null;
+            }
+            initialNotifSnapshotDone = false;
+            personalNotificationsListener = db.collection("users").doc(currentUser.uid).collection("notifications")
+                .onSnapshot(snap => {
+                    const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                    docs.sort((a, b) => {
+                        const ta = a.createdAt?.toMillis ? a.createdAt.toMillis() : (a.timestamp?.toMillis ? a.timestamp.toMillis() : 0);
+                        const tb = b.createdAt?.toMillis ? b.createdAt.toMillis() : (b.timestamp?.toMillis ? b.timestamp.toMillis() : 0);
+                        return tb - ta;
+                    });
+                    userPersonalNotifications = docs;
+
+                    snap.docChanges().forEach(change => {
+                        if (change.type === 'added') {
+                            const n = { id: change.doc.id, ...change.doc.data() };
+                            if (initialNotifSnapshotDone && !seenNotificationIds.has(n.id) && n.read !== true) {
+                                showToast(n.message || n.body || '', 'info', n.title || 'New Notification');
+                            }
+                            seenNotificationIds.add(n.id);
+                        }
+                    });
+                    initialNotifSnapshotDone = true;
+                    updateUserNotificationsUI();
+                }, err => console.warn('personalNotificationsListener error:', err));
+        }
+
+        function updateUserNotificationsUI() {
+            const unreadCount = userPersonalNotifications.filter(n => n.read !== true).length;
+            const badge = document.getElementById('user-notif-unread-badge');
+            if (badge) {
+                if (unreadCount > 0) {
+                    badge.textContent = unreadCount > 99 ? '99+' : String(unreadCount);
+                    badge.style.display = 'inline-flex';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+            const listEl = document.getElementById('user-notifications-list');
+            if (!listEl) return;
+            if (userPersonalNotifications.length === 0) {
+                listEl.innerHTML = `<div style="text-align:center; color:#64748B; padding:26px 12px; font-size:0.86rem;"><i class="fas fa-bell-slash" style="font-size:1.6rem; color:#CBD5E1; margin-bottom:8px; display:block;"></i>No personal notifications yet.</div>`;
+                return;
+            }
+            listEl.innerHTML = userPersonalNotifications.slice(0, 35).map(n => {
+                const isUnread = n.read !== true;
+                const ts = n.createdAt?.toDate ? n.createdAt.toDate() : (n.timestamp?.toDate ? n.timestamp.toDate() : null);
+                const timeStr = ts ? ts.toLocaleString([], { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
+                return `
+                    <div onclick="markSingleUserNotificationRead('${n.id}')" style="background:${isUnread ? '#EFF6FF' : '#F8FAFC'}; border:1.5px solid ${isUnread ? '#93C5FD' : '#E2E8F0'}; border-radius:12px; padding:11px 13px; cursor:pointer; transition:all 0.15s ease;">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+                            <div style="font-weight:800; font-size:0.86rem; color:#0F172A;">${n.title || 'Notification'}</div>
+                            ${isUnread ? '<span style="background:#0D5C9E; color:#fff; font-size:0.60rem; font-weight:800; padding:2px 6px; border-radius:999px;">NEW</span>' : ''}
+                        </div>
+                        <div style="font-size:0.80rem; color:#334155; margin-top:4px; line-height:1.4; white-space:pre-line;">${n.message || n.body || ''}</div>
+                        ${timeStr ? `<div style="font-size:0.68rem; color:#64748B; margin-top:6px; text-align:right;">${timeStr}</div>` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openUserNotificationsModal() {
+            updateUserNotificationsUI();
+            const modal = document.getElementById('user-notifications-modal');
+            if (modal) modal.style.display = 'block';
+        }
+
+        async function markSingleUserNotificationRead(notifId) {
+            if (!currentUser || !notifId) return;
+            try {
+                await db.collection("users").doc(currentUser.uid).collection("notifications").doc(notifId).update({ read: true });
+            } catch (e) {}
+        }
+
+        async function markAllUserNotificationsRead() {
+            if (!currentUser) return;
+            const unread = userPersonalNotifications.filter(n => n.read !== true);
+            if (unread.length === 0) return;
+            try {
+                const batch = db.batch();
+                unread.slice(0, 100).forEach(n => {
+                    batch.update(db.collection("users").doc(currentUser.uid).collection("notifications").doc(n.id), { read: true });
+                });
+                await batch.commit();
+                showToast('All notifications marked as read.', 'success');
+            } catch (e) {
+                console.warn('Mark all read error:', e);
+            }
         }
 
         // ─── APP UPDATE ───
