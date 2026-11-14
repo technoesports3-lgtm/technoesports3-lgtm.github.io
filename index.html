@@ -8045,6 +8045,23 @@
                     badgeEl.className = 'pro-countdown-badge live';
                     badgeEl.innerHTML = '<span class="pulse-dot red"></span> LIVE NOW';
                 });
+                // Immediately disable any active JOIN button for this tournament once start time arrives
+                const joinBtns = document.querySelectorAll(`[data-join-btn="${tournamentId}"]`);
+                joinBtns.forEach(btn => {
+                    if (!btn.classList.contains('joined')) {
+                        btn.disabled = true;
+                        btn.classList.remove('pressable');
+                        btn.classList.add('disabled');
+                        btn.removeAttribute('onclick');
+                        btn.innerHTML = '<i class="fas fa-lock" style="font-size:0.65rem;"></i> CLOSED';
+                    }
+                });
+                // If the slot registration modal is currently open for this tournament, close it immediately
+                const regModal = document.getElementById('registration-modal');
+                if (regModal && regModal.style.display === 'block' && selectedTournament && selectedTournament.id === tournamentId) {
+                    closeModal('registration-modal');
+                    showToast('Registration closed! Tournament start time has arrived.', 'error');
+                }
                 if (tournamentTimers.has(tournamentId)) {
                     clearInterval(tournamentTimers.get(tournamentId));
                     tournamentTimers.delete(tournamentId);
@@ -8066,21 +8083,57 @@
 
         function getTournamentStartDateTime(t) {
             if (!t || !t.conductingDate) return null;
-            const parts = String(t.conductingDate).split('-');
+            const rawDate = String(t.conductingDate).trim();
+            const dashParts = rawDate.split('-');
+            const slashParts = rawDate.split('/');
             let d;
-            if (parts.length === 3) {
-                d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]), 0, 0, 0, 0);
+            if (dashParts.length === 3 && dashParts[0].length === 4) {
+                d = new Date(parseInt(dashParts[0], 10), parseInt(dashParts[1], 10) - 1, parseInt(dashParts[2], 10), 0, 0, 0, 0);
+            } else if (slashParts.length === 3 && slashParts[2].length === 4) {
+                d = new Date(parseInt(slashParts[2], 10), parseInt(slashParts[1], 10) - 1, parseInt(slashParts[0], 10), 0, 0, 0, 0);
             } else {
-                d = new Date(t.conductingDate);
+                d = new Date(rawDate);
             }
             if (isNaN(d.getTime())) return null;
             if (t.conductingTime) {
-                const timeParts = String(t.conductingTime).split(':');
-                d.setHours(parseInt(timeParts[0]) || 0, parseInt(timeParts[1]) || 0, 0, 0);
+                const rawTime = String(t.conductingTime).trim();
+                const ampmMatch = rawTime.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)?$/i);
+                if (ampmMatch) {
+                    let hrs = parseInt(ampmMatch[1], 10) || 0;
+                    const mins = parseInt(ampmMatch[2], 10) || 0;
+                    const secs = parseInt(ampmMatch[3], 10) || 0;
+                    const meridiem = (ampmMatch[4] || '').toUpperCase();
+                    if (meridiem === 'PM' && hrs < 12) hrs += 12;
+                    if (meridiem === 'AM' && hrs === 12) hrs = 0;
+                    d.setHours(hrs, mins, secs, 0);
+                } else {
+                    const timeParts = rawTime.split(':');
+                    d.setHours(parseInt(timeParts[0], 10) || 0, parseInt(timeParts[1], 10) || 0, 0, 0);
+                }
             } else {
                 d.setHours(23, 59, 59, 0);
             }
             return d;
+        }
+
+        // Strict helper: returns true if tournament registration is closed (scheduled start time reached/passed or status not open)
+        function hasTournamentRegistrationClosed(t) {
+            if (!t) return true;
+            const rawStatus = String(t.status || '').trim().toLowerCase();
+            if (rawStatus === 'completed' || rawStatus === 'ended' || rawStatus === 'cancelled' || rawStatus === 'inactive' || rawStatus === 'ongoing' || rawStatus === 'live') {
+                return true;
+            }
+            if (t.registrationEndTime) {
+                const regEnd = new Date(t.registrationEndTime);
+                if (!isNaN(regEnd.getTime()) && regEnd <= new Date()) {
+                    return true;
+                }
+            }
+            const startDt = getTournamentStartDateTime(t);
+            if (startDt && Date.now() >= startDt.getTime()) {
+                return true;
+            }
+            return false;
         }
 
         function startTournamentStartTimer(tournament) {
@@ -8941,7 +8994,7 @@
                     ${activeGames.map((game, idx) => {
                         const gameModes = getActiveModesListForGame(game);
                         const gameTournaments = currentTournaments.filter(t => t.isActive !== false && String(t.status || '').trim().toLowerCase() !== 'inactive' && doesTournamentBelongToGame(t, game));
-                        const openMatchesCount = gameTournaments.filter(t => String(t.status || '').trim().toLowerCase() !== 'completed' && (t.participants || 0) < (t.maxParticipants || 999)).length;
+                        const openMatchesCount = gameTournaments.filter(t => !hasTournamentRegistrationClosed(t) && (t.participants || 0) < (t.maxParticipants || 999)).length;
                         const liveMatchesCount = gameTournaments.filter(t => getTournamentTemporalStatus(t) === 'live').length;
                         const fallbackArt = idx % 2 === 0 ? ESPORTS_ARTWORK.gameFreeFireMax : ESPORTS_ARTWORK.gameClashSquad;
                         const safeGameImg = resolveSafeImageUrl(game.imageUrl, fallbackArt);
@@ -9099,8 +9152,8 @@
 
             container.innerHTML = modesForGame.map((mode, idx) => {
                 const modeMatches = currentTournaments.filter(t => t.isActive !== false && String(t.status || '').trim().toLowerCase() !== 'inactive' && doesTournamentBelongToMode(t, mode));
-                const upcomingCount = modeMatches.filter(t => String(t.status || '').trim().toLowerCase() !== 'completed').length;
-                const openCount = modeMatches.filter(t => String(t.status || '').trim().toLowerCase() !== 'completed' && (t.participants || 0) < (t.maxParticipants || 999)).length;
+                const upcomingCount = modeMatches.filter(t => !hasTournamentRegistrationClosed(t)).length;
+                const openCount = modeMatches.filter(t => !hasTournamentRegistrationClosed(t) && (t.participants || 0) < (t.maxParticipants || 999)).length;
                 const fallbackThumb = fallbackThumbs[idx % fallbackThumbs.length];
                 const thumbSrc = resolveSafeImageUrl(mode.thumbnailUrl || mode.imageUrl, fallbackThumb);
 
@@ -9211,11 +9264,9 @@
             const spotsLeft = Math.max(0, maxP - currentP);
             const fillPct = maxP > 0 ? Math.min(100, Math.round((currentP / maxP) * 100)) : 0;
 
-            let registrationEnded = false;
-            if (tournament.registrationEndTime) registrationEnded = new Date(tournament.registrationEndTime) <= new Date();
-
             const temporalStatus = getTournamentTemporalStatus(tournament);
             const tournamentStarted = temporalStatus === 'live' || temporalStatus === 'results';
+            const registrationEnded = hasTournamentRegistrationClosed(tournament) || tournamentStarted;
 
             let tTime = tournament.conductingTime || 'TBA';
             if (tTime !== 'TBA' && tTime.includes(':')) {
@@ -9321,31 +9372,31 @@
                 `;
             } else if (temporalStatus === 'results') {
                 primaryActionBtnHTML = `
-                    <button type="button" class="pro-btn-join disabled" disabled>
+                    <button type="button" class="pro-btn-join disabled" data-join-btn="${tournament.id}" disabled>
                         ENDED
                     </button>
                 `;
             } else if (isRegistered && isPending) {
                 primaryActionBtnHTML = `
-                    <button type="button" class="pro-btn-join disabled" disabled>
+                    <button type="button" class="pro-btn-join disabled" data-join-btn="${tournament.id}" disabled>
                         PENDING
+                    </button>
+                `;
+            } else if (registrationEnded || tournamentStarted) {
+                primaryActionBtnHTML = `
+                    <button type="button" class="pro-btn-join disabled" data-join-btn="${tournament.id}" disabled title="Registration closed as tournament time has started">
+                        <i class="fas fa-lock" style="font-size:0.65rem;"></i> CLOSED
                     </button>
                 `;
             } else if (isFull) {
                 primaryActionBtnHTML = `
-                    <button type="button" class="pro-btn-join disabled" disabled>
+                    <button type="button" class="pro-btn-join disabled" data-join-btn="${tournament.id}" disabled>
                         FULL
-                    </button>
-                `;
-            } else if (registrationEnded) {
-                primaryActionBtnHTML = `
-                    <button type="button" class="pro-btn-join disabled" disabled>
-                        CLOSED
                     </button>
                 `;
             } else {
                 primaryActionBtnHTML = `
-                    <button type="button" class="pro-btn-join pressable" onclick="handleJoinButtonClick(this, '${tournament.id}')">
+                    <button type="button" class="pro-btn-join pressable" data-join-btn="${tournament.id}" onclick="handleJoinButtonClick(this, '${tournament.id}')">
                         JOIN <i class="fas fa-bolt" style="font-size:0.68rem;"></i>
                     </button>
                 `;
@@ -9764,8 +9815,9 @@
             const t = currentTournaments.find(t => t.id === tournamentId);
             if (!t) return;
 
-            if (t.registrationEndTime && new Date(t.registrationEndTime) <= new Date())
-                return showToast("Registration ended.", 'error');
+            if (hasTournamentRegistrationClosed(t)) {
+                return showToast("Registration closed! Tournament has already started or ended.", 'error');
+            }
             if (t.participants >= t.maxParticipants) return showToast("Tournament is full.", 'error');
 
             const existingReg = userRegistrations.find(r => r.tournamentId === t.id);
@@ -9810,6 +9862,12 @@
         async function buildSlotUI(tournament) {
             const formContainer = document.getElementById('registration-form-container');
             const t = tournament;
+
+            if (hasTournamentRegistrationClosed(t)) {
+                closeModal('registration-modal');
+                showToast('Registration closed! Tournament start time has already passed.', 'error');
+                return;
+            }
 
             try {
                 const snap = await db.collection("tournament_registrations")
@@ -10250,6 +10308,11 @@
                 showToast('No tournament selected.', 'error');
                 return;
             }
+            if (hasTournamentRegistrationClosed(t)) {
+                closeModal('registration-modal');
+                showToast('Registration closed! Tournament start time has already passed.', 'error');
+                return;
+            }
 
             const takenSlots = slotBookingState.takenSlots;
             let isTaken = false;
@@ -10306,6 +10369,11 @@
         async function processSlotBooking() {
             const t = selectedTournament;
             if (!t) return showToast('No tournament selected.', 'error');
+
+            if (hasTournamentRegistrationClosed(t)) {
+                closeModal('registration-modal');
+                return showToast('Registration closed! Tournament start time has already passed.', 'error');
+            }
 
             const team = slotBookingState.selectedTeam;
             const slot = slotBookingState.selectedSlot;
@@ -10364,6 +10432,11 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
 
             try {
+                // Re-verify right before deducting coins that the scheduled start time hasn't just arrived
+                if (hasTournamentRegistrationClosed(t)) {
+                    closeModal('registration-modal');
+                    throw new Error('Registration closed! Tournament start time has already arrived.');
+                }
                 const payResult = await payTournamentEntry(t.id, t.entryFee || 0);
                 if (!payResult || !payResult.success) {
                     throw new Error(payResult?.message || 'Payment failed.');
