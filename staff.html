@@ -3895,6 +3895,72 @@
             </div>
         </div>
 
+        <!-- Modal for Editing User Wallet Balance Directly -->
+        <div id="edit-wallet-modal" class="modal">
+            <div class="modal-content" style="max-width: 480px;">
+                <span class="close-button" onclick="closeModal('edit-wallet-modal')">&times;</span>
+                <h3 style="font-size: 1.2em; color: #00a8ff; margin-bottom: 10px;">
+                    <i class="fas fa-wallet"></i> Edit User Wallet Balance
+                </h3>
+                <input type="hidden" id="edit-wallet-user-id" value="">
+
+                <div id="edit-wallet-user-summary"
+                    style="background:rgba(0,168,255,0.08); border:1px solid rgba(0,168,255,0.28); border-radius:10px; padding:10px 12px; margin-bottom:14px; font-size:0.88em; color:#ddd;">
+                </div>
+
+                <div class="form-group" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:12px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                        <label style="margin:0; color:#00a8ff; font-weight:800;">
+                            <i class="fas fa-coins"></i> PLAY WALLET BALANCE (COINS / ₹)
+                        </label>
+                        <span id="edit-wallet-current-play-badge" style="font-size:0.78em; color:#aaa;">Current: ₹0.00</span>
+                    </div>
+                    <input type="number" id="edit-wallet-play-input" min="0" step="0.01" placeholder="Enter new Play Wallet balance (e.g., 100)"
+                        style="font-size:1.15em; font-weight:800; color:#fff; margin-bottom:8px;">
+                    <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                        <button type="button" class="btn-outline-sm" style="font-size:0.74em; padding:4px 8px;" onclick="adjustEditWalletInput('edit-wallet-play-input', 10)">+10</button>
+                        <button type="button" class="btn-outline-sm" style="font-size:0.74em; padding:4px 8px;" onclick="adjustEditWalletInput('edit-wallet-play-input', 50)">+50</button>
+                        <button type="button" class="btn-outline-sm" style="font-size:0.74em; padding:4px 8px;" onclick="adjustEditWalletInput('edit-wallet-play-input', 100)">+100</button>
+                        <button type="button" class="btn-outline-sm" style="font-size:0.74em; padding:4px 8px; border-color:#f59e0b; color:#fbbf24;" onclick="adjustEditWalletInput('edit-wallet-play-input', -10)">-10</button>
+                        <button type="button" class="btn-outline-sm" style="font-size:0.74em; padding:4px 8px; border-color:#f59e0b; color:#fbbf24;" onclick="adjustEditWalletInput('edit-wallet-play-input', -50)">-50</button>
+                        <button type="button" class="btn-danger-sm" style="font-size:0.74em; padding:4px 8px;" onclick="document.getElementById('edit-wallet-play-input').value = '0'">Set 0</button>
+                    </div>
+                </div>
+
+                <div class="form-group" style="background:rgba(38,162,105,0.05); border:1px solid rgba(38,162,105,0.22); border-radius:10px; padding:12px; margin-top:12px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                        <label style="margin:0; color:#2ec27e; font-weight:800;">
+                            <i class="fas fa-trophy"></i> WITHDRAWABLE WINNINGS (COINS / ₹)
+                        </label>
+                        <span id="edit-wallet-current-win-badge" style="font-size:0.78em; color:#aaa;">Current: ₹0.00</span>
+                    </div>
+                    <input type="number" id="edit-wallet-win-input" min="0" step="0.01" placeholder="Enter new Withdrawable Winnings balance"
+                        style="font-size:1.15em; font-weight:800; color:#2ec27e; margin-bottom:8px;">
+                    <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                        <button type="button" class="btn-outline-sm" style="font-size:0.74em; padding:4px 8px;" onclick="adjustEditWalletInput('edit-wallet-win-input', 10)">+10</button>
+                        <button type="button" class="btn-outline-sm" style="font-size:0.74em; padding:4px 8px;" onclick="adjustEditWalletInput('edit-wallet-win-input', 50)">+50</button>
+                        <button type="button" class="btn-outline-sm" style="font-size:0.74em; padding:4px 8px; border-color:#f59e0b; color:#fbbf24;" onclick="adjustEditWalletInput('edit-wallet-win-input', -10)">-10</button>
+                        <button type="button" class="btn-outline-sm" style="font-size:0.74em; padding:4px 8px; border-color:#f59e0b; color:#fbbf24;" onclick="adjustEditWalletInput('edit-wallet-win-input', -50)">-50</button>
+                        <button type="button" class="btn-danger-sm" style="font-size:0.74em; padding:4px 8px;" onclick="document.getElementById('edit-wallet-win-input').value = '0'">Set 0</button>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top:12px;">
+                    <label>REASON / TRANSACTION NOTE (OPTIONAL)</label>
+                    <input type="text" id="edit-wallet-reason" placeholder="e.g., Balance updated by Staff" value="Wallet Balance Adjusted by Staff">
+                </div>
+
+                <div style="display: flex; gap: 10px; margin-top: 16px;">
+                    <button class="back-button" onclick="closeModal('edit-wallet-modal')" style="flex:1;">
+                        Cancel
+                    </button>
+                    <button onclick="saveEditedUserWallet()" id="save-edit-wallet-btn" style="flex:2; background:linear-gradient(135deg, #26a269 0%, #1e8e4a 100%);">
+                        <i class="fas fa-save"></i> Save Wallet Balance
+                    </button>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script>
@@ -7350,8 +7416,10 @@
                         <td>${user.email || 'N/A'}</td>
                         <td>${user.tournamentsParticipated || 0}</td>
                         <td>
-                            <div style="font-weight:700; color:#fff;">Play: ₹${safePlayBal.toFixed(2)}</div>
-                            <div style="font-size:0.8em; color:#26a269; font-weight:600;">Win: ₹${safeWinBal.toFixed(2)}</div>
+                            <div onclick="openEditWalletModal('${user.id}')" style="cursor:pointer; display:inline-block; padding:4px 8px; border-radius:8px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1);" title="Click to Edit Wallet Balance">
+                                <div style="font-weight:700; color:#fff;">Play: ₹${safePlayBal.toFixed(2)} <i class="fas fa-pen" style="font-size:0.72em; color:#00a8ff; margin-left:4px;"></i></div>
+                                <div style="font-size:0.8em; color:#26a269; font-weight:600;">Win: ₹${safeWinBal.toFixed(2)}</div>
+                            </div>
                         </td>
                         <td>${statusBadge}</td>
                         <td>
@@ -7359,8 +7427,8 @@
                                 <button onclick="openPersonalNotifyModal('${user.id}')" style="background:linear-gradient(135deg,#00a8ff,#0077cc); padding:6px 10px; font-size:0.78em;" title="Send Personal Notification to ${user.username || 'User'}">
                                     <i class="fas fa-bell"></i> Notify
                                 </button>
-                                <button onclick="addWalletCredit('${user.id}')" style="background:#26a269; padding:6px 10px; font-size:0.78em;">
-                                    <i class="fas fa-plus-circle"></i> +Play ₹
+                                <button onclick="openEditWalletModal('${user.id}')" style="background:linear-gradient(135deg,#f59e0b,#d97706); padding:6px 10px; font-size:0.78em;" title="Edit Wallet Coins / Balance">
+                                    <i class="fas fa-wallet"></i> Edit Coins
                                 </button>
                                 ${blockButton}
                             </div>
@@ -7485,35 +7553,178 @@
             }
         }
 
-        async function addWalletCredit(userId) {
+        function openEditWalletModal(userId) {
             if (!hasPermissions.manageUsers) {
                 showToast("You don't have permission to manage users.", 'error');
                 return;
             }
-            const amountInput = prompt("Enter amount to add to Play Wallet (₹ for tournament registration):");
-            if (amountInput === null) return;
-            const amount = Number(amountInput);
-            if (!Number.isFinite(amount) || amount <= 0) {
-                showToast("Please enter a valid amount.", 'error');
+            const user = allUsers.find(u => u.id === userId);
+            if (!user) {
+                showToast("User not found.", 'error');
                 return;
+            }
+            const currentPlay = Math.max(0, Number(user.walletBalance || 0));
+            const currentWin = Math.max(0, Number(user.withdrawableBalance || 0));
+
+            document.getElementById('edit-wallet-user-id').value = user.id;
+            const summaryEl = document.getElementById('edit-wallet-user-summary');
+            if (summaryEl) {
+                summaryEl.innerHTML = `
+                    <div><strong>User:</strong> <span style="color:#00a8ff; font-weight:800;">${user.username || 'Player'}</span> (${user.email || 'No email'})</div>
+                    ${user.freeFireName || user.freeFireUID ? `<div style="margin-top:3px; font-size:0.9em; color:#aaa;">Free Fire: <strong>${user.freeFireName || '-'}</strong> | UID: <strong>${user.freeFireUID || '-'}</strong></div>` : ''}
+                `;
+            }
+
+            const playBadge = document.getElementById('edit-wallet-current-play-badge');
+            if (playBadge) playBadge.textContent = `Current: ₹${currentPlay.toFixed(2)}`;
+            const winBadge = document.getElementById('edit-wallet-current-win-badge');
+            if (winBadge) winBadge.textContent = `Current: ₹${currentWin.toFixed(2)}`;
+
+            const playInput = document.getElementById('edit-wallet-play-input');
+            if (playInput) playInput.value = String(currentPlay);
+            const winInput = document.getElementById('edit-wallet-win-input');
+            if (winInput) winInput.value = String(currentWin);
+            const reasonInput = document.getElementById('edit-wallet-reason');
+            if (reasonInput) reasonInput.value = 'Wallet Balance Adjusted by Staff';
+
+            document.getElementById('edit-wallet-modal').style.display = 'block';
+            setTimeout(() => {
+                if (playInput) {
+                    playInput.focus();
+                    playInput.select();
+                }
+            }, 120);
+        }
+
+        function adjustEditWalletInput(inputId, delta) {
+            const el = document.getElementById(inputId);
+            if (!el) return;
+            const currentVal = Number(el.value || 0);
+            const nextVal = Math.max(0, Math.round(((Number.isFinite(currentVal) ? currentVal : 0) + Number(delta)) * 100) / 100);
+            el.value = String(nextVal);
+        }
+
+        async function saveEditedUserWallet() {
+            if (!hasPermissions.manageUsers) {
+                showToast("You don't have permission to manage users.", 'error');
+                return;
+            }
+            const userId = document.getElementById('edit-wallet-user-id').value.trim();
+            if (!userId) return;
+
+            const rawPlay = document.getElementById('edit-wallet-play-input').value.trim();
+            const rawWin = document.getElementById('edit-wallet-win-input').value.trim();
+            const reason = document.getElementById('edit-wallet-reason').value.trim() || 'Wallet Balance Adjusted by Staff';
+
+            const newPlay = Number(rawPlay);
+            const newWin = Number(rawWin);
+
+            if (rawPlay === '' || !Number.isFinite(newPlay) || newPlay < 0) {
+                showToast("Please enter a valid Play Balance (0 or more coins).", 'error');
+                return;
+            }
+            if (rawWin === '' || !Number.isFinite(newWin) || newWin < 0) {
+                showToast("Please enter a valid Withdrawable Winnings balance (0 or more coins).", 'error');
+                return;
+            }
+
+            const btn = document.getElementById('save-edit-wallet-btn');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<span class="loading-spinner"></span> Saving...';
             }
 
             try {
                 const userRef = db.collection("users").doc(userId);
                 const userSnap = await userRef.get();
-                const currentPlay = Math.max(0, Number(userSnap.exists ? (userSnap.data()?.walletBalance || 0) : 0));
-                const newPlay = currentPlay + amount;
+                const existingData = userSnap.exists ? (userSnap.data() || {}) : {};
+                const oldPlay = Math.max(0, Number(existingData.walletBalance || 0));
+                const oldWin = Math.max(0, Number(existingData.withdrawableBalance || 0));
+
+                const safeNewPlay = Math.max(0, Math.round(newPlay * 100) / 100);
+                const safeNewWin = Math.max(0, Math.round(newWin * 100) / 100);
+
                 await userRef.update({
-                    walletBalance: newPlay,
+                    walletBalance: safeNewPlay,
+                    withdrawableBalance: safeNewWin,
                     updatedAt: FieldValue.serverTimestamp()
                 });
-                showToast(`₹${amount.toFixed(2)} added to Play Wallet.`, 'success');
-                logStaffAction('manual_wallet_credit', `Added ₹${amount.toFixed(2)} to user ${userId}`, amount);
+
+                const nowIso = new Date().toISOString();
+                const txPromises = [];
+
+                if (safeNewPlay !== oldPlay) {
+                    const diffPlay = Math.round(Math.abs(safeNewPlay - oldPlay) * 100) / 100;
+                    const txType = safeNewPlay > oldPlay ? 'credit' : 'debit';
+                    txPromises.push(db.collection('wallet_transactions').add({
+                        userId,
+                        type: txType,
+                        amount: diffPlay,
+                        description: `${reason} (Play Balance: ${oldPlay} → ${safeNewPlay})`,
+                        balanceBefore: oldPlay,
+                        balanceAfter: safeNewPlay,
+                        walletBucket: 'play',
+                        isWithdrawable: false,
+                        adjustedByStaffId: currentStaff?.uid || '',
+                        adjustedByStaffName: staffData?.name || 'Staff',
+                        status: 'success',
+                        createdAt: nowIso
+                    }));
+                }
+
+                if (safeNewWin !== oldWin) {
+                    const diffWin = Math.round(Math.abs(safeNewWin - oldWin) * 100) / 100;
+                    const txType = safeNewWin > oldWin ? 'credit' : 'debit';
+                    txPromises.push(db.collection('wallet_transactions').add({
+                        userId,
+                        type: txType,
+                        amount: diffWin,
+                        description: `${reason} (Winnings: ${oldWin} → ${safeNewWin})`,
+                        balanceBefore: oldWin,
+                        balanceAfter: safeNewWin,
+                        walletBucket: 'withdrawable_only',
+                        isWithdrawable: true,
+                        adjustedByStaffId: currentStaff?.uid || '',
+                        adjustedByStaffName: staffData?.name || 'Staff',
+                        status: 'success',
+                        createdAt: nowIso
+                    }));
+                }
+
+                if (txPromises.length > 0) {
+                    await Promise.all(txPromises);
+                }
+
+                // Update local user state immediately
+                const userObj = allUsers.find(u => u.id === userId);
+                if (userObj) {
+                    userObj.walletBalance = safeNewPlay;
+                    userObj.withdrawableBalance = safeNewWin;
+                    renderUsersTable();
+                }
+
+                await logStaffAction(
+                    'edited_user_wallet',
+                    `User ${userObj?.username || userId}: Play ₹${oldPlay} -> ₹${safeNewPlay}, Win ₹${oldWin} -> ₹${safeNewWin} (${reason})`,
+                    Math.abs(safeNewPlay - oldPlay) + Math.abs(safeNewWin - oldWin)
+                );
                 await updateStaffPerformance(0, 1, 0);
+
+                showToast(`✅ Wallet updated! Play: ₹${safeNewPlay.toFixed(2)} | Win: ₹${safeNewWin.toFixed(2)}`, 'success');
+                closeModal('edit-wallet-modal');
             } catch (error) {
-                console.error("Error adding wallet credit:", error);
+                console.error("Error updating user wallet balance:", error);
                 showToast("Failed to update wallet balance.", 'error');
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-save"></i> Save Wallet Balance';
+                }
             }
+        }
+
+        async function addWalletCredit(userId) {
+            openEditWalletModal(userId);
         }
 
         async function toggleUserBlock(userId, currentBlockedStatus) {
