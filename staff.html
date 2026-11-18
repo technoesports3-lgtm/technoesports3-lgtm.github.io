@@ -2419,6 +2419,80 @@
                             </button>
                         </div>
                     </div>
+
+                    <!-- 4. Scheduled & Random Auto-Notifications Manager (No Bot Required) -->
+                    <div class="content-card">
+                        <div class="content-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                            <h3><i class="fas fa-clock"></i> Scheduled &amp; Random Auto-Notifications Manager (No Bot Needed)</h3>
+                            <button type="button" class="btn-outline-sm" onclick="seedDefaultScheduledNotifications()" style="border-color:#10B981; color:#10B981;">
+                                <i class="fas fa-magic"></i> Load 5 Default Daily Timings
+                            </button>
+                        </div>
+                        <div class="content-body">
+                            <div style="color: #00a8ff; background: rgba(25, 118, 210, 0.08); border: 1px solid rgba(25, 118, 210, 0.2); padding: 10px 14px; border-radius: 10px; margin-bottom: 15px; font-size:0.88em;">
+                                <i class="fas fa-info-circle"></i> Save notification messages and timings here. The backend server automatically sends these notifications at your saved IST timings every day (completely independent of the Python bot!). Turn on <strong>Random Pool Mode</strong> to pick a random saved message at that time so users stay excited to open the app!
+                            </div>
+
+                            <input type="hidden" id="sched-notif-edit-id" value="">
+                            <div class="tournament-form-grid">
+                                <div class="form-group">
+                                    <label>NOTIFICATION TITLE</label>
+                                    <input type="text" id="sched-notif-title" placeholder="e.g., 🔥 Free Fire Custom Rooms Open Now!">
+                                </div>
+                                <div class="form-group">
+                                    <label>DAILY SCHEDULED TIME (IST)</label>
+                                    <input type="time" id="sched-notif-time" value="18:00">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>NOTIFICATION MESSAGE</label>
+                                <textarea id="sched-notif-message" rows="2" placeholder="e.g., New Solo & Duo matches are filling up fast! Open Techno E-Sports & book your slot now to win real cash coins! 💰"></textarea>
+                            </div>
+
+                            <div class="tournament-form-grid">
+                                <div class="form-group">
+                                    <div class="show-credentials-toggle" style="margin:0;">
+                                        <div>
+                                            <span style="font-weight:700; font-size:0.86em;">🎲 Random Pool Mode</span>
+                                            <div style="font-size:0.74em; color:#aaa;">Pick a random saved message at this time</div>
+                                        </div>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="sched-notif-random" checked>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="show-credentials-toggle" style="margin:0;">
+                                        <span style="font-weight:700; font-size:0.86em;">✅ Active Daily Schedule</span>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="sched-notif-active" checked>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
+                                <button type="button" onclick="saveScheduledNotification()" id="save-sched-notif-btn" style="flex:1;">
+                                    <i class="fas fa-plus-circle"></i> SAVE SCHEDULED NOTIFICATION
+                                </button>
+                                <button type="button" class="btn-outline-sm" onclick="resetScheduledNotificationForm()" style="padding:12px 18px;">
+                                    <i class="fas fa-undo"></i> Clear
+                                </button>
+                            </div>
+
+                            <h4 style="margin:22px 0 12px 0; color:var(--primary-blue);">SAVED NOTIFICATION TIMINGS &amp; MESSAGES POOL</h4>
+                            <div id="scheduled-notifications-admin-list">
+                                <div class="empty-state" style="padding:20px;">
+                                    <i class="fas fa-clock"></i>
+                                    <h3>No Scheduled Notifications Saved</h3>
+                                    <p>Add a notification timing above or click "Load 5 Default Daily Timings".</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </section>
 
                 <!-- Game & Mode Classification Builder Section -->
@@ -5045,6 +5119,247 @@
                 `).join('');
         }
 
+        // ============================================================
+        // SCHEDULED & RANDOM AUTO-NOTIFICATIONS MANAGER (NO BOT NEEDED)
+        // ============================================================
+        let scheduledNotifications = [];
+        let scheduledNotificationsListener = null;
+
+        function formatTime12HrStaff(time24) {
+            if (!time24 || !String(time24).includes(':')) return time24 || '--:--';
+            const [hStr, mStr] = String(time24).split(':');
+            const h = parseInt(hStr, 10);
+            if (isNaN(h)) return time24;
+            const ampm = h >= 12 ? 'PM' : 'AM';
+            const h12 = h % 12 || 12;
+            return `${h12}:${(mStr || '00').slice(0, 2)} ${ampm}`;
+        }
+
+        function loadScheduledNotificationsAdmin() {
+            if (scheduledNotificationsListener) return;
+            scheduledNotificationsListener = db.collection("scheduled_notifications").onSnapshot(snap => {
+                scheduledNotifications = snap.docs
+                    .map(d => ({ id: d.id, ...d.data() }))
+                    .sort((a, b) => String(a.scheduledTime || '').localeCompare(String(b.scheduledTime || '')));
+                renderScheduledNotificationsAdmin();
+            }, err => console.warn('scheduled_notifications listener error:', err));
+        }
+
+        function resetScheduledNotificationForm() {
+            const editEl = document.getElementById('sched-notif-edit-id');
+            if (editEl) editEl.value = '';
+            const titleEl = document.getElementById('sched-notif-title');
+            if (titleEl) titleEl.value = '';
+            const msgEl = document.getElementById('sched-notif-message');
+            if (msgEl) msgEl.value = '';
+            const timeEl = document.getElementById('sched-notif-time');
+            if (timeEl) timeEl.value = '18:00';
+            const randEl = document.getElementById('sched-notif-random');
+            if (randEl) randEl.checked = true;
+            const actEl = document.getElementById('sched-notif-active');
+            if (actEl) actEl.checked = true;
+            const btn = document.getElementById('save-sched-notif-btn');
+            if (btn) btn.innerHTML = '<i class="fas fa-plus-circle"></i> SAVE SCHEDULED NOTIFICATION';
+        }
+
+        async function saveScheduledNotification() {
+            const editId = document.getElementById('sched-notif-edit-id')?.value?.trim() || '';
+            const title = document.getElementById('sched-notif-title')?.value?.trim() || '';
+            const message = document.getElementById('sched-notif-message')?.value?.trim() || '';
+            const scheduledTime = document.getElementById('sched-notif-time')?.value?.trim() || '';
+            const pickRandomFromPool = document.getElementById('sched-notif-random')?.checked !== false;
+            const isActive = document.getElementById('sched-notif-active')?.checked !== false;
+
+            if (!title || !message || !scheduledTime) {
+                showToast('Please enter Notification Title, Message, and Scheduled Time.', 'error');
+                return;
+            }
+
+            setButtonLoading('save-sched-notif-btn', true);
+            try {
+                const payload = {
+                    title,
+                    message,
+                    scheduledTime: scheduledTime.slice(0, 5),
+                    pickRandomFromPool,
+                    isActive,
+                    updatedAt: FieldValue.serverTimestamp(),
+                    updatedBy: currentStaff?.uid || ''
+                };
+                if (editId) {
+                    await db.collection("scheduled_notifications").doc(editId).update(payload);
+                    showToast(`Updated scheduled notification (${formatTime12HrStaff(scheduledTime)})!`, 'success');
+                } else {
+                    payload.createdAt = FieldValue.serverTimestamp();
+                    payload.totalSentCount = 0;
+                    await db.collection("scheduled_notifications").add(payload);
+                    showToast(`Saved daily auto-notification for ${formatTime12HrStaff(scheduledTime)}!`, 'success');
+                }
+                resetScheduledNotificationForm();
+                logRecentActivity(`Saved scheduled notification at ${scheduledTime}: ${title}`);
+            } catch (err) {
+                console.error('Error saving scheduled notification:', err);
+                showToast('Failed to save scheduled notification.', 'error');
+            } finally {
+                setButtonLoading('save-sched-notif-btn', false);
+                const btn = document.getElementById('save-sched-notif-btn');
+                if (btn) btn.innerHTML = '<i class="fas fa-plus-circle"></i> SAVE SCHEDULED NOTIFICATION';
+            }
+        }
+
+        function editScheduledNotification(id) {
+            const item = scheduledNotifications.find(x => x.id === id);
+            if (!item) return;
+            document.getElementById('sched-notif-edit-id').value = item.id;
+            document.getElementById('sched-notif-title').value = item.title || '';
+            document.getElementById('sched-notif-message').value = item.message || '';
+            document.getElementById('sched-notif-time').value = item.scheduledTime || '18:00';
+            document.getElementById('sched-notif-random').checked = item.pickRandomFromPool !== false;
+            document.getElementById('sched-notif-active').checked = item.isActive !== false;
+            const btn = document.getElementById('save-sched-notif-btn');
+            if (btn) btn.innerHTML = `<i class="fas fa-save"></i> UPDATE SCHEDULE (${formatTime12HrStaff(item.scheduledTime)})`;
+            document.getElementById('sched-notif-title')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        async function toggleScheduledNotificationStatus(id, currentState) {
+            try {
+                await db.collection("scheduled_notifications").doc(id).update({
+                    isActive: !currentState,
+                    updatedAt: FieldValue.serverTimestamp()
+                });
+                showToast(`Schedule ${!currentState ? 'enabled' : 'paused'}!`, 'success');
+            } catch (err) {
+                showToast('Failed to update status.', 'error');
+            }
+        }
+
+        async function deleteScheduledNotification(id) {
+            if (!confirm('Delete this scheduled notification?')) return;
+            try {
+                await db.collection("scheduled_notifications").doc(id).delete();
+                showToast('Scheduled notification deleted.', 'success');
+            } catch (err) {
+                showToast('Failed to delete scheduled notification.', 'error');
+            }
+        }
+
+        async function sendScheduledNotificationNow(id) {
+            const item = scheduledNotifications.find(x => x.id === id);
+            if (!item) return;
+            try {
+                showToast(`Sending "${item.title}" to all users...`, 'info');
+                await sendPushNotification(item.title, item.message);
+                await db.collection("scheduled_notifications").doc(id).update({
+                    lastSentAt: new Date().toISOString(),
+                    totalSentCount: Number(item.totalSentCount || 0) + 1
+                });
+            } catch (err) {
+                showToast('Failed to send push notification.', 'error');
+            }
+        }
+
+        async function seedDefaultScheduledNotifications() {
+            const defaults = [
+                {
+                    title: '🔥 Morning Free Fire Custom Rooms Open!',
+                    message: 'Good morning Gamers! Today\'s Solo & Duo Free Fire tournaments are live. Book your slot early & win real cash coins! 💰',
+                    scheduledTime: '10:00',
+                    pickRandomFromPool: true,
+                    isActive: true
+                },
+                {
+                    title: '🎮 Afternoon Battle Royale & Lone Wolf Matches!',
+                    message: 'Ready for a 1v1 or Duo match? Afternoon matches are starting soon — open TECHNO E-SPORTS and join now!',
+                    scheduledTime: '13:30',
+                    pickRandomFromPool: true,
+                    isActive: true
+                },
+                {
+                    title: '⚡ Evening Rush: Slots Filling Up Fast!',
+                    message: 'Only a few slots left in today\'s evening Free Fire rooms! Grab your spot now & claim Per-Kill & Booyah prizes! 🏆',
+                    scheduledTime: '16:30',
+                    pickRandomFromPool: true,
+                    isActive: true
+                },
+                {
+                    title: '🏆 Prime Time Championship Matches Live!',
+                    message: 'Prime Time Duo & Solo tournaments are open! Invite your friend, book your slot & win instant withdrawable winnings! 💸',
+                    scheduledTime: '19:30',
+                    pickRandomFromPool: true,
+                    isActive: true
+                },
+                {
+                    title: '🌙 Night Squad & Lone Wolf Arena + Free Coins!',
+                    message: 'Don\'t miss tonight\'s final Free Fire custom rooms! Watch 3 quick ads to claim your free daily coin & join a match now!',
+                    scheduledTime: '21:30',
+                    pickRandomFromPool: true,
+                    isActive: true
+                }
+            ];
+
+            try {
+                const batch = db.batch();
+                defaults.forEach(item => {
+                    const ref = db.collection("scheduled_notifications").doc();
+                    batch.set(ref, {
+                        ...item,
+                        totalSentCount: 0,
+                        createdAt: FieldValue.serverTimestamp(),
+                        updatedAt: FieldValue.serverTimestamp()
+                    });
+                });
+                await batch.commit();
+                showToast('✅ Loaded 5 daily engagement notifications & timings!', 'success');
+            } catch (err) {
+                console.error('Seed scheduled notifications error:', err);
+                showToast('Failed to load default schedules.', 'error');
+            }
+        }
+
+        function renderScheduledNotificationsAdmin() {
+            const container = document.getElementById('scheduled-notifications-admin-list');
+            if (!container) return;
+            if (!scheduledNotifications.length) {
+                container.innerHTML = `
+                    <div class="empty-state" style="padding:20px;">
+                        <i class="fas fa-clock"></i>
+                        <h3>No Scheduled Notifications Saved</h3>
+                        <p>Add a notification timing above or click "Load 5 Default Daily Timings".</p>
+                    </div>`;
+                return;
+            }
+            container.innerHTML = scheduledNotifications.map(item => `
+                <div class="admin-entity-card">
+                    <div style="width:68px; height:58px; border-radius:10px; background:rgba(0,168,255,0.12); border:1px solid rgba(0,168,255,0.35); display:flex; flex-direction:column; align-items:center; justify-content:center; flex-shrink:0;">
+                        <i class="fas fa-clock" style="color:#00a8ff; font-size:0.95rem; margin-bottom:2px;"></i>
+                        <span style="font-size:0.74rem; font-weight:800; color:#fff;">${formatTime12HrStaff(item.scheduledTime)}</span>
+                    </div>
+                    <div class="admin-entity-info">
+                        <div class="admin-entity-title">
+                            <span>${item.title || 'Scheduled Alert'}</span>
+                            <span class="status-badge ${item.isActive !== false ? 'status-active' : 'status-inactive'}">${item.isActive !== false ? 'Active' : 'Paused'}</span>
+                            ${item.pickRandomFromPool !== false ? '<span class="pill-count-blue"><i class="fas fa-dice"></i> Random Pool</span>' : '<span class="pill-count-green">Fixed Message</span>'}
+                        </div>
+                        <div class="admin-entity-sub" style="color:#ccc;">
+                            <span>${item.message || ''}</span>
+                        </div>
+                        <div class="admin-entity-sub" style="margin-top:4px; font-size:0.72rem; color:#888;">
+                            <span>Sent Count: ${item.totalSentCount || 0}</span>
+                            ${item.lastSentDate ? `<span>• Last Sent: ${item.lastSentDate}</span>` : ''}
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                        <button type="button" class="btn-outline-sm" onclick="sendScheduledNotificationNow('${item.id}')" title="Send Immediately"><i class="fas fa-paper-plane"></i> Send Now</button>
+                        <button type="button" class="btn-outline-sm" onclick="editScheduledNotification('${item.id}')"><i class="fas fa-edit"></i> Edit</button>
+                        <button type="button" class="btn-outline-sm" onclick="toggleScheduledNotificationStatus('${item.id}', ${item.isActive !== false})">
+                            <i class="fas ${item.isActive !== false ? 'fa-pause' : 'fa-play'}"></i> ${item.isActive !== false ? 'Pause' : 'Enable'}
+                        </button>
+                        <button type="button" class="btn-danger-sm" onclick="deleteScheduledNotification('${item.id}')"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
         // --- Navigation ---
         function showSection(sectionId) {
             document.querySelectorAll('.section').forEach(section => section.style.display = 'none');
@@ -5065,6 +5380,7 @@
                 renderEsportsModesAdmin();
             } else if (sectionId === 'announcements-section') {
                 renderPromoBannersAdmin();
+                loadScheduledNotificationsAdmin();
             } else if (sectionId === 'registered-users-section' && hasPermissions.viewReports) {
                 populateTournamentSelection();
             } else if (sectionId === 'prize-distribution-section' && hasPermissions.viewReports) {
