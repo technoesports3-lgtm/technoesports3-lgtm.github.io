@@ -7473,65 +7473,261 @@
             };
         }
 
+        // ─── LOCAL TRANSACTION CACHE & OFFLINE/QUOTA-SAFE WALLET HELPERS ───
+        function getLocalCachedTransactions(uid) {
+            if (!uid) return [];
+            try {
+                const raw = localStorage.getItem(`te_tx_history_${uid}`);
+                const parsed = raw ? JSON.parse(raw) : [];
+                return Array.isArray(parsed) ? parsed : [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function saveLocalCachedTransactions(uid, list) {
+            if (!uid || !Array.isArray(list)) return;
+            try {
+                localStorage.setItem(`te_tx_history_${uid}`, JSON.stringify(list.slice(0, 40)));
+            } catch (e) {}
+        }
+
+        function prependLocalCachedTransaction(uid, txObj) {
+            if (!uid || !txObj) return;
+            const current = getLocalCachedTransactions(uid);
+            const txId = txObj.id || `local_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+            const entry = { id: txId, createdAt: new Date().toISOString(), ...txObj };
+            const deduped = [entry, ...current.filter(item => item.id !== txId)].slice(0, 40);
+            saveLocalCachedTransactions(uid, deduped);
+            walletTransactions = deduped;
+            renderWalletTransactions();
+        }
+
+        function mergeAndSortTransactions(lists) {
+            const byKey = new Map();
+            lists.flat().forEach((tx, idx) => {
+                if (!tx || typeof tx !== 'object') return;
+                const tsRaw = tx.createdAt || tx.date || tx.timestamp || '';
+                const tsStr = tsRaw?.toDate ? tsRaw.toDate().toISOString() : String(tsRaw || '');
+                const amt = Number(tx.amount || 0).toFixed(2);
+                const desc = String(tx.description || '').trim();
+                const dedupKey = tx.id && !String(tx.id).startsWith('local_')
+                    ? String(tx.id)
+                    : `${tx.type || 'tx'}_${amt}_${desc}_${tsStr.slice(0, 16) || idx}`;
+                if (!byKey.has(dedupKey)) {
+                    byKey.set(dedupKey, {
+                        ...tx,
+                        id: tx.id || dedupKey,
+                        createdAt: tsStr || new Date().toISOString()
+                    });
+                }
+            });
+            return Array.from(byKey.values()).sort((a, b) => {
+                const da = new Date(a.createdAt || a.date || 0).getTime() || 0;
+                const dbTime = new Date(b.createdAt || b.date || 0).getTime() || 0;
+                return dbTime - da;
+            });
+        }
+
+        async function flushQueuedWithdrawals() {
+            const uid = getCurrentUserId();
+            if (!uid) return;
+            let queue = [];
+            try {
+                queue = JSON.parse(localStorage.getItem(`te_pending_withdrawal_queue_${uid}`) || '[]');
+                if (!Array.isArray(queue) || queue.length === 0) return;
+            } catch (e) {
+                return;
+            }
+
+            const remaining = [];
+            for (const item of queue) {
+                try {
+                    const r = await fetch(`${BACKEND_BASE_URL}/api/wallet/withdraw`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            userId: uid,
+                            amount: item.amount,
+                            upiId: item.upiId,
+                            upiQrCode: item.upiQrCode || '',
+                            upiUri: item.upiUri || '',
+                            source: 'admin_credited_only'
+                        })
+                    });
+                    if (r.ok) {
+                        localStorage.removeItem(`te_local_withdrawable_override_${uid}`);
+                        continue;
+                    }
+                    // Try direct Firestore fallback
+                    await db.collection('withdrawal_requests').add({
+                        userId: uid,
+                        username: item.username || 'Player',
+                        email: item.email || '',
+                        phone: item.phone || '',
+                        amount: item.amount,
+                        upiId: item.upiId || 'QR Code Uploaded',
+                        upiQrCode: item.upiQrCode || null,
+                        upiUri: item.upiUri || null,
+                        paymentMethod: item.upiQrCode ? 'qr_code' : 'upi_id',
+                        status: 'pending',
+                        createdAt: item.createdAt || new Date().toISOString()
+                    });
+                    await db.collection('users').doc(uid).update({
+                        withdrawableBalance: Math.max(0, Number(item.withdrawableAfter ?? 0))
+                    }).catch(() => null);
+                    localStorage.removeItem(`te_local_withdrawable_override_${uid}`);
+                } catch (_err) {
+                    remaining.push(item);
+                }
+            }
+
+            try {
+                if (remaining.length > 0) {
+                    localStorage.setItem(`te_pending_withdrawal_queue_${uid}`, JSON.stringify(remaining));
+                } else {
+                    localStorage.removeItem(`te_pending_withdrawal_queue_${uid}`);
+                }
+            } catch (e) {}
+        }
+
         async function fetchWalletBalance() {
             const uid = getCurrentUserId();
             if (!uid) return;
             try {
-                const userDoc = await db.collection("users").doc(uid).get();
-                let firestoreData = {};
-                if (userDoc.exists) {
-                    firestoreData = userDoc.data() || {};
+                let firestoreData = null;
+                try {
+                    const userDoc = await db.collection("users").doc(uid).get();
+                    if (userDoc.exists) firestoreData = userDoc.data() || {};
+                } catch (fsErr) {
+                    // Fallback to Firestore IndexedDB cache if quota is temporarily exceeded
+                    try {
+                        const cachedDoc = await db.collection("users").doc(uid).get({ source: 'cache' });
+                        if (cachedDoc.exists) firestoreData = cachedDoc.data() || {};
+                    } catch (_cacheErr) {}
+                }
+
+                if (firestoreData) {
                     currentUserData.freeFireName = firestoreData.freeFireName || currentUserData.freeFireName || '';
                     currentUserData.freeFireUID = firestoreData.freeFireUID || currentUserData.freeFireUID || '';
                     currentUserData.duoPartnerName = firestoreData.duoPartnerName || currentUserData.duoPartnerName || '';
                     currentUserData.duoPartnerUID = firestoreData.duoPartnerUID || currentUserData.duoPartnerUID || '';
+                    if (firestoreData.savedUpiQrCode) currentUserData.savedUpiQrCode = firestoreData.savedUpiQrCode;
+                    if (firestoreData.savedUpiId) currentUserData.savedUpiId = firestoreData.savedUpiId;
+
+                    const healed = await ensureAndHealSeparateWalletBalances(uid, firestoreData);
+                    walletBalance = healed.playBalance;
+                    withdrawableBalance = healed.withdrawable;
+                } else {
+                    // Only call backend API if Firestore client read didn't return data
+                    try {
+                        const r = await fetch(`${BACKEND_BASE_URL}/api/wallet/balance/${uid}`);
+                        if (r.ok) {
+                            const d = await r.json();
+                            const apiPlay = Number(d.balance ?? d.walletBalance ?? walletBalance);
+                            const apiWin = Number(d.withdrawableBalance ?? withdrawableBalance);
+                            if (Number.isFinite(apiPlay) && apiPlay >= 0) walletBalance = apiPlay;
+                            if (Number.isFinite(apiWin) && apiWin >= 0) withdrawableBalance = apiWin;
+                        }
+                    } catch (apiErr) {
+                        console.warn('Backend wallet balance fallback note:', apiErr);
+                    }
                 }
 
-                const healed = await ensureAndHealSeparateWalletBalances(uid, firestoreData);
-                walletBalance = healed.playBalance;
-                withdrawableBalance = healed.withdrawable;
-
-                try {
-                    const r = await fetch(`${BACKEND_BASE_URL}/api/wallet/balance/${uid}`);
-                    if (r.ok) {
-                        const d = await r.json();
-                        const apiPlay = Number(d.balance ?? d.walletBalance ?? walletBalance);
-                        const apiWin = Number(d.withdrawableBalance ?? withdrawableBalance);
-                        if (Number.isFinite(apiPlay) && apiPlay >= 0) {
-                            walletBalance = apiPlay;
-                        }
-                        if (Number.isFinite(apiWin) && apiWin >= 0) {
-                            withdrawableBalance = apiWin;
-                        }
-                    }
-                } catch (apiErr) {
-                    console.warn('Backend wallet balance fetch fallback to Firestore:', apiErr);
+                // Respect any locally queued withdrawal override not yet flushed to Firestore
+                const localWinOverride = localStorage.getItem(`te_local_withdrawable_override_${uid}`);
+                if (localWinOverride !== null && Number.isFinite(Number(localWinOverride))) {
+                    withdrawableBalance = Math.min(withdrawableBalance, Math.max(0, Number(localWinOverride)));
                 }
 
                 updateWalletUI();
                 updateProfileFFDetails();
-            } catch (e) { console.error('Wallet balance error:', e);
-                showToast('Unable to fetch wallet balance.', 'error'); }
+                flushQueuedWithdrawals();
+            } catch (e) {
+                console.warn('Wallet balance fetch warning:', e);
+                updateWalletUI();
+            }
         }
 
         async function fetchWalletTransactions() {
             const uid = getCurrentUserId();
             if (!uid) return;
             const container = document.getElementById('wallet-transactions-list');
-            if (container) container.innerHTML = '<p style="color:var(--text-muted);text-align:center;">Loading transactions...</p>';
+            const cachedTxs = getLocalCachedTransactions(uid);
+
+            // Immediately render cached transactions if available so user never sees blank/error state
+            if (cachedTxs.length > 0) {
+                walletTransactions = cachedTxs;
+                renderWalletTransactions();
+            } else if (container) {
+                container.innerHTML = '<p style="color:var(--text-muted);text-align:center;">Loading transactions...</p>';
+            }
+
+            const collectedLists = [cachedTxs];
+
+            // 1. Try Backend API
             try {
                 const r = await fetch(`${BACKEND_BASE_URL}/api/wallet/transactions/${uid}`);
-                const d = await r.json();
-                if (!r.ok) throw new Error(d.message || 'Failed');
-                walletTransactions = Array.isArray(d.transactions) ? d.transactions : [];
-                renderWalletTransactions();
-                if (document.getElementById('transaction-history-page').style.display === 'block') {
-                    renderFullTransactionHistory();
+                if (r.ok) {
+                    const d = await r.json();
+                    if (Array.isArray(d.transactions) && d.transactions.length > 0) {
+                        collectedLists.push(d.transactions);
+                    }
                 }
-            } catch (e) {
-                console.error('Wallet transactions error:', e);
-                if (container) container.innerHTML =
-                    '<p style="color:#d72638;text-align:center;">Failed to load transactions.</p>';
+            } catch (_apiErr) {}
+
+            // 2. If backend didn't return transactions, try direct Firestore client query (without orderBy so no composite index is required) + cache fallback
+            if (collectedLists.length === 1) {
+                try {
+                    const snap = await db.collection('wallet_transactions').where('userId', '==', uid).limit(30).get();
+                    if (!snap.empty) {
+                        collectedLists.push(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+                    }
+                } catch (_fsErr) {
+                    try {
+                        const cacheSnap = await db.collection('wallet_transactions').where('userId', '==', uid).limit(30).get({ source: 'cache' });
+                        if (!cacheSnap.empty) {
+                            collectedLists.push(cacheSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+                        }
+                    } catch (_cErr) {}
+                }
+
+                // Also check prize transactions ('transactions') & 'withdrawal_requests' for complete history
+                try {
+                    const [prizeSnap, wdSnap] = await Promise.all([
+                        db.collection('transactions').where('userId', '==', uid).limit(20).get().catch(() => null),
+                        db.collection('withdrawal_requests').where('userId', '==', uid).limit(20).get().catch(() => null)
+                    ]);
+                    if (prizeSnap && !prizeSnap.empty) {
+                        collectedLists.push(prizeSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+                    }
+                    if (wdSnap && !wdSnap.empty) {
+                        collectedLists.push(wdSnap.docs.map(doc => {
+                            const wd = doc.data() || {};
+                            return {
+                                id: `wd_${doc.id}`,
+                                userId: uid,
+                                type: 'debit',
+                                amount: Number(wd.amount || 0),
+                                description: wd.upiId && wd.upiId !== 'QR Code Uploaded'
+                                    ? `Withdrawal - UPI: ${wd.upiId}`
+                                    : 'Withdrawal - UPI QR Code',
+                                isWithdrawable: true,
+                                status: wd.status || 'pending',
+                                createdAt: wd.createdAt || new Date().toISOString()
+                            };
+                        }));
+                    }
+                } catch (_extraErr) {}
+            }
+
+            walletTransactions = mergeAndSortTransactions(collectedLists);
+            if (walletTransactions.length > 0) {
+                saveLocalCachedTransactions(uid, walletTransactions);
+            }
+            renderWalletTransactions();
+            if (document.getElementById('transaction-history-page')?.style.display === 'block') {
+                renderFullTransactionHistory();
             }
         }
 
@@ -8060,9 +8256,9 @@
                     reader.onload = (e) => {
                         const img = new Image();
                         img.onload = () => {
-                            const maxDim = 560;
-                            let w = img.width || 400;
-                            let h = img.height || 400;
+                            const maxDim = 420;
+                            let w = img.width || 360;
+                            let h = img.height || 360;
                             if (w > maxDim || h > maxDim) {
                                 if (w > h) {
                                     h = Math.round((h * maxDim) / w);
@@ -8079,9 +8275,9 @@
                             ctx.fillStyle = '#FFFFFF';
                             ctx.fillRect(0, 0, w, h);
                             ctx.drawImage(img, 0, 0, w, h);
-                            let out = canvas.toDataURL('image/jpeg', 0.80);
-                            if (out.length > 260000) {
-                                out = canvas.toDataURL('image/jpeg', 0.65);
+                            let out = canvas.toDataURL('image/jpeg', 0.72);
+                            if (out.length > 90000) {
+                                out = canvas.toDataURL('image/jpeg', 0.58);
                             }
                             resolve({ dataUrl: out, imgElement: img });
                         };
@@ -8200,11 +8396,14 @@
             if (btn && btn.disabled) return;
             if (btn) {
                 btn.disabled = true;
-                btn.innerHTML = '<span class="btn-micro-spinner"></span> Verifying...';
+                btn.innerHTML = '<span class="btn-micro-spinner"></span> Submitting...';
             }
 
             try {
-                await fetchWalletBalance();
+                // Only re-fetch balance if current in-memory withdrawableBalance is less than amount (saves Firestore reads!)
+                if (Number(withdrawableBalance || 0) < amount) {
+                    await fetchWalletBalance();
+                }
                 const playBalanceBeforeWithdraw = Math.max(0, Number(walletBalance || 0));
                 const withdrawableBeforeWithdraw = Math.max(0, Number(withdrawableBalance || 0));
 
@@ -8213,110 +8412,166 @@
                     return;
                 }
 
-                if (btn) btn.innerHTML = '<span class="btn-micro-spinner"></span> Submitting...';
+                const expectedWithdrawableAfter = Math.max(0, withdrawableBeforeWithdraw - amount);
+                const nowIso = new Date().toISOString();
+                const playerName = currentUserData?.username || currentUserData?.freeFireName || 'Player';
+                const playerEmail = currentUserData?.email || currentUser?.email || '';
+                const playerPhone = currentUserData?.phone || '';
 
-                const r = await fetch(`${BACKEND_BASE_URL}/api/wallet/withdraw`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        userId: uid,
-                        amount,
-                        upiId: effectiveUpiId,
-                        upiQrCode: hasQr ? currentWithdrawQrDataUrl : '',
-                        upiUri: currentDetectedUpiUri || '',
-                        source: 'admin_credited_only'
-                    })
-                });
-                const d = await r.json();
-                if (!r.ok) throw new Error(d.message || 'Withdrawal failed');
-
-                // Save QR code & user details directly onto the latest withdrawal_requests doc in Firestore as well
-                // (guarantees QR image is attached even if Render backend is still running an older build)
+                // Save user's UPI & QR locally first so it's never lost
                 try {
-                    const userUpdates = {};
                     if (rawUpiId || currentDetectedUpiFromQr) {
-                        userUpdates.savedUpiId = rawUpiId || currentDetectedUpiFromQr;
-                        localStorage.setItem(`te_saved_upi_id_${uid}`, userUpdates.savedUpiId);
+                        localStorage.setItem(`te_saved_upi_id_${uid}`, rawUpiId || currentDetectedUpiFromQr);
                     }
                     if (hasQr) {
-                        userUpdates.savedUpiQrCode = currentWithdrawQrDataUrl;
                         localStorage.setItem(`te_saved_upi_qr_${uid}`, currentWithdrawQrDataUrl);
                     }
-                    if (Object.keys(userUpdates).length > 0) {
-                        await db.collection('users').doc(uid).update(userUpdates).catch(() => null);
-                    }
+                } catch (e) {}
 
-                    const latestReqSnap = await db.collection('withdrawal_requests')
-                        .where('userId', '==', uid)
-                        .get()
-                        .catch(() => null);
-                    if (latestReqSnap && !latestReqSnap.empty) {
-                        const sortedDocs = latestReqSnap.docs
-                            .map(doc => ({ id: doc.id, ref: doc.ref, ...doc.data() }))
-                            .filter(item => item.status === 'pending')
-                            .sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
-                        if (sortedDocs.length > 0) {
-                            const latestDoc = sortedDocs[0];
-                            const patchPayload = {
-                                username: currentUserData?.username || currentUserData?.freeFireName || 'Player',
-                                email: currentUserData?.email || currentUser?.email || '',
-                                phone: currentUserData?.phone || '',
-                                upiId: effectiveUpiId
-                            };
-                            if (hasQr && !latestDoc.upiQrCode) {
-                                patchPayload.upiQrCode = currentWithdrawQrDataUrl;
-                                patchPayload.paymentMethod = rawUpiId ? 'qr_and_upi' : 'qr_code';
-                            }
-                            if (currentDetectedUpiUri && !latestDoc.upiUri) {
-                                patchPayload.upiUri = currentDetectedUpiUri;
-                            }
-                            await latestDoc.ref.update(patchPayload).catch(() => null);
+                let backendSucceeded = false;
+                let firestoreFallbackSucceeded = false;
+                let lastWithdrawErr = null;
+
+                // TIER 1: Try Backend Withdrawal API
+                try {
+                    const r = await fetch(`${BACKEND_BASE_URL}/api/wallet/withdraw`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            userId: uid,
+                            amount,
+                            upiId: effectiveUpiId,
+                            upiQrCode: hasQr ? currentWithdrawQrDataUrl : '',
+                            upiUri: currentDetectedUpiUri || '',
+                            source: 'admin_credited_only'
+                        })
+                    });
+                    const d = await r.json().catch(() => ({}));
+                    if (r.ok && d.success !== false) {
+                        backendSucceeded = true;
+                    } else {
+                        lastWithdrawErr = new Error(d.message || `HTTP ${r.status}`);
+                        // If backend rejected specifically due to insufficient balance on server, stop here
+                        if (r.status === 400 && String(d.message || '').toLowerCase().includes('insufficient')) {
+                            throw lastWithdrawErr;
                         }
                     }
-                } catch (qrPatchErr) {
-                    console.warn('QR metadata patch warning:', qrPatchErr);
+                } catch (apiErr) {
+                    if (String(apiErr.message || '').toLowerCase().includes('insufficient')) {
+                        throw apiErr;
+                    }
+                    lastWithdrawErr = apiErr;
                 }
 
-                // Trigger instant staff alert fallback
+                // TIER 2: If Backend failed (e.g. Render not yet redeployed, payload size, or quota error), write directly to Firestore
+                if (!backendSucceeded) {
+                    try {
+                        await db.collection('withdrawal_requests').add({
+                            userId: uid,
+                            username: playerName,
+                            email: playerEmail,
+                            phone: playerPhone,
+                            amount,
+                            upiId: effectiveUpiId,
+                            upiQrCode: hasQr ? currentWithdrawQrDataUrl : null,
+                            upiUri: currentDetectedUpiUri || null,
+                            paymentMethod: hasQr ? (rawUpiId ? 'qr_and_upi' : 'qr_code') : 'upi_id',
+                            status: 'pending',
+                            withdrawableBefore: withdrawableBeforeWithdraw,
+                            withdrawableAfter: expectedWithdrawableAfter,
+                            createdAt: nowIso
+                        });
+
+                        await db.collection('users').doc(uid).update({
+                            walletBalance: playBalanceBeforeWithdraw,
+                            withdrawableBalance: expectedWithdrawableAfter,
+                            ...(rawUpiId ? { savedUpiId: rawUpiId } : {}),
+                            ...(hasQr ? { savedUpiQrCode: currentWithdrawQrDataUrl } : {}),
+                            updatedAt: nowIso
+                        });
+
+                        await db.collection('wallet_transactions').add({
+                            userId: uid,
+                            amount,
+                            type: 'debit',
+                            description: hasQr && !rawUpiId
+                                ? 'Withdrawal - UPI QR Code'
+                                : `Withdrawal - UPI: ${effectiveUpiId}`,
+                            walletBucket: 'withdrawable_only',
+                            isWithdrawable: true,
+                            balanceAfter: expectedWithdrawableAfter,
+                            playBalanceAfter: playBalanceBeforeWithdraw,
+                            status: 'pending',
+                            createdAt: nowIso
+                        }).catch(() => null);
+
+                        firestoreFallbackSucceeded = true;
+                    } catch (fsFallbackErr) {
+                        lastWithdrawErr = fsFallbackErr;
+                    }
+                }
+
+                // TIER 3: If Firestore itself is temporarily over free-tier daily quota (RESOURCE_EXHAUSTED),
+                // queue the withdrawal locally for automatic Firestore sync + immediately send Email alert to Admin!
+                if (!backendSucceeded && !firestoreFallbackSucceeded) {
+                    const errMsg = String(lastWithdrawErr?.message || '');
+                    const isQuotaOrNetwork = /RESOURCE_EXHAUSTED|quota|exceeded|network|failed to fetch|500|502|503/i.test(errMsg);
+                    if (!isQuotaOrNetwork) {
+                        throw lastWithdrawErr || new Error('Withdrawal failed');
+                    }
+
+                    try {
+                        const existingQueue = JSON.parse(localStorage.getItem(`te_pending_withdrawal_queue_${uid}`) || '[]');
+                        existingQueue.push({
+                            userId: uid,
+                            username: playerName,
+                            email: playerEmail,
+                            phone: playerPhone,
+                            amount,
+                            upiId: effectiveUpiId,
+                            upiQrCode: hasQr ? currentWithdrawQrDataUrl : '',
+                            upiUri: currentDetectedUpiUri || '',
+                            withdrawableBefore: withdrawableBeforeWithdraw,
+                            withdrawableAfter: expectedWithdrawableAfter,
+                            createdAt: nowIso
+                        });
+                        localStorage.setItem(`te_pending_withdrawal_queue_${uid}`, JSON.stringify(existingQueue));
+                        localStorage.setItem(`te_local_withdrawable_override_${uid}`, String(expectedWithdrawableAfter));
+                    } catch (qErr) {}
+                }
+
+                // Trigger Staff / Admin Payout Alert (Firestore + FormSubmit Email)
                 triggerClientSideStaffWithdrawalAlert({
                     uid,
-                    username: currentUserData?.username || currentUserData?.freeFireName || 'Player',
-                    email: currentUserData?.email || currentUser?.email || '',
-                    phone: currentUserData?.phone || '',
+                    username: playerName,
+                    email: playerEmail,
+                    phone: playerPhone,
                     amount,
                     upiLabel: effectiveUpiId,
                     hasQrCode: hasQr
                 });
 
-                // Enforce strict separation in Firestore: withdrawing winnings must ONLY reduce withdrawableBalance, NEVER walletBalance (Play Balance)!
-                const expectedWithdrawableAfter = Math.max(0, withdrawableBeforeWithdraw - amount);
-                try {
-                    const postSnap = await db.collection("users").doc(uid).get();
-                    if (postSnap.exists) {
-                        const postData = postSnap.data() || {};
-                        const postPlay = Number(postData.walletBalance ?? playBalanceBeforeWithdraw);
-                        const postWin = Number(postData.withdrawableBalance ?? expectedWithdrawableAfter);
-                        if (postPlay < playBalanceBeforeWithdraw || postWin < 0) {
-                            await db.collection("users").doc(uid).update({
-                                walletBalance: playBalanceBeforeWithdraw,
-                                withdrawableBalance: expectedWithdrawableAfter
-                            });
-                        }
-                    }
-                } catch (guardErr) {
-                    console.warn('Post-withdrawal separation guard warning:', guardErr);
-                }
+                // Immediately record in local transaction history so Recent Activity shows it right away!
+                prependLocalCachedTransaction(uid, {
+                    userId: uid,
+                    type: 'debit',
+                    amount,
+                    description: hasQr && !rawUpiId
+                        ? 'Withdrawal - UPI QR Code'
+                        : `Withdrawal - UPI: ${effectiveUpiId}`,
+                    walletBucket: 'withdrawable_only',
+                    isWithdrawable: true,
+                    balanceAfter: expectedWithdrawableAfter,
+                    status: 'pending',
+                    createdAt: nowIso
+                });
 
                 walletBalance = playBalanceBeforeWithdraw;
                 withdrawableBalance = expectedWithdrawableAfter;
                 updateWalletUI();
 
                 showWithdrawSuccessPopup();
-
                 document.getElementById('withdraw-amount').value = '';
-                await fetchWalletBalance();
-                await fetchWalletTransactions();
-                await fetchProfileData();
             } catch (e) {
                 showToast(e.message || 'Withdrawal failed', 'error');
             } finally {
@@ -10855,7 +11110,9 @@
         async function payTournamentEntry(tournamentId, amount) {
             const uid = getCurrentUserId();
             const entryFee = Math.max(0, Number(amount || 0));
-            await fetchWalletBalance();
+            if (Number(walletBalance || 0) < entryFee) {
+                await fetchWalletBalance();
+            }
             const playBalBefore = Math.max(0, Number(walletBalance || 0));
             const winBalBefore = Math.max(0, Number(withdrawableBalance || 0));
 
@@ -10863,31 +11120,51 @@
                 throw new Error(`Insufficient Play Balance! Available: ${playBalBefore} Coins, Required: ${entryFee} Coins.`);
             }
 
-            const r = await fetch(`${BACKEND_BASE_URL}/api/payment/pay-tournament`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId: uid, tournamentId, amount: entryFee })
-            });
-            const d = await r.json();
-            if (!r.ok) throw new Error(d.message || 'Tournament payment failed.');
-
             const expectedPlayAfter = Math.max(0, playBalBefore - entryFee);
             try {
-                const postSnap = await db.collection("users").doc(uid).get();
-                if (postSnap.exists) {
-                    const postData = postSnap.data() || {};
-                    const postPlay = Number(postData.walletBalance ?? expectedPlayAfter);
-                    const postWin = Number(postData.withdrawableBalance ?? winBalBefore);
-                    if (postPlay < 0 || postWin !== winBalBefore) {
-                        await db.collection("users").doc(uid).update({
-                            walletBalance: Math.max(0, postPlay),
-                            withdrawableBalance: winBalBefore
-                        });
-                    }
+                const r = await fetch(`${BACKEND_BASE_URL}/api/payment/pay-tournament`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: uid, tournamentId, amount: entryFee })
+                });
+                const d = await r.json().catch(() => ({}));
+                if (!r.ok) throw new Error(d.message || 'Tournament payment failed.');
+            } catch (apiPayErr) {
+                if (String(apiPayErr.message || '').toLowerCase().includes('insufficient') ||
+                    String(apiPayErr.message || '').toLowerCase().includes('closed')) {
+                    throw apiPayErr;
                 }
-            } catch (guardErr) {
-                console.warn('Post-entry-fee separation guard warning:', guardErr);
+                // Direct Firestore fallback if backend is unreachable or quota-throttled
+                await db.collection('users').doc(uid).update({
+                    walletBalance: expectedPlayAfter
+                });
+                await db.collection('wallet_transactions').add({
+                    userId: uid,
+                    type: 'debit',
+                    amount: entryFee,
+                    description: 'Tournament Entry Fee',
+                    tournamentId: tournamentId || null,
+                    balanceBefore: playBalBefore,
+                    balanceAfter: expectedPlayAfter,
+                    walletBucket: 'play',
+                    isWithdrawable: false,
+                    createdAt: new Date().toISOString(),
+                    status: 'success'
+                }).catch(() => null);
             }
+
+            prependLocalCachedTransaction(uid, {
+                userId: uid,
+                type: 'debit',
+                amount: entryFee,
+                description: 'Tournament Entry Fee',
+                tournamentId: tournamentId || null,
+                balanceAfter: expectedPlayAfter,
+                walletBucket: 'play',
+                isWithdrawable: false,
+                status: 'success',
+                createdAt: new Date().toISOString()
+            });
 
             walletBalance = expectedPlayAfter;
             withdrawableBalance = winBalBefore;
@@ -11540,7 +11817,12 @@ function copyAllCredentials(id, pass) {
                 }
                 loadWalletAndReferralData();
                 if (walletBalanceInterval) clearInterval(walletBalanceInterval);
-                walletBalanceInterval = setInterval(fetchWalletBalance, 15000);
+                // Gentle 3-minute balance sync only when tab is visible to prevent exhausting Firestore daily read quota
+                walletBalanceInterval = setInterval(() => {
+                    if (document.visibilityState === 'visible') {
+                        fetchWalletBalance();
+                    }
+                }, 180000);
                 setupRealTimeListeners();
                 resetAutoLogoutTimer();
                 setupActivityListeners();
