@@ -6079,8 +6079,44 @@
                             <input type="number" id="withdraw-amount" min="50" placeholder="Enter amount (Minimum 50)">
                         </div>
 
+                        <!-- OPTION 1: UPLOAD UPI QR CODE (FOR USERS WHO DON'T KNOW UPI ID) -->
+                        <div class="form-group" style="margin-bottom:12px;">
+                            <label style="color:var(--text-secondary); font-size:0.78rem; font-weight:800; display:flex; align-items:center; justify-content:space-between;">
+                                <span><i class="fas fa-qrcode" style="color:#0D5C9E;"></i> Option 1: Upload Your UPI QR Code (Easiest)</span>
+                                <span style="background:#EFF6FF; color:#0D5C9E; padding:2px 8px; border-radius:999px; font-size:0.65rem; font-weight:800;">No UPI ID Needed</span>
+                            </label>
+                            <input type="file" id="withdraw-qr-file" accept="image/*" style="display:none;" onchange="handleWithdrawQrUpload(event)">
+                            <div id="withdraw-qr-dropzone" onclick="document.getElementById('withdraw-qr-file').click()" style="margin-top:6px; border:2px dashed #93C5FD; background:linear-gradient(135deg,#F8FAFC,#EFF6FF); border-radius:14px; padding:14px 12px; text-align:center; cursor:pointer; transition:all 0.2s ease;">
+                                <div id="withdraw-qr-placeholder">
+                                    <div style="width:42px; height:42px; border-radius:12px; background:#DBEAFE; color:#0D5C9E; display:inline-flex; align-items:center; justify-content:center; font-size:1.25rem; margin-bottom:6px;">
+                                        <i class="fas fa-qrcode"></i>
+                                    </div>
+                                    <div style="font-weight:800; font-size:0.84rem; color:#0F172A;">Tap to Upload PhonePe / GPay / Paytm QR Code</div>
+                                    <div style="font-size:0.72rem; color:#64748B; margin-top:2px;">Don't know your UPI ID? Just upload your QR screenshot!</div>
+                                </div>
+                                <div id="withdraw-qr-preview-box" style="display:none; align-items:center; justify-content:space-between; gap:12px; text-align:left;">
+                                    <div style="display:flex; align-items:center; gap:10px; min-width:0;">
+                                        <img id="withdraw-qr-preview-img" src="" alt="UPI QR Preview" style="width:58px; height:58px; object-fit:contain; border-radius:10px; border:2px solid #10B981; background:#fff; padding:2px; flex-shrink:0;">
+                                        <div style="min-width:0;">
+                                            <div id="withdraw-qr-status" style="font-weight:800; font-size:0.82rem; color:#059669;"><i class="fas fa-check-circle"></i> UPI QR Code Attached!</div>
+                                            <div id="withdraw-qr-substatus" style="font-size:0.71rem; color:#475569; margin-top:2px;">Tap image to change QR code</div>
+                                        </div>
+                                    </div>
+                                    <button type="button" onclick="event.stopPropagation(); clearWithdrawQrCode();" style="background:#FEE2E2; color:#DC2626; border:1px solid #FECACA; border-radius:8px; padding:6px 10px; font-size:0.72rem; font-weight:800; cursor:pointer; flex-shrink:0;">
+                                        <i class="fas fa-times"></i> Remove
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="display:flex; align-items:center; gap:10px; margin:8px 0 10px;">
+                            <div style="flex:1; height:1px; background:#E2E8F0;"></div>
+                            <span style="font-size:0.68rem; font-weight:800; color:#94A3B8; letter-spacing:0.8px;">OR ENTER UPI ID</span>
+                            <div style="flex:1; height:1px; background:#E2E8F0;"></div>
+                        </div>
+
                         <div class="form-group" style="margin-bottom:14px;">
-                            <label style="color:var(--text-secondary); font-size:0.78rem; font-weight:700;">Your UPI ID (GPay / PhonePe / Paytm)</label>
+                            <label style="color:var(--text-secondary); font-size:0.78rem; font-weight:700;">Option 2: Your UPI ID (Optional if QR Code Uploaded)</label>
                             <input type="text" id="withdraw-upi" placeholder="example: yourname@okaxis or 9876543210@ybl">
                         </div>
 
@@ -7380,6 +7416,7 @@
             if (wbDisplay) wbDisplay.textContent = wb;
             const wbInfo = document.getElementById('withdrawable-info-amount');
             if (wbInfo) wbInfo.textContent = wb;
+            if (typeof loadSavedWithdrawQrCode === 'function') loadSavedWithdrawQrCode();
         }
 
         // Auto-heal any negative Play Balance (e.g. -244 caused by old withdrawal logic subtracting from both balances)
@@ -7941,13 +7978,223 @@
             document.getElementById('qr-full-page').style.display = 'none';
         }
 
-        // ─── WITHDRAW (STRICTLY FROM WITHDRAWABLE WINNINGS ONLY — NEVER DEDUCTS PLAY BALANCE) ───
+        // ─── WITHDRAW (STRICTLY FROM WITHDRAWABLE WINNINGS ONLY + SUPPORTS UPI QR CODE UPLOAD) ───
+        let currentWithdrawQrDataUrl = '';
+        let currentDetectedUpiFromQr = '';
+        let currentDetectedUpiUri = '';
+
+        function loadSavedWithdrawQrCode() {
+            try {
+                const uid = getCurrentUserId();
+                const savedQr = (currentUserData && currentUserData.savedUpiQrCode)
+                    || (uid && localStorage.getItem(`te_saved_upi_qr_${uid}`))
+                    || '';
+                const savedUpi = (currentUserData && currentUserData.savedUpiId)
+                    || (uid && localStorage.getItem(`te_saved_upi_id_${uid}`))
+                    || '';
+                const upiInput = document.getElementById('withdraw-upi');
+                if (upiInput && !upiInput.value && savedUpi && savedUpi !== 'QR Code Uploaded' && savedUpi !== 'UPI-QR-UPLOADED') {
+                    upiInput.value = savedUpi;
+                }
+                if (savedQr && savedQr.startsWith('data:image/') && !currentWithdrawQrDataUrl) {
+                    currentWithdrawQrDataUrl = savedQr;
+                    renderWithdrawQrPreview('✅ Saved UPI QR Code Ready', 'Loaded from your previous withdrawal (Tap to change)');
+                }
+            } catch (e) {}
+        }
+
+        function renderWithdrawQrPreview(statusText, subText) {
+            const placeholder = document.getElementById('withdraw-qr-placeholder');
+            const previewBox = document.getElementById('withdraw-qr-preview-box');
+            const previewImg = document.getElementById('withdraw-qr-preview-img');
+            const statusEl = document.getElementById('withdraw-qr-status');
+            const subEl = document.getElementById('withdraw-qr-substatus');
+            const dropzone = document.getElementById('withdraw-qr-dropzone');
+            if (!placeholder || !previewBox || !previewImg) return;
+
+            if (currentWithdrawQrDataUrl) {
+                previewImg.src = currentWithdrawQrDataUrl;
+                placeholder.style.display = 'none';
+                previewBox.style.display = 'flex';
+                if (statusEl) statusEl.innerHTML = `<i class="fas fa-check-circle"></i> ${statusText || 'UPI QR Code Attached!'}`;
+                if (subEl) subEl.textContent = subText || 'Tap to change QR image';
+                if (dropzone) {
+                    dropzone.style.borderColor = '#10B981';
+                    dropzone.style.background = 'linear-gradient(135deg,#ECFDF5,#F0FDF4)';
+                }
+            } else {
+                previewImg.src = '';
+                placeholder.style.display = 'block';
+                previewBox.style.display = 'none';
+                if (dropzone) {
+                    dropzone.style.borderColor = '#93C5FD';
+                    dropzone.style.background = 'linear-gradient(135deg,#F8FAFC,#EFF6FF)';
+                }
+            }
+        }
+
+        function clearWithdrawQrCode() {
+            currentWithdrawQrDataUrl = '';
+            currentDetectedUpiFromQr = '';
+            currentDetectedUpiUri = '';
+            const fileInput = document.getElementById('withdraw-qr-file');
+            if (fileInput) fileInput.value = '';
+            const uid = getCurrentUserId();
+            if (uid) {
+                try { localStorage.removeItem(`te_saved_upi_qr_${uid}`); } catch (e) {}
+            }
+            renderWithdrawQrPreview();
+        }
+
+        async function handleWithdrawQrUpload(event) {
+            const file = event?.target?.files?.[0];
+            if (!file) return;
+            if (!file.type || !file.type.startsWith('image/')) {
+                showToast('Please select a valid QR Code image (PNG/JPG)', 'error');
+                return;
+            }
+
+            try {
+                const compressedDataUrl = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            const maxDim = 560;
+                            let w = img.width || 400;
+                            let h = img.height || 400;
+                            if (w > maxDim || h > maxDim) {
+                                if (w > h) {
+                                    h = Math.round((h * maxDim) / w);
+                                    w = maxDim;
+                                } else {
+                                    w = Math.round((w * maxDim) / h);
+                                    h = maxDim;
+                                }
+                            }
+                            const canvas = document.createElement('canvas');
+                            canvas.width = w;
+                            canvas.height = h;
+                            const ctx = canvas.getContext('2d');
+                            ctx.fillStyle = '#FFFFFF';
+                            ctx.fillRect(0, 0, w, h);
+                            ctx.drawImage(img, 0, 0, w, h);
+                            let out = canvas.toDataURL('image/jpeg', 0.80);
+                            if (out.length > 260000) {
+                                out = canvas.toDataURL('image/jpeg', 0.65);
+                            }
+                            resolve({ dataUrl: out, imgElement: img });
+                        };
+                        img.onerror = () => reject(new Error('Could not load QR image'));
+                        img.src = e.target.result;
+                    };
+                    reader.onerror = () => reject(new Error('Failed to read QR file'));
+                    reader.readAsDataURL(file);
+                });
+
+                currentWithdrawQrDataUrl = compressedDataUrl.dataUrl;
+                currentDetectedUpiFromQr = '';
+                currentDetectedUpiUri = '';
+
+                // Try native BarcodeDetector (supported on Android Chrome / WebView) to auto-detect UPI ID from QR
+                if ('BarcodeDetector' in window) {
+                    try {
+                        const detector = new BarcodeDetector({ formats: ['qr_code'] });
+                        const barcodes = await detector.detect(compressedDataUrl.imgElement);
+                        if (barcodes && barcodes.length > 0 && barcodes[0].rawValue) {
+                            const rawQr = String(barcodes[0].rawValue).trim();
+                            if (/^upi:\/\/pay/i.test(rawQr)) {
+                                currentDetectedUpiUri = rawQr;
+                                const paMatch = rawQr.match(/[?&]pa=([^&]+)/i);
+                                if (paMatch && paMatch[1]) {
+                                    currentDetectedUpiFromQr = decodeURIComponent(paMatch[1]).trim();
+                                    const upiInput = document.getElementById('withdraw-upi');
+                                    if (upiInput && !upiInput.value.trim()) {
+                                        upiInput.value = currentDetectedUpiFromQr;
+                                    }
+                                }
+                            }
+                        }
+                    } catch (_qrErr) {}
+                }
+
+                const uid = getCurrentUserId();
+                if (uid) {
+                    try { localStorage.setItem(`te_saved_upi_qr_${uid}`, currentWithdrawQrDataUrl); } catch (e) {}
+                }
+
+                renderWithdrawQrPreview(
+                    currentDetectedUpiFromQr ? `QR Attached (${currentDetectedUpiFromQr})` : 'UPI QR Code Attached!',
+                    'Ready for instant payout — tap Request Withdrawal below'
+                );
+                showToast('✅ UPI QR Code uploaded successfully!', 'success');
+            } catch (err) {
+                console.error('QR upload error:', err);
+                showToast('Failed to process QR code image. Please try another screenshot.', 'error');
+            }
+        }
+
+        async function triggerClientSideStaffWithdrawalAlert({ uid, username, email, phone, amount, upiLabel, hasQrCode }) {
+            try {
+                const paymentMethodText = hasQrCode
+                    ? (upiLabel && upiLabel !== 'QR Code Uploaded' && upiLabel !== 'UPI-QR-UPLOADED'
+                        ? `UPI QR Code + UPI (${upiLabel})`
+                        : 'UPI QR Code Uploaded')
+                    : `UPI: ${upiLabel}`;
+
+                // 1. Write live alert doc to Firestore 'staff_notifications' so Staff Panel receives instant chime + popup
+                await db.collection('staff_notifications').add({
+                    userId: uid,
+                    username: username || 'Player',
+                    userEmail: email || '',
+                    userPhone: phone || '',
+                    amount,
+                    upiId: upiLabel,
+                    hasQrCode: !!hasQrCode,
+                    title: `💸 New Payout Request: ₹${amount}`,
+                    message: `${username || 'Player'} requested ₹${amount} withdrawal (${paymentMethodText})`,
+                    type: 'withdrawal_alert',
+                    read: false,
+                    createdAt: new Date().toISOString()
+                }).catch(() => null);
+
+                // 2. If staff/admin configured an alert email in app_config/payout_alerts, also send FormSubmit email fallback
+                const cfgDoc = await db.collection('app_config').doc('payout_alerts').get().catch(() => null);
+                if (cfgDoc && cfgDoc.exists) {
+                    const cfg = cfgDoc.data() || {};
+                    const adminEmail = (cfg.alertEmail || '').trim();
+                    if (adminEmail && adminEmail.includes('@')) {
+                        fetch(`https://formsubmit.co/ajax/${encodeURIComponent(adminEmail)}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+                            body: JSON.stringify({
+                                _subject: `💸 Techno E-Sports Payout Alert: ₹${amount} (${username || 'Player'})`,
+                                _template: 'table',
+                                _captcha: 'false',
+                                Player: username || 'Player',
+                                Amount: `₹${amount}`,
+                                Payment_Method: paymentMethodText,
+                                Phone: phone || 'N/A',
+                                Email: email || 'N/A',
+                                Time: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
+                            })
+                        }).catch(() => null);
+                    }
+                }
+            } catch (e) {}
+        }
+
         async function requestWithdrawal() {
             const uid = getCurrentUserId();
             const amount = Number(document.getElementById('withdraw-amount').value);
-            const upiId = document.getElementById('withdraw-upi').value.trim();
-            if (!amount || amount < 50) return showToast('Minimum withdrawal is 50', 'error');
-            if (!upiId) return showToast('Please enter UPI ID', 'error');
+            const rawUpiId = document.getElementById('withdraw-upi').value.trim();
+            const hasQr = !!(currentWithdrawQrDataUrl && currentWithdrawQrDataUrl.startsWith('data:image/'));
+            const effectiveUpiId = rawUpiId || currentDetectedUpiFromQr || (hasQr ? 'QR Code Uploaded' : '');
+
+            if (!amount || amount < 50) return showToast('Minimum withdrawal is ₹50', 'error');
+            if (!rawUpiId && !hasQr) {
+                return showToast('Please upload your UPI QR Code or enter your UPI ID', 'error');
+            }
 
             const btn = document.getElementById('withdraw-btn');
             if (btn && btn.disabled) return;
@@ -7974,12 +8221,72 @@
                     body: JSON.stringify({
                         userId: uid,
                         amount,
-                        upiId,
+                        upiId: effectiveUpiId,
+                        upiQrCode: hasQr ? currentWithdrawQrDataUrl : '',
+                        upiUri: currentDetectedUpiUri || '',
                         source: 'admin_credited_only'
                     })
                 });
                 const d = await r.json();
                 if (!r.ok) throw new Error(d.message || 'Withdrawal failed');
+
+                // Save QR code & user details directly onto the latest withdrawal_requests doc in Firestore as well
+                // (guarantees QR image is attached even if Render backend is still running an older build)
+                try {
+                    const userUpdates = {};
+                    if (rawUpiId || currentDetectedUpiFromQr) {
+                        userUpdates.savedUpiId = rawUpiId || currentDetectedUpiFromQr;
+                        localStorage.setItem(`te_saved_upi_id_${uid}`, userUpdates.savedUpiId);
+                    }
+                    if (hasQr) {
+                        userUpdates.savedUpiQrCode = currentWithdrawQrDataUrl;
+                        localStorage.setItem(`te_saved_upi_qr_${uid}`, currentWithdrawQrDataUrl);
+                    }
+                    if (Object.keys(userUpdates).length > 0) {
+                        await db.collection('users').doc(uid).update(userUpdates).catch(() => null);
+                    }
+
+                    const latestReqSnap = await db.collection('withdrawal_requests')
+                        .where('userId', '==', uid)
+                        .get()
+                        .catch(() => null);
+                    if (latestReqSnap && !latestReqSnap.empty) {
+                        const sortedDocs = latestReqSnap.docs
+                            .map(doc => ({ id: doc.id, ref: doc.ref, ...doc.data() }))
+                            .filter(item => item.status === 'pending')
+                            .sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
+                        if (sortedDocs.length > 0) {
+                            const latestDoc = sortedDocs[0];
+                            const patchPayload = {
+                                username: currentUserData?.username || currentUserData?.freeFireName || 'Player',
+                                email: currentUserData?.email || currentUser?.email || '',
+                                phone: currentUserData?.phone || '',
+                                upiId: effectiveUpiId
+                            };
+                            if (hasQr && !latestDoc.upiQrCode) {
+                                patchPayload.upiQrCode = currentWithdrawQrDataUrl;
+                                patchPayload.paymentMethod = rawUpiId ? 'qr_and_upi' : 'qr_code';
+                            }
+                            if (currentDetectedUpiUri && !latestDoc.upiUri) {
+                                patchPayload.upiUri = currentDetectedUpiUri;
+                            }
+                            await latestDoc.ref.update(patchPayload).catch(() => null);
+                        }
+                    }
+                } catch (qrPatchErr) {
+                    console.warn('QR metadata patch warning:', qrPatchErr);
+                }
+
+                // Trigger instant staff alert fallback
+                triggerClientSideStaffWithdrawalAlert({
+                    uid,
+                    username: currentUserData?.username || currentUserData?.freeFireName || 'Player',
+                    email: currentUserData?.email || currentUser?.email || '',
+                    phone: currentUserData?.phone || '',
+                    amount,
+                    upiLabel: effectiveUpiId,
+                    hasQrCode: hasQr
+                });
 
                 // Enforce strict separation in Firestore: withdrawing winnings must ONLY reduce withdrawableBalance, NEVER walletBalance (Play Balance)!
                 const expectedWithdrawableAfter = Math.max(0, withdrawableBeforeWithdraw - amount);
@@ -8007,7 +8314,6 @@
                 showWithdrawSuccessPopup();
 
                 document.getElementById('withdraw-amount').value = '';
-                document.getElementById('withdraw-upi').value = '';
                 await fetchWalletBalance();
                 await fetchWalletTransactions();
                 await fetchProfileData();
@@ -10881,8 +11187,25 @@ function copyAllCredentials(id, pass) {
                 currentTournaments = snap.docs.map(d => {
                     const data = d.data();
                     return { id: d.id, ...data, category: normalizeTournamentCategory(data.category) };
-                }).filter(t => t.isActive !== false || String(t.status || '').toLowerCase() === 'completed');
+                }).filter(t => {
+                    const st = String(t.status || '').toLowerCase();
+                    if (st === 'cancelled' || st === 'deleted' || t.isDeleted === true) return false;
+                    return t.isActive !== false || st === 'completed';
+                });
                 homeDrillState.tournamentsLoaded = true;
+                saveEcosystemCache();
+                // If the currently viewed tournament was deleted by the bot after completion/cancellation, close its modal/details view
+                if (selectedTournament && !currentTournaments.some(t => t.id === selectedTournament.id)) {
+                    const detailsPage = document.getElementById('tournament-details-page');
+                    if (detailsPage && detailsPage.style.display !== 'none') {
+                        detailsPage.style.display = 'none';
+                    }
+                    const slotModal = document.getElementById('slot-selection-modal');
+                    if (slotModal && slotModal.style.display !== 'none') {
+                        slotModal.style.display = 'none';
+                    }
+                    selectedTournament = null;
+                }
                 renderTournaments();
             }, e => console.error("Tournament listener error:", e));
 
