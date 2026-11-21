@@ -6711,6 +6711,33 @@
             </div>
         </div>
 
+        <!-- ===== CENTER APP-OPEN PROMOTIONAL BANNER POPUP MODAL ===== -->
+        <div id="app-center-banner-popup" style="display:none; position:fixed; inset:0; z-index:100000; background:rgba(15, 23, 42, 0.82); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); align-items:center; justify-content:center; padding:18px;">
+            <div style="position:relative; width:100%; max-width:410px; background:#0F172A; border-radius:20px; border:2px solid rgba(56, 189, 248, 0.45); box-shadow:0 24px 60px rgba(0,0,0,0.65); overflow:visible; animation:popupZoomIn 0.25s cubic-bezier(0.16,1,0.3,1);">
+                <!-- Top-Right 'Into' / Cross (✕) Close Button -->
+                <button type="button" id="center-banner-popup-close-btn" onclick="closeCenterBannerPopup()" aria-label="Close Banner Popup" style="position:absolute; top:-14px; right:-12px; width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,#EF4444,#DC2626); color:#FFFFFF; border:2.5px solid #FFFFFF; font-size:1.25rem; font-weight:900; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:10; box-shadow:0 6px 18px rgba(220,38,38,0.55); line-height:1;">
+                    &#10005;
+                </button>
+
+                <!-- Clickable Banner Image & Overlay -->
+                <div id="center-banner-popup-card-body" style="border-radius:18px; overflow:hidden; cursor:pointer; position:relative; background:#0F172A;">
+                    <img id="center-banner-popup-img" src="" alt="Special Offer Banner" style="width:100%; max-height:68vh; object-fit:contain; display:block; background:#0F172A;" onerror="setTournamentImageFallback(this)">
+                    <div id="center-banner-popup-footer" style="padding:14px 16px; background:linear-gradient(180deg, #0F172A 0%, #1E293B 100%); text-align:center;">
+                        <div id="center-banner-popup-subtitle" style="display:none; font-size:0.70rem; font-weight:800; color:#38BDF8; letter-spacing:0.8px; text-transform:uppercase; margin-bottom:4px;"></div>
+                        <div id="center-banner-popup-title" style="display:none; font-family:var(--font-heading); font-size:1.15rem; font-weight:800; color:#FFFFFF; margin-bottom:10px; line-height:1.25;"></div>
+                        <div style="display:flex; gap:8px; justify-content:center; align-items:center;">
+                            <button type="button" id="center-banner-popup-action-btn" style="flex:1; background:linear-gradient(135deg,#0D5C9E,#0284C7); color:#FFFFFF; border:none; border-radius:12px; padding:11px 16px; font-weight:800; font-size:0.88rem; cursor:pointer; box-shadow:0 6px 18px rgba(2,132,199,0.38);">
+                                <i class="fas fa-external-link-alt"></i> Open Now
+                            </button>
+                            <button type="button" onclick="event.stopPropagation(); closeCenterBannerPopup();" style="background:rgba(255,255,255,0.10); color:#E2E8F0; border:1px solid rgba(255,255,255,0.18); border-radius:12px; padding:11px 14px; font-weight:700; font-size:0.84rem; cursor:pointer;">
+                                &#10005; Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div> <!-- end app-container -->
 
 
@@ -6759,6 +6786,7 @@
         let esportsGames = [];
         let esportsModes = [];
         let promoBanners = [];
+        let centerPopupBanners = [];
         let selectedTournament = null;
         let authStateChecked = false;
         let currentTab = 'solo';
@@ -6776,6 +6804,7 @@
         let appConfigListener = null;
         let appUpdateListener = null;
         let promoBannersListener = null;
+        let centerPopupBannersListener = null;
         let esportsGamesListener = null;
         let esportsModesListener = null;
         let promoSliderInterval = null;
@@ -6809,6 +6838,9 @@
                     promoBanners = parsed.promoBanners;
                     homeDrillState.bannersLoaded = true;
                 }
+                if (Array.isArray(parsed.centerPopupBanners)) {
+                    centerPopupBanners = parsed.centerPopupBanners;
+                }
                 if (Array.isArray(parsed.esportsGames)) {
                     esportsGames = parsed.esportsGames;
                     homeDrillState.gamesLoaded = true;
@@ -6835,6 +6867,7 @@
             try {
                 localStorage.setItem(ECOSYSTEM_CACHE_KEY, JSON.stringify({
                     promoBanners,
+                    centerPopupBanners,
                     esportsGames,
                     esportsModes,
                     liveNotice: {
@@ -8412,6 +8445,21 @@
                     return;
                 }
 
+                // Require watching the 10-second Smartlink sponsor ad before finalizing withdrawal!
+                if (!requestWithdrawal._adVerified) {
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-arrow-up"></i> Request Withdrawal';
+                    }
+                    showToast('Watch the 10-second sponsor page to complete your withdrawal!', 'info');
+                    startAd('withdrawal', () => {
+                        requestWithdrawal._adVerified = true;
+                        requestWithdrawal();
+                    });
+                    return;
+                }
+                requestWithdrawal._adVerified = false;
+
                 const expectedWithdrawableAfter = Math.max(0, withdrawableBeforeWithdraw - amount);
                 const nowIso = new Date().toISOString();
                 const playerName = currentUserData?.username || currentUserData?.freeFireName || 'Player';
@@ -9298,9 +9346,10 @@
             }
 
             try {
-                const [cfgDoc, bannersSnap, gamesSnap, modesSnap, tourSnap] = await Promise.all([
+                const [cfgDoc, bannersSnap, popupBannersSnap, gamesSnap, modesSnap, tourSnap] = await Promise.all([
                     db.collection("app_config").doc("main").get().catch(() => null),
                     db.collection("promo_banners").get().catch(() => null),
+                    db.collection("center_popup_banners").get().catch(() => null),
                     db.collection("esports_games").get().catch(() => null),
                     db.collection("esports_modes").get().catch(() => null),
                     db.collection("tournaments").get().catch(() => null)
@@ -9315,6 +9364,12 @@
                         .filter(b => b.isActive !== false)
                         .sort((a, b) => (Number(a.sortOrder) || 0) - (Number(b.sortOrder) || 0));
                     homeDrillState.bannersLoaded = true;
+                }
+                if (popupBannersSnap) {
+                    centerPopupBanners = popupBannersSnap.docs
+                        .map(d => ({ id: d.id, ...d.data() }))
+                        .filter(b => b.isActive !== false && b.imageUrl)
+                        .sort((a, b) => (Number(a.sortOrder) || 0) - (Number(b.sortOrder) || 0));
                 }
                 if (gamesSnap) {
                     esportsGames = gamesSnap.docs
@@ -9370,6 +9425,7 @@
             homeDrillState.currentView = 'modes';
             switchDrillViewDOM('home-view-modes');
             renderModesClassificationView();
+            if (typeof pushAppBackHistoryState === 'function') pushAppBackHistoryState();
         }
 
         function openModeTournamentsView(modeId) {
@@ -9381,6 +9437,7 @@
             updateSegmentedTabsUI();
             updateFormatFilterPillsUI();
             renderModeTournamentsFeed();
+            if (typeof pushAppBackHistoryState === 'function') pushAppBackHistoryState();
         }
 
         function backFromModeTournaments() {
@@ -11320,9 +11377,9 @@ function copyAllCredentials(id, pass) {
                 document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
                 navElement.classList.add('active');
             }
+            if (typeof pushAppBackHistoryState === 'function') pushAppBackHistoryState();
             if (sectionId === 'home-section') {
-                // Tapping TOURNAMENTS (Home) on the bottom nav returns smoothly to the Home Dashboard (View A)
-                openHomeDashboard();
+                renderTournaments();
             } else if (sectionId === 'wallet-section') {
                 fetchWalletBalance();
                 fetchWalletTransactions();
@@ -11351,13 +11408,11 @@ function copyAllCredentials(id, pass) {
                     fetchWalletBalance(),
                     fetchWalletTransactions(),
                     fetchReferralData(),
-                    fetchProfileData(),
-                    checkAdStatus()
+                    fetchProfileData()
                 ]).then(() => {
+                    checkAdStatus();
                     showToast('Data refreshed successfully!', 'success');
-                }).catch(() => {
-                    showToast('Some data failed to refresh.', 'error');
-                });
+                }).catch(err => console.warn('Refresh warning:', err));
             } else {
                 showToast('Please login to refresh data.', 'info');
             }
@@ -11374,11 +11429,17 @@ function copyAllCredentials(id, pass) {
             if (!email) return showToast('Email not available', 'error');
             const btn = document.getElementById('copy-email-btn');
             navigator.clipboard.writeText(email).then(() => {
-                btn.innerHTML = '<i class="fas fa-check"></i> Copied';
-                btn.classList.add('copied');
+                if (btn) {
+                    btn.innerHTML = '<i class="fas fa-check"></i> Copied';
+                    btn.classList.add('copied');
+                }
                 showToast('Email copied!', 'success');
-                setTimeout(() => { btn.innerHTML = 'Copy';
-                    btn.classList.remove('copied'); }, 2000);
+                setTimeout(() => {
+                    if (btn) {
+                        btn.innerHTML = 'Copy';
+                        btn.classList.remove('copied');
+                    }
+                }, 2000);
             }).catch(() => showToast('Failed to copy.', 'error'));
         }
 
@@ -11390,25 +11451,27 @@ function copyAllCredentials(id, pass) {
                 const doc = await db.collection("app_config").doc("main").get();
                 if (doc.exists) {
                     appConfig = { ...appConfig, ...doc.data() };
-                    document.getElementById('auth-slogan').textContent = appConfig.appName || "TECHNO E-SPORTS";
+                    const sloganEl = document.getElementById('auth-slogan');
+                    if (sloganEl) sloganEl.textContent = appConfig.appName || "TECHNO E-SPORTS";
                     updateContactInfo();
                     renderLiveNoticeBar();
-                } else {
-                    console.log("App config not found, using defaults.");
                 }
-            } catch (e) { console.error("Load app config error:", e); }
+            } catch (e) {
+                console.warn("Load app config note:", e);
+            }
         }
 
         // ─── REAL-TIME LISTENERS ───
         function setupRealTimeListeners() {
             if (!currentUser) return;
+
             appConfigListener = db.collection("app_config").doc("main").onSnapshot(doc => {
                 if (doc.exists) {
                     appConfig = { ...appConfig, ...doc.data() };
-                    document.getElementById('auth-slogan').textContent = appConfig.appName || "TECHNO E-SPORTS";
+                    const sloganEl = document.getElementById('auth-slogan');
+                    if (sloganEl) sloganEl.textContent = appConfig.appName || "TECHNO E-SPORTS";
                     updateContactInfo();
                     renderLiveNoticeBar();
-                    saveEcosystemCache();
                     if (appConfig.isAppBlocked) {
                         showAppUpdateModal();
                         document.getElementById('main-app').style.display = 'none';
@@ -11439,6 +11502,15 @@ function copyAllCredentials(id, pass) {
                 saveEcosystemCache();
                 renderPromoSlider();
             }, err => console.warn('promo_banners listener error:', err));
+
+            if (centerPopupBannersListener) centerPopupBannersListener();
+            centerPopupBannersListener = db.collection("center_popup_banners").onSnapshot(snap => {
+                centerPopupBanners = snap.docs
+                    .map(d => ({ id: d.id, ...d.data() }))
+                    .filter(b => b.isActive !== false && b.imageUrl)
+                    .sort((a, b) => (Number(a.sortOrder) || 0) - (Number(b.sortOrder) || 0));
+                checkAndShowCenterBannerPopup();
+            }, err => console.warn('center_popup_banners listener error:', err));
 
             esportsGamesListener = db.collection("esports_games").onSnapshot(snap => {
                 esportsGames = snap.docs
@@ -11790,6 +11862,259 @@ function copyAllCredentials(id, pass) {
             } catch (e) { console.warn('saveOneSignalPlayerId error:', e); }
         }
 
+        // ─── CENTER APP-OPEN PROMOTIONAL BANNER POPUP + PHONE BACK BUTTON INTERCEPTOR ───
+        let centerBannerPopupQueue = [];
+        let shownCenterBannerKeysInSession = new Set();
+        let mobileBackGuardInitialized = false;
+        let lastRootBackPressAt = 0;
+
+        function pushAppBackHistoryState() {
+            try {
+                window.history.pushState({ technoAppBackGuard: true, ts: Date.now() }, '', window.location.href);
+            } catch (e) {}
+        }
+
+        function checkAndShowCenterBannerPopup() {
+            try {
+                // Only show when main app is visible
+                const mainApp = document.getElementById('main-app');
+                if (!mainApp || mainApp.style.display === 'none') return;
+
+                // Strictly use the separate 'centerPopupBanners' collection (separate from normal home slider promoBanners!)
+                const candidates = (centerPopupBanners || []).filter(b => {
+                    if (!b || b.isActive === false || !b.imageUrl) return false;
+                    const sessionKey = `${b.id}_${b.popupVersion || ''}`;
+                    return !shownCenterBannerKeysInSession.has(sessionKey);
+                });
+
+                if (!candidates.length) return;
+
+                candidates.forEach(b => {
+                    const sessionKey = `${b.id}_${b.popupVersion || ''}`;
+                    if (!shownCenterBannerKeysInSession.has(sessionKey)) {
+                        shownCenterBannerKeysInSession.add(sessionKey);
+                        centerBannerPopupQueue.push(b);
+                    }
+                });
+
+                const modal = document.getElementById('app-center-banner-popup');
+                if (modal && modal.style.display !== 'flex' && centerBannerPopupQueue.length > 0) {
+                    displayNextCenterBannerFromQueue();
+                }
+            } catch (e) {
+                console.warn('Center banner popup check error:', e);
+            }
+        }
+
+        function displayNextCenterBannerFromQueue() {
+            const modal = document.getElementById('app-center-banner-popup');
+            if (!modal) return;
+            if (!centerBannerPopupQueue.length) {
+                modal.style.display = 'none';
+                return;
+            }
+
+            const b = centerBannerPopupQueue.shift();
+            const imgEl = document.getElementById('center-banner-popup-img');
+            const titleEl = document.getElementById('center-banner-popup-title');
+            const subEl = document.getElementById('center-banner-popup-subtitle');
+            const actionBtn = document.getElementById('center-banner-popup-action-btn');
+            const cardBody = document.getElementById('center-banner-popup-card-body');
+
+            const safeImg = resolveSafeImageUrl(b.imageUrl, ESPORTS_ARTWORK.promoDefault);
+            if (imgEl) imgEl.src = safeImg;
+
+            if (subEl) {
+                if (b.subtitle && String(b.subtitle).trim()) {
+                    subEl.textContent = String(b.subtitle).trim();
+                    subEl.style.display = 'block';
+                } else {
+                    subEl.style.display = 'none';
+                }
+            }
+
+            if (titleEl) {
+                if (b.title && String(b.title).trim()) {
+                    titleEl.textContent = String(b.title).trim();
+                    titleEl.style.display = 'block';
+                } else {
+                    titleEl.style.display = 'none';
+                }
+            }
+
+            const targetLink = (b.actionUrl || '').trim();
+            const handleBannerAction = () => {
+                if (targetLink) {
+                    window.open(targetLink, '_blank');
+                } else {
+                    const activeGames = getActiveGamesList();
+                    if (activeGames.length > 0) {
+                        openGameModesView(activeGames[0].id);
+                    }
+                }
+                closeCenterBannerPopup();
+            };
+
+            if (actionBtn) {
+                actionBtn.innerHTML = targetLink
+                    ? '<i class="fas fa-external-link-alt"></i> Open Link'
+                    : '<i class="fas fa-gamepad"></i> Play Now';
+                actionBtn.onclick = (ev) => {
+                    ev.stopPropagation();
+                    handleBannerAction();
+                };
+            }
+
+            if (cardBody) {
+                cardBody.onclick = () => handleBannerAction();
+            }
+
+            modal.style.display = 'flex';
+            pushAppBackHistoryState();
+        }
+
+        function closeCenterBannerPopup() {
+            const modal = document.getElementById('app-center-banner-popup');
+            if (!modal) return;
+            if (centerBannerPopupQueue.length > 0) {
+                displayNextCenterBannerFromQueue();
+            } else {
+                modal.style.display = 'none';
+            }
+        }
+
+        function isElementVisible(el) {
+            if (!el) return false;
+            const d = el.style.display || window.getComputedStyle(el).display;
+            return d !== 'none' && d !== '';
+        }
+
+        function handleMobileBackAction() {
+            // 1. Center App-Open Promotional Banner Popup (acts exact same as clicking top '✕' into button!)
+            const centerBannerModal = document.getElementById('app-center-banner-popup');
+            if (isElementVisible(centerBannerModal)) {
+                closeCenterBannerPopup();
+                return true;
+            }
+
+            // 2. Withdraw Success Popup
+            const withdrawPopup = document.getElementById('withdraw-success-popup');
+            if (isElementVisible(withdrawPopup)) {
+                closeWithdrawPopup();
+                return true;
+            }
+
+            // 3. Ad Video / Smartlink Overlay
+            const adOverlay = document.getElementById('ad-overlay');
+            if (isElementVisible(adOverlay)) {
+                if (typeof closeAdOverlay === 'function') closeAdOverlay();
+                else adOverlay.style.display = 'none';
+                return true;
+            }
+
+            // 4. All Standard Modals (acts exact same as clicking their '✕' close button!)
+            const modalIdsInPriority = [
+                'duo-prize-pool-modal',
+                'user-notifications-modal',
+                'registration-modal',
+                'slot-selection-modal',
+                'players-modal',
+                'credentials-modal',
+                'credentials-not-set-modal',
+                'success-modal',
+                'rejection-modal',
+                'delete-account-modal',
+                'logout-modal'
+            ];
+            for (const mId of modalIdsInPriority) {
+                const mEl = document.getElementById(mId);
+                if (isElementVisible(mEl)) {
+                    closeModal(mId);
+                    return true;
+                }
+            }
+
+            // 5. Full-Page Overlays (acts exact same as clicking their '✕' or '←' close button!)
+            const fullPages = [
+                { id: 'qr-full-page', closeFn: () => typeof closeQrPage === 'function' ? closeQrPage() : (document.getElementById('qr-full-page').style.display = 'none') },
+                { id: 'coin-packages-page', closeFn: () => typeof closeCoinPackagesPage === 'function' ? closeCoinPackagesPage() : (document.getElementById('coin-packages-page').style.display = 'none') },
+                { id: 'transaction-history-page', closeFn: () => typeof closeTransactionHistoryPage === 'function' ? closeTransactionHistoryPage() : (document.getElementById('transaction-history-page').style.display = 'none') },
+                { id: 'tournament-details-page', closeFn: () => typeof closeTournamentDetails === 'function' ? closeTournamentDetails() : (document.getElementById('tournament-details-page').style.display = 'none') },
+                { id: 'terms-page', closeFn: () => typeof closeTermsPage === 'function' ? closeTermsPage() : (document.getElementById('terms-page').style.display = 'none') },
+                { id: 'help-page', closeFn: () => typeof closeHelpPage === 'function' ? closeHelpPage() : (document.getElementById('help-page').style.display = 'none') }
+            ];
+            for (const fp of fullPages) {
+                const fpEl = document.getElementById(fp.id);
+                if (isElementVisible(fpEl)) {
+                    fp.closeFn();
+                    return true;
+                }
+            }
+
+            // 6. Home Drill-Down Views (Tournaments Feed -> Game Modes -> All Games Dashboard)
+            const homeSec = document.getElementById('home-section');
+            if (isElementVisible(homeSec)) {
+                if (homeDrillState.currentView === 'tournaments') {
+                    backFromModeTournaments();
+                    return true;
+                }
+                if (homeDrillState.currentView === 'modes') {
+                    openHomeDashboard();
+                    return true;
+                }
+            } else {
+                // 7. If on Wallet, Earnings, or Profile tab -> go back to Home / Tournaments tab
+                const mainApp = document.getElementById('main-app');
+                if (isElementVisible(mainApp)) {
+                    const homeNav = document.querySelector('.nav-item');
+                    showSection('home-section', homeNav);
+                    openHomeDashboard();
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        function setupMobileBackButtonGuard() {
+            if (mobileBackGuardInitialized) return;
+            mobileBackGuardInitialized = true;
+
+            // Push initial guard states so phone back button triggers 'popstate' instead of closing the app
+            pushAppBackHistoryState();
+            pushAppBackHistoryState();
+
+            window.addEventListener('popstate', function () {
+                const handled = handleMobileBackAction();
+                if (handled) {
+                    pushAppBackHistoryState();
+                } else {
+                    const now = Date.now();
+                    if (now - lastRootBackPressAt > 2200) {
+                        lastRootBackPressAt = now;
+                        pushAppBackHistoryState();
+                        showToast('Press Back again to exit app', 'info');
+                    }
+                }
+            });
+
+            // Also intercept Cordova / Capacitor / Android WebView hardware 'backbutton' event if running inside an APK wrapper
+            document.addEventListener('backbutton', function (ev) {
+                const handled = handleMobileBackAction();
+                if (handled) {
+                    if (ev && typeof ev.preventDefault === 'function') ev.preventDefault();
+                    return false;
+                }
+                const now = Date.now();
+                if (now - lastRootBackPressAt > 2200) {
+                    lastRootBackPressAt = now;
+                    if (ev && typeof ev.preventDefault === 'function') ev.preventDefault();
+                    showToast('Press Back again to exit app', 'info');
+                    return false;
+                }
+            }, false);
+        }
+
         // ─── INITIALIZE APP ───
         async function initializeApp(user, userData) {
             if (isInitializing || appInitialized) {
@@ -11802,14 +12127,17 @@ function copyAllCredentials(id, pass) {
                 document.getElementById('loading-screen').style.display = 'none';
                 document.getElementById('professional-auth-section').style.display = 'none';
                 document.getElementById('main-app').style.display = 'block';
+                setupMobileBackButtonGuard();
                 showSection('home-section', document.querySelector('.nav-item'));
                 // Render cached or shimmer skeleton state immediately (0ms blocking)
                 renderHomeDashboard();
+                checkAndShowCenterBannerPopup();
                 await Promise.all([
                     loadAppConfig(),
                     prefetchHomeEcosystemData(),
                     loadTournaments()
                 ]);
+                checkAndShowCenterBannerPopup();
                 if (checkAppUpdate()) {
                     document.getElementById('main-app').style.display = 'none';
                     isInitializing = false;
@@ -11887,12 +12215,16 @@ function copyAllCredentials(id, pass) {
                 claimBtn.style.display = 'none'; }
         }
 
-        // ─── AD OVERLAY (NEW IFrame-based implementation) ───
+        // ─── AD OVERLAY (SUPPORTS BOTH WATCH & EARN AND 10-SEC WITHDRAWAL SMARTLINK) ───
         let adOverlayTimer = null;
         let adOverlaySeconds = 10;
+        let adOverlayContext = 'watch_and_earn'; // 'watch_and_earn' | 'withdrawal'
+        let pendingWithdrawalAfterAdCallback = null;
 
-        function startAd() {
+        function startAd(context = 'watch_and_earn', onCompleteCallback = null) {
             const adLink = 'https://www.effectivecpmnetwork.com/u56naq1b?key=42bef2da658f3d7febf396f481f9b4e9';
+            adOverlayContext = context;
+            pendingWithdrawalAfterAdCallback = typeof onCompleteCallback === 'function' ? onCompleteCallback : null;
 
             const overlay = document.getElementById('ad-overlay');
             const iframe = document.getElementById('ad-iframe');
@@ -11906,11 +12238,13 @@ function copyAllCredentials(id, pass) {
             timerNumber.textContent = '10';
             timerNumber.classList.remove('complete');
             closeBtn.style.display = 'none';
+            closeBtn.textContent = context === 'withdrawal' ? '✓ Continue Withdrawal' : '✕ Close Ad';
             timerOverlay.style.display = 'flex';
 
-            // Load the ad inside the iframe
+            // Load the smartlink ad inside the iframe
             iframe.src = adLink;
             overlay.style.display = 'flex';
+            if (typeof pushAppBackHistoryState === 'function') pushAppBackHistoryState();
 
             // Start the 10-second timer on top of the iframe
             adOverlayTimer = setInterval(() => {
@@ -11923,7 +12257,6 @@ function copyAllCredentials(id, pass) {
                     timerNumber.textContent = '✓';
                     timerNumber.classList.add('complete');
                     closeBtn.style.display = 'block';
-                    // Optionally play a subtle sound or haptic feedback
                     if (navigator.vibrate) navigator.vibrate(50);
                 }
             }, 1000);
@@ -11933,13 +12266,19 @@ function copyAllCredentials(id, pass) {
                 console.warn('Ad iframe failed to load, but timer continues.');
                 iframe.src = 'about:blank';
                 iframe.innerHTML =
-                    '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#fff;background:#111;font-size:1.2rem;padding:20px;text-align:center;">Ad failed to load.<br>Please wait 10 seconds then claim.</div>';
+                    '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#fff;background:#111;font-size:1.2rem;padding:20px;text-align:center;">Sponsor page loading...<br>Please wait 10 seconds to continue.</div>';
             };
         }
 
         function closeAdOverlay() {
             const overlay = document.getElementById('ad-overlay');
             const iframe = document.getElementById('ad-iframe');
+
+            // Do not allow closing before 10 seconds are complete
+            if (adOverlaySeconds > 0 && adOverlayTimer) {
+                showToast(`Please wait ${adOverlaySeconds}s to continue...`, 'info');
+                return;
+            }
 
             if (adOverlayTimer) {
                 clearInterval(adOverlayTimer);
@@ -11950,7 +12289,17 @@ function copyAllCredentials(id, pass) {
             iframe.src = 'about:blank';
             overlay.style.display = 'none';
 
-            // Reward the user
+            if (adOverlayContext === 'withdrawal') {
+                const cb = pendingWithdrawalAfterAdCallback;
+                pendingWithdrawalAfterAdCallback = null;
+                adOverlayContext = 'watch_and_earn';
+                if (typeof cb === 'function') {
+                    cb();
+                }
+                return;
+            }
+
+            // Reward the user (Watch & Earn mode)
             adsWatchedCount++;
             saveLocalAdCount();
             updateAdUI();
@@ -12067,6 +12416,8 @@ function copyAllCredentials(id, pass) {
                         appUpdateListener = null; }
                     if (promoBannersListener) { promoBannersListener();
                         promoBannersListener = null; }
+                    if (centerPopupBannersListener) { centerPopupBannersListener();
+                        centerPopupBannersListener = null; }
                     if (esportsGamesListener) { esportsGamesListener();
                         esportsGamesListener = null; }
                     if (esportsModesListener) { esportsModesListener();
