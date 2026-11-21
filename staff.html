@@ -2385,12 +2385,94 @@
                             </div>
 
                             <h4 style="margin:22px 0 12px 0; color:var(--primary-blue);">ACTIVE &amp; SAVED PROMOTIONAL
-                                BANNERS</h4>
+                                BANNERS (TOP SWIPING SLIDER)</h4>
                             <div id="promo-banners-admin-list">
                                 <div class="empty-state" style="padding:25px;">
                                     <i class="fas fa-images"></i>
                                     <h3>No Promotional Banners Yet</h3>
                                     <p>Add a promotional banner above to display on the User Panel Home Slider.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2B. Separate Center App-Open Popup Banners -->
+                    <div class="content-card">
+                        <div class="content-header">
+                            <h3><i class="fas fa-window-restore"></i> Center App-Open Popup Banners (Separate Popup When User Opens App)</h3>
+                        </div>
+                        <div class="content-body">
+                            <div style="color:#00a8ff; background:rgba(0,168,255,0.08); border:1px solid rgba(0,168,255,0.25); padding:10px 14px; border-radius:10px; margin-bottom:15px; font-weight:500;">
+                                <i class="fas fa-info-circle"></i> These popup banners are <strong>completely separate</strong> from the top swiping slider. They pop up in the <strong>middle of the screen</strong> with a top <strong>&#10005; (Cross / Close)</strong> button when a user opens the app!
+                            </div>
+                            <input type="hidden" id="center-popup-edit-id" value="">
+                            <div class="tournament-form-grid">
+                                <div class="form-group">
+                                    <label>POPUP BANNER TITLE (OPTIONAL)</label>
+                                    <input type="text" id="center-popup-title-input"
+                                        placeholder="e.g., Special Mega Tournament Live!">
+                                </div>
+                                <div class="form-group">
+                                    <label>POPUP SUBTITLE / BADGE (OPTIONAL)</label>
+                                    <input type="text" id="center-popup-subtitle-input"
+                                        placeholder="e.g., Limited Slots • Register Now">
+                                </div>
+                            </div>
+                            <div class="tournament-form-grid">
+                                <div class="form-group">
+                                    <label>UPLOAD OR PASTE CENTER POPUP IMAGE</label>
+                                    <div class="file-upload-container"
+                                        onclick="document.getElementById('center-popup-image-file').click()">
+                                        <div class="file-upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                                        <div class="file-upload-text">
+                                            Click to upload Center Popup Banner Image<br>
+                                            <small>Supported: JPG, PNG, WebP</small>
+                                        </div>
+                                        <img id="center-popup-image-preview" class="uploaded-image-preview"
+                                            alt="Center Popup Preview">
+                                        <input type="file" id="center-popup-image-file" class="file-input-hidden"
+                                            accept="image/*"
+                                            onchange="handleCustomAssetUpload('center-popup', this.files[0])">
+                                        <div class="upload-progress" id="center-popup-upload-progress">
+                                            <div class="upload-progress-bar" id="center-popup-upload-progress-bar"></div>
+                                        </div>
+                                    </div>
+                                    <input type="text" id="center-popup-image-url"
+                                        placeholder="Or paste direct Popup Image URL (https://...)"
+                                        style="margin-top:8px;">
+                                </div>
+                                <div class="form-group">
+                                    <label>TARGET LINK WHEN USER CLICKS POPUP (OPTIONAL)</label>
+                                    <input type="text" id="center-popup-action-url"
+                                        placeholder="https://... (or leave blank to open Games)">
+                                    <label style="margin-top:12px;">SORT ORDER (LOWER POPS UP FIRST)</label>
+                                    <input type="number" id="center-popup-sort-order" value="1" min="0">
+                                    <div class="show-credentials-toggle" style="margin-top:12px; background:rgba(0,168,255,0.10); border:1px solid rgba(0,168,255,0.35);">
+                                        <span style="font-weight:800; font-size:0.88em; color:#00a8ff;"><i class="fas fa-window-restore"></i> Active Center App Popup</span>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="center-popup-is-active" checked>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                                <button type="button" onclick="saveCenterPopupBanner()" id="save-center-popup-banner-btn"
+                                    style="flex:1; background:linear-gradient(135deg,#00a8ff,#0077cc);">
+                                    <i class="fas fa-plus-circle"></i> SAVE CENTER POPUP BANNER
+                                </button>
+                                <button type="button" class="btn-outline-sm" onclick="resetCenterPopupBannerForm()"
+                                    style="padding:12px 18px;">
+                                    <i class="fas fa-undo"></i> Clear
+                                </button>
+                            </div>
+
+                            <h4 style="margin:22px 0 12px 0; color:#00a8ff;">ACTIVE &amp; SAVED CENTER POPUP BANNERS</h4>
+                            <div id="center-popup-banners-admin-list">
+                                <div class="empty-state" style="padding:25px;">
+                                    <i class="fas fa-window-restore"></i>
+                                    <h3>No Center Popup Banners Yet</h3>
+                                    <p>Add a center popup banner above to pop up in the middle of the app when users open it.</p>
                                 </div>
                             </div>
                         </div>
@@ -4955,10 +5037,12 @@
         let esportsGames = [];
         let esportsModes = [];
         let promoBanners = [];
+        let centerPopupBanners = [];
         let liveNoticeConfig = { liveNoticeText: '', liveNoticeLink: '', liveNoticeActive: true };
         let gamesListener = null;
         let modesListener = null;
         let bannersListener = null;
+        let centerPopupBannersListener = null;
         let configListener = null;
 
         // --- Real-time Listeners ---
@@ -5024,6 +5108,14 @@
                     promoBanners.sort((a, b) => (Number(a.sortOrder) || 0) - (Number(b.sortOrder) || 0));
                     renderPromoBannersAdmin();
                 }, (err) => console.warn('promo_banners listener error:', err));
+
+            if (centerPopupBannersListener) centerPopupBannersListener();
+            centerPopupBannersListener = db.collection("center_popup_banners")
+                .onSnapshot((snapshot) => {
+                    centerPopupBanners = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    centerPopupBanners.sort((a, b) => (Number(a.sortOrder) || 0) - (Number(b.sortOrder) || 0));
+                    renderCenterPopupBannersAdmin();
+                }, (err) => console.warn('center_popup_banners listener error:', err));
 
             if (configListener) configListener();
             configListener = db.collection("app_config").doc("main")
@@ -5498,6 +5590,7 @@
                 renderEsportsModesAdmin();
             } else if (sectionId === 'announcements-section') {
                 renderPromoBannersAdmin();
+                renderCenterPopupBannersAdmin();
                 loadScheduledNotificationsAdmin();
             } else if (sectionId === 'registered-users-section' && hasPermissions.viewReports) {
                 populateTournamentSelection();
@@ -5646,16 +5739,16 @@
                 };
                 if (editId) {
                     await db.collection("promo_banners").doc(editId).update(payload);
-                    showToast('Promotional banner updated!', 'success');
+                    showToast('Promotional slider banner updated!', 'success');
                 } else {
                     payload.createdAt = FieldValue.serverTimestamp();
                     payload.createdBy = currentStaff?.uid || '';
                     await db.collection("promo_banners").add(payload);
-                    showToast('Promotional banner added to User Home!', 'success');
+                    showToast('Promotional banner added to Home Slider!', 'success');
                 }
                 clearUserPanelEcosystemCache();
                 resetPromoBannerForm();
-                logRecentActivity(editId ? `Updated banner: ${title || 'Promo'}` : `Created banner: ${title || 'Promo'}`);
+                logRecentActivity(editId ? `Updated slider banner: ${title || 'Promo'}` : `Created slider banner: ${title || 'Promo'}`);
             } catch (err) {
                 console.error('Error saving promo banner:', err);
                 showToast('Failed to save promotional banner.', 'error');
@@ -5725,7 +5818,7 @@
                 <div class="admin-entity-card">
                     <img src="${b.imageUrl || ''}" class="admin-banner-thumb" alt="Banner" onerror="setTournamentImageFallback(this)">
                     <div class="admin-entity-info">
-                        <div class="admin-entity-title">
+                        <div class="admin-entity-title" style="flex-wrap:wrap; gap:6px;">
                             <span>${b.title || 'Promotional Slide'}</span>
                             <span class="status-badge ${b.isActive !== false ? 'status-active' : 'status-inactive'}">${b.isActive !== false ? 'Active' : 'Hidden'}</span>
                             <span class="pill-count-blue">Order #${b.sortOrder ?? 1}</span>
@@ -5741,6 +5834,159 @@
                             <i class="fas ${b.isActive !== false ? 'fa-eye-slash' : 'fa-eye'}"></i> ${b.isActive !== false ? 'Hide' : 'Show'}
                         </button>
                         <button type="button" class="btn-danger-sm" onclick="deletePromoBanner('${b.id}')"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ============================================================
+        // SEPARATE CENTER APP-OPEN POPUP BANNERS (center_popup_banners)
+        // ============================================================
+        function resetCenterPopupBannerForm() {
+            const editEl = document.getElementById('center-popup-edit-id');
+            if (editEl) editEl.value = '';
+            const titleEl = document.getElementById('center-popup-title-input');
+            if (titleEl) titleEl.value = '';
+            const subEl = document.getElementById('center-popup-subtitle-input');
+            if (subEl) subEl.value = '';
+            const imgUrlEl = document.getElementById('center-popup-image-url');
+            if (imgUrlEl) imgUrlEl.value = '';
+            const actUrlEl = document.getElementById('center-popup-action-url');
+            if (actUrlEl) actUrlEl.value = '';
+            const sortEl = document.getElementById('center-popup-sort-order');
+            if (sortEl) sortEl.value = String(centerPopupBanners.length + 1);
+            const activeEl = document.getElementById('center-popup-is-active');
+            if (activeEl) activeEl.checked = true;
+            const preview = document.getElementById('center-popup-image-preview');
+            if (preview) { preview.src = ''; preview.style.display = 'none'; }
+            const btn = document.getElementById('save-center-popup-banner-btn');
+            if (btn) btn.innerHTML = '<i class="fas fa-plus-circle"></i> SAVE CENTER POPUP BANNER';
+        }
+
+        async function saveCenterPopupBanner() {
+            const editId = (document.getElementById('center-popup-edit-id')?.value || '').trim();
+            const title = (document.getElementById('center-popup-title-input')?.value || '').trim();
+            const subtitle = (document.getElementById('center-popup-subtitle-input')?.value || '').trim();
+            const imageUrl = (document.getElementById('center-popup-image-url')?.value || '').trim();
+            const actionUrl = (document.getElementById('center-popup-action-url')?.value || '').trim();
+            const sortOrder = parseInt(document.getElementById('center-popup-sort-order')?.value) || 1;
+            const isActive = document.getElementById('center-popup-is-active') ? document.getElementById('center-popup-is-active').checked : true;
+
+            if (!imageUrl) {
+                showToast('Please upload or paste a Center Popup Banner Image URL.', 'error');
+                return;
+            }
+
+            setButtonLoading('save-center-popup-banner-btn', true);
+            try {
+                const payload = {
+                    title,
+                    subtitle,
+                    imageUrl,
+                    actionUrl,
+                    sortOrder,
+                    isActive,
+                    popupVersion: Date.now(),
+                    updatedAt: FieldValue.serverTimestamp()
+                };
+                if (editId) {
+                    await db.collection("center_popup_banners").doc(editId).update(payload);
+                    showToast('✅ Center Popup Banner updated!', 'success');
+                } else {
+                    payload.createdAt = FieldValue.serverTimestamp();
+                    payload.createdBy = currentStaff?.uid || '';
+                    await db.collection("center_popup_banners").add(payload);
+                    showToast('🎯 Center Popup Banner created! It will now pop up in the middle of the app!', 'success');
+                }
+                clearUserPanelEcosystemCache();
+                resetCenterPopupBannerForm();
+                logRecentActivity(editId ? `Updated center popup banner: ${title || 'Popup'}` : `Created center popup banner: ${title || 'Popup'}`);
+            } catch (err) {
+                console.error('Error saving center popup banner:', err);
+                showToast('Failed to save center popup banner.', 'error');
+            } finally {
+                setButtonLoading('save-center-popup-banner-btn', false);
+                const btn = document.getElementById('save-center-popup-banner-btn');
+                if (btn) btn.innerHTML = '<i class="fas fa-plus-circle"></i> SAVE CENTER POPUP BANNER';
+            }
+        }
+
+        function editCenterPopupBanner(bannerId) {
+            const b = centerPopupBanners.find(x => x.id === bannerId);
+            if (!b) return;
+            document.getElementById('center-popup-edit-id').value = b.id;
+            document.getElementById('center-popup-title-input').value = b.title || '';
+            document.getElementById('center-popup-subtitle-input').value = b.subtitle || '';
+            document.getElementById('center-popup-image-url').value = b.imageUrl || '';
+            document.getElementById('center-popup-action-url').value = b.actionUrl || '';
+            document.getElementById('center-popup-sort-order').value = b.sortOrder ?? 1;
+            document.getElementById('center-popup-is-active').checked = b.isActive !== false;
+            const preview = document.getElementById('center-popup-image-preview');
+            if (preview && b.imageUrl) {
+                preview.src = b.imageUrl;
+                preview.style.display = 'block';
+            }
+            const btn = document.getElementById('save-center-popup-banner-btn');
+            if (btn) btn.innerHTML = '<i class="fas fa-save"></i> UPDATE CENTER POPUP BANNER';
+        }
+
+        async function toggleCenterPopupBannerStatus(bannerId, currentState) {
+            try {
+                await db.collection("center_popup_banners").doc(bannerId).update({
+                    isActive: !currentState,
+                    popupVersion: Date.now(),
+                    updatedAt: FieldValue.serverTimestamp()
+                });
+                clearUserPanelEcosystemCache();
+                showToast(`Center Popup Banner ${!currentState ? 'activated' : 'hidden'}!`, 'success');
+            } catch (err) {
+                showToast('Failed to update center popup status.', 'error');
+            }
+        }
+
+        async function deleteCenterPopupBanner(bannerId) {
+            if (!confirm('Delete this Center App-Open Popup Banner?')) return;
+            try {
+                await db.collection("center_popup_banners").doc(bannerId).delete();
+                clearUserPanelEcosystemCache();
+                showToast('Center Popup Banner deleted.', 'success');
+            } catch (err) {
+                showToast('Failed to delete center popup banner.', 'error');
+            }
+        }
+
+        function renderCenterPopupBannersAdmin() {
+            const container = document.getElementById('center-popup-banners-admin-list');
+            if (!container) return;
+            if (!centerPopupBanners.length) {
+                container.innerHTML = `
+                    <div class="empty-state" style="padding:25px;">
+                        <i class="fas fa-window-restore"></i>
+                        <h3>No Center Popup Banners Yet</h3>
+                        <p>Add a center popup banner above to pop up in the middle of the app when users open it.</p>
+                    </div>`;
+                return;
+            }
+            container.innerHTML = centerPopupBanners.map(b => `
+                <div class="admin-entity-card" style="border-color:rgba(0,168,255,0.35);">
+                    <img src="${b.imageUrl || ''}" class="admin-banner-thumb" alt="Center Popup" onerror="setTournamentImageFallback(this)">
+                    <div class="admin-entity-info">
+                        <div class="admin-entity-title" style="flex-wrap:wrap; gap:6px;">
+                            <span>${b.title || 'Center App Popup Banner'}</span>
+                            <span class="status-badge ${b.isActive !== false ? 'status-active' : 'status-inactive'}">${b.isActive !== false ? 'Active Popup' : 'Hidden'}</span>
+                            <span class="pill-count-blue">Order #${b.sortOrder ?? 1}</span>
+                        </div>
+                        <div class="admin-entity-sub">
+                            <span>${b.subtitle || 'Pops up in center on app open'}</span>
+                            ${b.actionUrl ? `<span>• Link: ${b.actionUrl}</span>` : ''}
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                        <button type="button" class="btn-outline-sm" onclick="editCenterPopupBanner('${b.id}')"><i class="fas fa-edit"></i> Edit</button>
+                        <button type="button" class="btn-outline-sm" onclick="toggleCenterPopupBannerStatus('${b.id}', ${b.isActive !== false})">
+                            <i class="fas ${b.isActive !== false ? 'fa-eye-slash' : 'fa-eye'}"></i> ${b.isActive !== false ? 'Hide' : 'Show'}
+                        </button>
+                        <button type="button" class="btn-danger-sm" onclick="deleteCenterPopupBanner('${b.id}')"><i class="fas fa-trash"></i></button>
                     </div>
                 </div>
             `).join('');
