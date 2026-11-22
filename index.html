@@ -11178,14 +11178,16 @@
             }
 
             const expectedPlayAfter = Math.max(0, playBalBefore - entryFee);
+            let d = { success: true, newBalance: expectedPlayAfter };
             try {
                 const r = await fetch(`${BACKEND_BASE_URL}/api/payment/pay-tournament`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ userId: uid, tournamentId, amount: entryFee })
                 });
-                const d = await r.json().catch(() => ({}));
-                if (!r.ok) throw new Error(d.message || 'Tournament payment failed.');
+                const respData = await r.json().catch(() => ({}));
+                if (!r.ok) throw new Error(respData.message || 'Tournament payment failed.');
+                d = { success: true, newBalance: expectedPlayAfter, ...respData };
             } catch (apiPayErr) {
                 if (String(apiPayErr.message || '').toLowerCase().includes('insufficient') ||
                     String(apiPayErr.message || '').toLowerCase().includes('closed')) {
@@ -11208,6 +11210,7 @@
                     createdAt: new Date().toISOString(),
                     status: 'success'
                 }).catch(() => null);
+                d = { success: true, newBalance: expectedPlayAfter };
             }
 
             prependLocalCachedTransaction(uid, {
